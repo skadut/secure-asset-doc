@@ -129,7 +129,7 @@ jobs:
             chown 65532:65532 /run/pki /run/keyd-pub /run/audit/keyd /run/audit/crypto-api /run/audit/tpm-msk
             chmod 700 /run/pki /run/keyd-pub /run/audit/keyd /run/audit/crypto-api /run/audit/tpm-msk
           '
-          if [ ! -f "$run/pki/keyzone/ca.pem" ]; then
+          if ! docker run --rm -v "$PWD/$run/pki:/pki:ro" alpine:3.20 test -f /pki/keyzone/ca.pem; then
             # Writes to a separate /gen target, so the read-only /run/pki mount of the service is not overridden.
             docker compose run --rm --no-deps -v "$PWD/$run/pki:/gen" tpm-msk pki --out /gen >/dev/null
           fi
