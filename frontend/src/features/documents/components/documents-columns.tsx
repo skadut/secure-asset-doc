@@ -27,18 +27,6 @@ function TitleCell({ doc }: { doc: DocRow }) {
   const Icon = expanded ? EyeOff : Eye
   return (
     <span className='flex min-w-0 items-center gap-2'>
-      <Link
-        to='/documents/$documentId'
-        params={{ documentId: doc.id }}
-        title={doc.title}
-        className={
-          expanded
-            ? 'min-w-0 flex-1 font-medium break-words whitespace-normal underline underline-offset-4'
-            : 'line-clamp-2 min-w-0 flex-1 font-medium break-words whitespace-normal underline underline-offset-4'
-        }
-      >
-        {doc.title}
-      </Link>
       <Button
         type='button'
         variant='ghost'
@@ -52,24 +40,38 @@ function TitleCell({ doc }: { doc: DocRow }) {
       >
         <Icon />
       </Button>
-      {doc.tokenOnly && (
-        <Badge
-          variant='outline'
-          className='flex-none shrink-0 whitespace-nowrap'
-        >
-          Terkunci
-        </Badge>
-      )}
-      {doc.granted && (
-        <Badge
-          variant='outline'
-          className='flex-none shrink-0 whitespace-nowrap'
-        >
-          Diberikan
-        </Badge>
-      )}
-      <span className='flex-none shrink-0 whitespace-nowrap'>
-        <DocStatusBadge status={doc.status} />
+      <Link
+        to='/documents/$documentId'
+        params={{ documentId: doc.id }}
+        title={doc.title}
+        className={
+          expanded
+            ? 'min-w-0 flex-1 font-medium break-words whitespace-normal underline underline-offset-4'
+            : 'line-clamp-2 min-w-0 flex-1 font-medium break-words whitespace-normal underline underline-offset-4'
+        }
+      >
+        {doc.title}
+      </Link>
+      <span className='flex w-24 flex-none flex-col items-center justify-center gap-1'>
+        {doc.tokenOnly && (
+          <Badge
+            variant='outline'
+            className='flex-none shrink-0 whitespace-nowrap'
+          >
+            Terkunci
+          </Badge>
+        )}
+        {doc.granted && (
+          <Badge
+            variant='outline'
+            className='flex-none shrink-0 whitespace-nowrap'
+          >
+            Diberikan
+          </Badge>
+        )}
+        <span className='flex-none shrink-0 whitespace-nowrap'>
+          <DocStatusBadge status={doc.status} />
+        </span>
       </span>
     </span>
   )
@@ -103,8 +105,12 @@ export const documentColumns: ColumnDef<DocRow>[] = [
   {
     accessorKey: 'tlp',
     size: 168,
-    header: 'TLP',
-    cell: ({ row }) => <TlpBadge tlp={row.original.tlp} />,
+    header: () => <div className='text-center'>TLP</div>,
+    cell: ({ row }) => (
+      <div className='flex justify-center'>
+        <TlpBadge tlp={row.original.tlp} />
+      </div>
+    ),
   },
   {
     id: 'version',
