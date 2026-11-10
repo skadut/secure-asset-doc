@@ -364,9 +364,9 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
   const rowValue = (item: DeviceCheck, i: number) => {
     if (item.status === 'pending') return 'Menunggu'
     if (i === 0 && item.status === 'pass')
-      return `Di dalam jaringan terisolasi${item.ip ? ` (${item.ip})` : ''}`
+      return `Alamat privat${item.ip ? ` (${item.ip})` : ''}`
     if (i === 0 && item.status === 'warn')
-      return `Di luar jaringan enclave${item.ip ? ` (${item.ip})` : ''}`
+      return `Alamat publik${item.ip ? ` (${item.ip})` : ''}`
     if (i === 1 && item.status === 'pass') return 'Terverifikasi'
     if (i === 2 && item.status === 'pass')
       return `crypto-api tersedia (mTLS, ${Math.round(item.latencyMs ?? 0)} ms)`
@@ -416,7 +416,7 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
             {[
               ['Faktor', 'Kata sandi, kode autentikator'],
               ['Jaminan', 'AAL2, SP 800-63B'],
-              ['Enclave', 'ENC-2, jaringan terisolasi'],
+              ['Kunci', 'MSK tersegel di TPM 2.0'],
               ['Sesi', 'Kunci idle 5 mnt, batas 30 mnt'],
             ].map(([title, value]) => (
               <div className='lg-fact' key={title}>
@@ -708,8 +708,7 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                       <div className='lg-eyebrow'>Tahap 4 dari 5</div>
                       <h2>Memeriksa perangkat ini</h2>
                       <p>
-                        Masuk hanya diizinkan dari perangkat terdaftar di dalam
-                        enclave.
+                        Sistem memeriksa jaringan, kode autentikator, layanan kripto, dan jam perangkat ini sebelum sesi dibuka.
                       </p>
                     </header>
                     {deviceError && (
