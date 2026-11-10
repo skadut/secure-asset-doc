@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Key Zone</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <section id="gate" class="gate">
+    <h1 id="gate-title">Key Zone</h1>
+    <p class="muted">Enter the operator token to manage the Key Zone. It is kept for this browser tab only.</p>
+    <form id="gate-form" class="form">
+      <div class="field">
+        <label for="gate-token">Operator token</label>
+        <input id="gate-token" type="password" autocomplete="off" spellcheck="false" required>
+      </div>
+      <p id="gate-error" class="form-error" aria-live="polite"></p>
+      <div class="actions">
+        <button class="btn" type="submit">Unlock dashboard</button>
+      </div>
+    </form>
+  </section>
+
+  <div id="app" hidden>
+    <header class="topbar">
+      <div class="brand">
+        <h1>Key Zone</h1>
+        <span id="mode-badge" class="badge" data-tone="off">Loading</span>
+        <span id="mode-note" class="muted"></span>
+      </div>
+      <div class="topbar-meta">
+        <span id="updated" class="muted"></span>
+        <button id="signout" class="btn btn-ghost" type="button">Sign out</button>
+      </div>
+    </header>
+
+    <main id="main" class="layout">
+      <section id="verdict" class="verdict" aria-live="polite">
+        <span id="verdict-badge" class="badge" data-tone="off">Loading</span>
+        <div>
+          <p id="verdict-text" class="verdict-text" tabindex="-1"></p>
+          <p id="verdict-detail" class="muted"></p>
+        </div>
+      </section>
+
+      <div class="grid">
+        <section id="ceremony" class="panel" aria-labelledby="ceremony-title">
+          <div class="panel-head">
+            <h2 id="ceremony-title" tabindex="-1">Ceremony</h2>
+          </div>
+          <div id="ceremony-live" class="notice" aria-live="polite"></div>
+
+          <div id="p-init" class="ceremony-panel" hidden>
+            <h3>Initialize Key Zone (Shamir 5 shares, threshold 3)</h3>
+            <form id="f-init" class="form">
+              <div class="check">
+                <input id="init-confirm" type="checkbox" required>
+                <label for="init-confirm">I understand initialization generates new keys and shows 5 shares once.</label>
+              </div>
+              <p id="init-error" class="form-error" aria-live="polite"></p>
+              <div class="actions">
+                <button class="btn" type="submit">Initialize</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="p-unseal" class="ceremony-panel" hidden>
+            <h3>Unseal nodes</h3>
+            <p id="unseal-auto" class="notice notice-warn" hidden>Auto-unseal running from stored shares.</p>
+            <p class="hint">Threshold 3 of 5 shares. Each custodian enters one share.</p>
+            <form id="f-unseal" class="form">
+              <div class="field">
+                <label for="unseal-share">Share</label>
+                <input id="unseal-share" type="password" autocomplete="off" spellcheck="false" required>
+              </div>
+              <p id="unseal-error" class="form-error" aria-live="polite"></p>
+              <div class="actions">
+                <button class="btn" type="submit">Submit share</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="p-reveal" class="ceremony-panel" hidden>
+            <h3>Reveal stored shares</h3>
+            <p class="notice notice-warn">Shares are stored on disk (left from unsafe mode). Reveal once, hand to custodians, then destroy.</p>
+            <div class="actions">
+              <button id="btn-reveal" class="btn" type="button">Reveal shares once</button>
+            </div>
+            <p id="reveal-error" class="form-error" aria-live="polite"></p>
+            <form id="f-destroy" class="form" hidden>
+              <div class="field">
+                <label for="destroy-phrase">Type exactly: I have recorded all 5 shares</label>
+                <input id="destroy-phrase" type="text" autocomplete="off" spellcheck="false">
+              </div>
+              <p id="destroy-error" class="form-error" aria-live="polite"></p>
+              <div class="actions">
+                <button id="btn-destroy" class="btn btn-danger" type="submit" disabled>Destroy stored shares</button>
+              </div>
+            </form>
+          </div>
+
+          <section id="configure" hidden>
+            <h3>Configuration checks</h3>
+            <ul id="configure-list" class="config-list"></ul>
+          </section>
+
+          <div id="p-store" class="ceremony-panel" hidden>
+            <h3>Store shares for auto-unseal</h3>
+            <form id="f-store" class="form">
+              <fieldset>
+                <legend>Shares (at least 3 of 5)</legend>
+                <div class="field">
+                  <label for="store-share-1">Share 1</label>
+                  <input id="store-share-1" class="share-input" type="password" autocomplete="off" spellcheck="false" required>
+                </div>
+                <div class="field">
+                  <label for="store-share-2">Share 2</label>
+                  <input id="store-share-2" class="share-input" type="password" autocomplete="off" spellcheck="false" required>
+                </div>
+                <div class="field">
+                  <label for="store-share-3">Share 3</label>
+                  <input id="store-share-3" class="share-input" type="password" autocomplete="off" spellcheck="false" required>
+                </div>
+                <div class="field">
+                  <label for="store-share-4">Share 4</label>
+                  <input id="store-share-4" class="share-input" type="password" autocomplete="off" spellcheck="false">
+                </div>
+                <div class="field">
+                  <label for="store-share-5">Share 5</label>
+                  <input id="store-share-5" class="share-input" type="password" autocomplete="off" spellcheck="false">
+                </div>
+              </fieldset>
+              <p id="store-error" class="form-error" aria-live="polite"></p>
+              <div class="actions">
+                <button class="btn" type="submit">Store shares</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="p-rekey" class="ceremony-panel" hidden>
+            <h3>MSK rotation (rekey)</h3>
+            <p id="rekey-state" class="muted"></p>
+            <div class="actions">
+              <button id="btn-rekey-start" class="btn" type="button">Start rekey</button>
+              <button id="btn-rekey-cancel" class="btn btn-ghost" type="button" hidden>Cancel rekey</button>
+            </div>
+            <form id="f-rekey" class="form" hidden>
+              <div id="rekey-share-field" class="field">
+                <label for="rekey-share">Share</label>
+                <input id="rekey-share" type="password" autocomplete="off" spellcheck="false" required>
+              </div>
+              <div class="actions">
+                <button id="btn-rekey-submit" class="btn" type="submit">Submit share</button>
+              </div>
+            </form>
+            <p id="rekey-error" class="form-error" aria-live="polite"></p>
+          </div>
+
+          <div id="p-none" class="ceremony-panel" hidden>
+            <h3>No node reachable</h3>
+            <p class="muted">Start at least one Key Zone node. Status retries every 5 s.</p>
+          </div>
+
+          <div id="share-reveal" role="region" aria-labelledby="share-title" hidden>
+            <h3 id="share-title" tabindex="-1"></h3>
+            <p class="notice notice-warn">Hand each share to its custodian only. This page does not store them and will not show them again.</p>
+            <ol id="share-list" class="share-list"></ol>
+            <label class="check">
+              <input id="share-ack" type="checkbox">
+              I have handed each share to a separate custodian
+            </label>
+            <div class="actions">
+              <button id="share-done" class="btn" type="button" disabled>Done, clear shares from screen</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="cluster" class="panel" aria-labelledby="cluster-title">
+          <div class="panel-head">
+            <h2 id="cluster-title">Cluster nodes</h2>
+          </div>
+          <div class="table-wrap" tabindex="0" role="region" aria-labelledby="cluster-title">
+            <table>
+              <thead>
+                <tr><th>Node</th><th>Reachable</th><th>Seal</th><th>Unseal progress</th><th>Version</th></tr>
+              </thead>
+              <tbody id="cluster-body"></tbody>
+            </table>
+          </div>
+          <p id="cluster-state" class="state-msg"></p>
+        </section>
+      </div>
+
+      <section id="keys" class="panel">
+        <h2>Key lifecycle</h2>
+        <p class="muted">States per NIST SP 800-57</p>
+        <div class="keys-list">
+          <article class="key-row">
+            <h3>MSK</h3>
+            <span id="key-msk-state" class="badge" data-tone="off"></span>
+            <dl class="facts">
+              <div><dt>Age</dt><dd id="key-msk-age" class="num"></dd></div>
+              <div><dt>Created</dt><dd id="key-msk-created" class="mono"></dd></div>
+              <div><dt>Last rotated</dt><dd id="key-msk-rekey" class="mono"></dd></div>
+              <div><dt>Cryptoperiod</dt><dd id="key-msk-period" class="num"></dd></div>
+              <div><dt>Expires</dt><dd id="key-msk-expires" class="mono"></dd></div>
+              <div><dt>Days left</dt><dd id="key-msk-days" class="num"></dd></div>
+            </dl>
+          </article>
+          <article class="key-row">
+            <h3>KEK <span id="key-kek-name" class="mono"></span></h3>
+            <span id="key-kek-state" class="badge" data-tone="off"></span>
+            <dl class="facts">
+              <div><dt>Version</dt><dd id="key-kek-version" class="num"></dd></div>
+              <div><dt>Age</dt><dd id="key-kek-age" class="num"></dd></div>
+              <div><dt>Created</dt><dd id="key-kek-created" class="mono"></dd></div>
+              <div><dt>Last rotated</dt><dd id="key-kek-rotated" class="mono"></dd></div>
+              <div><dt>Cryptoperiod</dt><dd id="key-kek-period" class="num"></dd></div>
+              <div><dt>Expires</dt><dd id="key-kek-expires" class="mono"></dd></div>
+              <div><dt>Days left</dt><dd id="key-kek-days" class="num"></dd></div>
+              <div><dt>Auto-rotate</dt><dd id="key-kek-auto"></dd></div>
+            </dl>
+          </article>
+          <article class="key-row">
+            <h3>DEK</h3>
+            <span id="key-dek-state" class="badge" data-tone="off"></span>
+            <dl class="facts">
+              <div><dt>TTL</dt><dd id="key-dek-ttl" class="num"></dd></div>
+              <div><dt>Generated, 24 h</dt><dd id="key-dek-generated" class="num"></dd></div>
+              <div><dt>Unwrapped, 24 h</dt><dd id="key-dek-unwrapped" class="num"></dd></div>
+              <div><dt>Total</dt><dd id="key-dek-total" class="num"></dd></div>
+              <div><dt>Last used</dt><dd id="key-dek-last" class="mono"></dd></div>
+            </dl>
+          </article>
+        </div>
+        <p id="key-msk-warn" class="warn-text" hidden></p>
+      </section>
+
+      <section id="certs" class="panel" aria-labelledby="certs-title">
+        <h2 id="certs-title">Certificates</h2>
+        <p id="certs-summary" class="state-msg"></p>
+        <p id="certs-state" class="state-msg" aria-live="polite"></p>
+        <div class="table-wrap" tabindex="0" role="region" aria-labelledby="certs-title" hidden>
+          <table id="certs-table">
+            <thead>
+              <tr><th>CN</th><th>Role</th><th>Status</th><th>Expires</th><th>Key</th><th>Private key</th></tr>
+            </thead>
+            <tbody id="certs-body"></tbody>
+          </table>
+        </div>
+        <div id="cert-detail" class="cert-detail" role="region" aria-labelledby="cert-detail-title" hidden>
+          <h3 id="cert-detail-title"></h3>
+          <dl id="cert-detail-facts" class="facts facts-wide"></dl>
+        </div>
+      </section>
+
+      <section id="cert-history" class="panel" aria-labelledby="cert-history-title">
+        <h2 id="cert-history-title">Certificate history</h2>
+        <p id="hist-state" class="state-msg" aria-live="polite"></p>
+        <div id="hist-content" class="hist-content" hidden>
+          <h3 id="hist-inv-title">Inventory</h3>
+          <div class="table-wrap" tabindex="0" role="region" aria-labelledby="hist-inv-title">
+            <table id="hist-inv-table">
+              <thead><tr><th>CN</th><th>Role</th><th>State</th><th>Private key</th><th>Valid from → to</th><th>Fingerprint</th></tr></thead>
+              <tbody id="hist-inv-body"></tbody>
+            </table>
+          </div>
+          <h3 id="hist-tl-title">Timeline (newest first)</h3>
+          <ol id="hist-timeline" class="timeline" aria-labelledby="hist-tl-title"></ol>
+        </div>
+      </section>
+
+      <section id="events" class="panel" aria-labelledby="events-title">
+        <h2 id="events-title">Key transaction log</h2>
+        <div class="filter" role="group" aria-label="Filter by key type">
+          <button class="filter-btn" type="button" data-type="ALL" aria-pressed="true">ALL</button>
+          <button class="filter-btn" type="button" data-type="MSK" aria-pressed="false">MSK</button>
+          <button class="filter-btn" type="button" data-type="KEK" aria-pressed="false">KEK</button>
+          <button class="filter-btn" type="button" data-type="DEK" aria-pressed="false">DEK</button>
+        </div>
+        <p id="events-state" class="state-msg" aria-live="polite"></p>
+        <div class="table-wrap" tabindex="0" role="region" aria-labelledby="events-title">
+          <table id="events-table">
+            <thead>
+              <tr><th>Time (UTC)</th><th>Type</th><th>Operation</th><th>Key ID</th><th>Version</th><th>Node</th><th>Actor</th><th>Result</th><th>NIST state</th><th>Note</th></tr>
+            </thead>
+            <tbody id="events-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="policy" class="panel" aria-labelledby="policy-title">
+        <h2 id="policy-title">Key policy</h2>
+        <div class="table-wrap" tabindex="0" role="region" aria-labelledby="policy-title">
+          <table>
+            <caption>Reference: NIST SP 800-57 Part 1 Rev. 5</caption>
+            <thead>
+              <tr><th>Key</th><th>NIST class</th><th>Purpose</th><th>Cryptoperiod</th><th>Configured</th><th>Custody</th><th>Reference</th></tr>
+            </thead>
+            <tbody id="policy-body"></tbody>
+          </table>
+        </div>
+        <p id="policy-state" class="state-msg"></p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

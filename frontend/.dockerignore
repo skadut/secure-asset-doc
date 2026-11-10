@@ -1,0 +1,17 @@
+node_modules
+dist
+.git
+.verification
+.env
+.env.*
+*.pem
+*.key
+certs
+*.log
+logs
+npm-debug.log*
+.hallmark
+anti-slop
+.claude
+.vscode
+coverage

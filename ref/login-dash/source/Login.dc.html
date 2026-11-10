@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sign in</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Saira+Semi+Condensed:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#0F1210}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;transition:background-color .15s ease,border-color .15s ease,color .15s ease,transform .1s ease}
+button:active:not(:disabled){transform:scale(.98)}
+button:disabled{cursor:not-allowed}
+.i{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;width:18px;height:18px;flex:none}
+.ghost:hover{background:#262C27}
+.solid:hover:not(:disabled){background:#FFFFFF}
+.proto:hover{background:#343B57}
+button:focus-visible,input:focus-visible{outline:2px solid #E8EAE4;outline-offset:2px}
+input::placeholder{color:#7D857C}
+/*LG-CSS-START*/
+@keyframes lgIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes lgStepIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+@keyframes lgScan{0%{top:-2px}100%{top:100%}}
+@keyframes lgSpin{to{transform:rotate(360deg)}}
+@keyframes lgDraw{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
+@keyframes lgTotp{from{stroke-dashoffset:0}to{stroke-dashoffset:100.5}}
+@keyframes lgShakeA{0%,100%{transform:none}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes lgShakeB{0%,100%{transform:none}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes lgOut{to{opacity:0;transform:scale(1.02)}}
+.lg-in{animation:lgIn .5s cubic-bezier(.2,.7,.2,1) both}
+.lg-in2{animation:lgIn .5s .1s cubic-bezier(.2,.7,.2,1) both}
+.lg-in3{animation:lgIn .5s .2s cubic-bezier(.2,.7,.2,1) both}
+.lg-step{animation:lgStepIn .32s cubic-bezier(.2,.7,.2,1) both}
+.lg-row{animation:lgIn .3s ease-out both}
+.lg-grid{background-image:linear-gradient(#1A1F1B 1px,transparent 1px),linear-gradient(90deg,#1A1F1B 1px,transparent 1px);background-size:32px 32px}
+.lg-scan{position:absolute;left:0;right:0;height:2px;background:rgba(168,216,188,.3);animation:lgScan 6s linear infinite}
+.lg-spin{animation:lgSpin .9s linear infinite}
+.lg-draw{stroke-dasharray:24;animation:lgDraw .4s ease-out both}
+.lg-totp{stroke-dasharray:100.5;animation:lgTotp 30s linear infinite}
+.lg-shake-a{animation:lgShakeA .4s}
+.lg-shake-b{animation:lgShakeB .4s}
+.lg-leave{animation:lgOut .6s .1s ease-in both}
+.lg-bar{transition:border-color .3s ease,color .3s ease}
+.lg-field{transition:border-color .2s ease}
+/*LG-CSS-END*/
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-direction: column; background: #0F1210; color: #E8EAE4; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.45">
+  <div style="position: sticky; top: 0; z-index: 20; background: #1E7B45; color: #FFFFFF; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; line-height: 28px; padding: 0 16px">GREEN // SIGN-IN, NO CONTROLLED CONTENT SHOWN // SAMPLE DATA, NOT A REAL MARKING</div>
+
+<div class="{{lg.leaveClass}}" style="flex: 1 1 auto; display: flex; flex-wrap: wrap; align-items: stretch">
+  <section aria-label="About this system" class="lg-grid" style="position: relative; overflow: hidden; flex: 1 1 420px; min-width: 0; box-sizing: border-box; padding: 48px 40px; background-color: #131714; border-right: 1px solid #2E3530; display: flex; flex-direction: column; gap: 32px">
+    <div class="lg-scan" aria-hidden="true"></div>
+    <div class="lg-in" style="position: relative; display: flex; align-items: center; gap: 12px">
+      <svg class="i" style="width: 40px; height: 40px" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V6z"></path><path d="M9 11h6M9 14.5h6"></path></svg>
+      <div>
+        <div style="font-family: 'Saira Semi Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.1">Secure Asset Doc</div>
+        <div style="color: #A3ABA2; font-size: 13px">Controlled document management</div>
+      </div>
+    </div>
+    <div class="lg-in2" style="position: relative; max-width: 460px">
+      <h1 style="margin: 0; font-family: 'Saira Semi Condensed', sans-serif; font-size: 44px; line-height: 1.05; font-weight: 600">Sign in to Secure Asset Doc</h1>
+      <p style="margin: 14px 0 0; color: #C4CAC1; font-size: 15px">Access is decided per document. Being named in a RED document is what opens it, never rank.</p>
+    </div>
+    <div class="lg-in3" style="position: relative; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap: 8px; max-width: 480px">
+      <div style="padding: 12px; background: #0F1210; border: 1px solid #2E3530; border-radius: 4px"><div style="font-size: 12px; color: #A3ABA2">Factors</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">Password, authenticator code</div></div>
+      <div style="padding: 12px; background: #0F1210; border: 1px solid #2E3530; border-radius: 4px"><div style="font-size: 12px; color: #A3ABA2">Assurance</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">AAL2, SP 800-63B</div></div>
+      <div style="padding: 12px; background: #0F1210; border: 1px solid #2E3530; border-radius: 4px"><div style="font-size: 12px; color: #A3ABA2">Enclave</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">ENC-2, isolated network</div></div>
+      <div style="padding: 12px; background: #0F1210; border: 1px solid #2E3530; border-radius: 4px"><div style="font-size: 12px; color: #A3ABA2">Session</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">5 min idle lock, 30 min limit</div></div>
+    </div>
+    <div style="position: relative; margin-top: auto; font-size: 12px; color: #A3ABA2">Locked out or lost your authenticator: system security officer, [PHONE EXTENSION]</div>
+  </section>
+
+  <section aria-label="Sign in" style="flex: 1 1 520px; min-width: 0; box-sizing: border-box; padding: 48px 24px; display: flex; justify-content: center; align-items: flex-start">
+    <div class="lg-in" style="width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 20px">
+      <ol aria-label="Sign-in progress" style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px">
+        <sc-for list="{{lg.steps}}" as="s" hint-placeholder-count="5">
+          <li class="lg-bar" aria-current="{{s.cur}}" style="padding-top: 8px; border-top: 3px solid {{s.bar}}; font-size: 12px; color: {{s.color}}">{{s.label}}</li>
+        </sc-for>
+      </ol>
+
+      <div class="{{lg.shakeClass}}" style="padding: 28px; background: #171B18; border: 1px solid #2E3530; border-radius: 4px">
+
+        <sc-if value="{{lg.is.notice}}" hint-placeholder-val="{{ true }}">
+          <div class="lg-step" style="display: flex; flex-direction: column; gap: 16px">
+            <div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #A3ABA2">{{lg.stepLabel}}</div>
+              <h2 style="margin: 2px 0 0; font-family: 'Saira Semi Condensed', sans-serif; font-size: 26px; line-height: 1.15; font-weight: 600">System use notice</h2>
+            </div>
+            <div style="padding: 14px; background: #0F1210; border: 1px solid #434B44; border-radius: 4px; font-size: 13px; line-height: 1.6; color: #C4CAC1; max-height: 220px; overflow-y: auto">
+              <p style="margin: 0 0 8px">You are accessing a restricted system of [ORGANIZATION NAME]. Use is limited to authorized users for official purposes.</p>
+              <p style="margin: 0 0 8px">All activity is monitored and recorded, including every access decision and every failed attempt. Records may be reviewed for security, audit and legal purposes.</p>
+              <p style="margin: 0">Trying to reach documents you are not named in may lead to disciplinary or legal action. [LEGAL TEXT FROM YOUR ORGANIZATION]</p>
+            </div>
+            <label style="display: flex; gap: 10px; align-items: flex-start; min-height: 44px; cursor: pointer">
+              <input type="checkbox" checked="{{lg.accepted}}" onChange="{{lg.toggleAccept}}" style="width: 20px; height: 20px; margin: 1px 0 0; flex: none; accent-color: #E8EAE4">
+              <span>I have read this notice and consent to monitoring.</span>
+            </label>
+            <button class="solid" type="button" disabled="{{lg.noticeBlocked}}" onClick="{{lg.acceptNotice}}" style="min-height: 44px; background: #E8EAE4; color: #0F1210; border: 0; border-radius: 4px; font-weight: 600; opacity: {{lg.noticeOpacity}}">Continue</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{lg.is.password}}" hint-placeholder-val="{{ false }}">
+          <div class="lg-step" style="display: flex; flex-direction: column; gap: 16px">
+            <div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #A3ABA2">{{lg.stepLabel}}</div>
+              <h2 style="margin: 2px 0 0; font-family: 'Saira Semi Condensed', sans-serif; font-size: 26px; line-height: 1.15; font-weight: 600">Sign in</h2>
+            </div>
+            <form onSubmit="{{lg.submitPassword}}" style="display: flex; flex-direction: column; gap: 14px">
+              <div>
+                <label for="lg-user" style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px">Username</label>
+                <input id="lg-user" type="text" autocomplete="username" spellcheck="false" value="{{lg.username}}" onChange="{{lg.onUsername}}" placeholder="first initial and last name, e.g. b.pratama" class="lg-field" style="box-sizing: border-box; width: 100%; min-height: 48px; padding: 0 12px; background: #0F1210; border: 1px solid {{lg.fieldBorder}}; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 15px">
+              </div>
+              <div>
+                <label for="lg-pass" style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px">Password</label>
+                <div style="display: flex; gap: 6px">
+                  <input id="lg-pass" type="{{lg.pwType}}" autocomplete="current-password" value="{{lg.password}}" onChange="{{lg.onPassword}}" class="lg-field" style="flex: 1 1 auto; min-width: 0; box-sizing: border-box; min-height: 48px; padding: 0 12px; background: #0F1210; border: 1px solid {{lg.fieldBorder}}; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 15px">
+                  <button class="ghost" type="button" aria-pressed="{{lg.showPw}}" aria-label="{{lg.pwToggleLabel}}" onClick="{{lg.togglePw}}" style="flex: none; width: 48px; min-height: 48px; background: transparent; border: 1px solid #434B44; border-radius: 4px; display: flex; align-items: center; justify-content: center">
+                    <sc-if value="{{lg.pwHidden}}" hint-placeholder-val="{{ true }}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg></sc-if>
+                    <sc-if value="{{lg.showPw}}" hint-placeholder-val="{{ false }}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 6.2A10 10 0 0 1 12 6c6 0 10 6 10 6a17 17 0 0 1-3.2 3.8M6.6 7.7C3.9 9.4 2 12 2 12s4 6 10 6c1.5 0 2.9-.4 4.1-.9"></path><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"></path></svg></sc-if>
+                  </button>
+                </div>
+              </div>
+              <sc-if value="{{lg.passwordError}}" hint-placeholder-val="{{ false }}">
+                <div role="alert" style="color: #FF9D94">Username or password is incorrect. {{lg.triesLabel}} before the account locks.</div>
+              </sc-if>
+              <button class="solid" type="submit" disabled="{{lg.passwordBlocked}}" style="min-height: 48px; background: #E8EAE4; color: #0F1210; border: 0; border-radius: 4px; font-weight: 600; opacity: {{lg.passwordOpacity}}; display: flex; align-items: center; justify-content: center; gap: 10px">
+                <sc-if value="{{lg.busy}}" hint-placeholder-val="{{ false }}"><span class="lg-spin" style="width: 14px; height: 14px; box-sizing: border-box; border: 2px solid #A3ABA2; border-top-color: #0F1210; border-radius: 50%"></span></sc-if>
+                {{lg.passwordLabel}}
+              </button>
+            </form>
+            <sc-if value="{{lg.showFill}}" hint-placeholder-val="{{ true }}">
+              <div>
+                <div style="font-size: 12px; color: #C5CBE0; margin-bottom: 8px">Prototype only, fill in as:</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 8px">
+                  <sc-for list="{{lg.users}}" as="u" hint-placeholder-count="4">
+                    <button class="proto" type="button" onClick="{{u.fill}}" style="min-height: 52px; padding: 8px 12px; text-align: left; background: #1B1F2B; border: 1px dashed #6F7A9C; border-radius: 4px; display: flex; flex-direction: column; justify-content: center">
+                      <span style="font-weight: 500">{{u.name}}</span>
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #C5CBE0">{{u.username}}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{lg.is.code}}" hint-placeholder-val="{{ false }}">
+          <div class="lg-step" style="display: flex; flex-direction: column; gap: 16px">
+            <div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #A3ABA2">{{lg.stepLabel}}</div>
+              <h2 style="margin: 2px 0 0; font-family: 'Saira Semi Condensed', sans-serif; font-size: 26px; line-height: 1.15; font-weight: 600">Enter your authenticator code</h2>
+              <p style="margin: 6px 0 0; color: #C4CAC1">Open Google Authenticator on your enrolled phone and enter the 6-digit code for Secure Asset Doc.</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #0F1210; border-radius: 4px">
+              <svg viewBox="0 0 36 36" style="width: 28px; height: 28px; flex: none; transform: rotate(-90deg)" aria-hidden="true"><circle cx="18" cy="18" r="16" fill="none" stroke="#2E3530" stroke-width="3"></circle><circle class="lg-totp" cx="18" cy="18" r="16" fill="none" stroke="#A8D8BC" stroke-width="3"></circle></svg>
+              <div style="flex: 1 1 auto; min-width: 0">
+                <div>{{lg.user.name}}</div>
+                <div style="font-size: 12px; color: #A3ABA2">Codes change every 30 seconds</div>
+              </div>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #A3ABA2">{{lg.user.username}}</span>
+            </div>
+            <form onSubmit="{{lg.submitCode}}" style="display: flex; flex-direction: column; gap: 12px">
+              <label for="lg-code" style="font-size: 13px; font-weight: 600">6-digit code</label>
+              <input id="lg-code" type="text" inputmode="numeric" autocomplete="one-time-code" value="{{lg.code}}" onChange="{{lg.onCode}}" placeholder="000000" class="lg-field" style="box-sizing: border-box; width: 100%; min-height: 56px; padding: 0 12px; background: #0F1210; border: 1px solid {{lg.codeBorder}}; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 26px; letter-spacing: 0.5em; text-align: center">
+              <div aria-hidden="true" style="display: flex; justify-content: center; gap: 10px">
+                <sc-for list="{{lg.codeDots}}" as="d" hint-placeholder-count="6">
+                  <span style="width: 10px; height: 10px; border-radius: 50%; background: {{d.bg}}; transition: background-color .15s ease"></span>
+                </sc-for>
+              </div>
+              <sc-if value="{{lg.codeError}}" hint-placeholder-val="{{ false }}">
+                <div role="alert" style="color: #FF9D94">That code did not match. Check the code for Secure Asset Doc and try again. {{lg.triesLabel}} before the account locks.</div>
+              </sc-if>
+              <button class="solid" type="submit" disabled="{{lg.codeBlocked}}" style="min-height: 48px; background: #E8EAE4; color: #0F1210; border: 0; border-radius: 4px; font-weight: 600; opacity: {{lg.codeOpacity}}; display: flex; align-items: center; justify-content: center; gap: 10px">
+                <sc-if value="{{lg.busy}}" hint-placeholder-val="{{ false }}"><span class="lg-spin" style="width: 14px; height: 14px; box-sizing: border-box; border: 2px solid #A3ABA2; border-top-color: #0F1210; border-radius: 50%"></span></sc-if>
+                {{lg.codeLabel}}
+              </button>
+            </form>
+            <button class="ghost" type="button" onClick="{{lg.backToPassword}}" style="min-height: 44px; background: transparent; border: 1px solid #434B44; border-radius: 4px; font-weight: 500">Sign in as someone else</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{lg.is.device}}" hint-placeholder-val="{{ false }}">
+          <div class="lg-step" style="display: flex; flex-direction: column; gap: 16px">
+            <div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #A3ABA2">{{lg.stepLabel}}</div>
+              <h2 style="margin: 2px 0 0; font-family: 'Saira Semi Condensed', sans-serif; font-size: 26px; line-height: 1.15; font-weight: 600">Checking this device</h2>
+              <p style="margin: 6px 0 0; color: #C4CAC1">Signing in is allowed only from a registered device inside the enclave.</p>
+            </div>
+            <div style="display: flex; flex-direction: column">
+              <sc-for list="{{lg.checks}}" as="p" hint-placeholder-count="4">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #252B26">
+                  <span style="display: flex; align-items: center; gap: 10px">
+                    <span style="width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: {{p.color}}">
+                      <sc-if value="{{p.done}}" hint-placeholder-val="{{ true }}"><svg class="i lg-draw" style="width: 16px; height: 16px" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+                      <sc-if value="{{p.checking}}" hint-placeholder-val="{{ false }}"><span class="lg-spin" style="width: 14px; height: 14px; box-sizing: border-box; border: 2px solid #434B44; border-top-color: #E8EAE4; border-radius: 50%"></span></sc-if>
+                      <sc-if value="{{p.pending}}" hint-placeholder-val="{{ false }}"><span style="width: 8px; height: 8px; border-radius: 50%; background: #434B44"></span></sc-if>
+                    </span>
+                    <span style="display: flex; flex-direction: column">
+                      <span style="color: {{p.labelColor}}">{{p.label}}</span>
+                      <span style="font-size: 12px; color: #A3ABA2">{{p.help}}</span>
+                    </span>
+                  </span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{p.color}}; text-align: right">{{p.value}}</span>
+                </div>
+              </sc-for>
+            </div>
+            <button class="solid" type="button" disabled="{{lg.deviceBlocked}}" onClick="{{lg.deviceContinue}}" style="min-height: 48px; background: #E8EAE4; color: #0F1210; border: 0; border-radius: 4px; font-weight: 600; opacity: {{lg.deviceOpacity}}">Continue</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{lg.is.welcome}}" hint-placeholder-val="{{ false }}">
+          <div class="lg-step" style="display: flex; flex-direction: column; gap: 16px">
+            <div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #A3ABA2">{{lg.stepLabel}}</div>
+              <h2 style="margin: 2px 0 0; font-family: 'Saira Semi Condensed', sans-serif; font-size: 26px; line-height: 1.15; font-weight: 600">Confirm and enter</h2>
+            </div>
+            <div class="lg-row" style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid #A8D8BC; border-radius: 4px">
+              <svg class="i lg-draw" style="width: 24px; height: 24px; color: #A8D8BC" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+              <div><strong style="display: block">Identity verified</strong><span style="color: #C4CAC1">Password, authenticator code and device all passed.</span></div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 12px">
+              <div><div style="color: #A3ABA2; font-size: 12px">Signed in as</div><div>{{lg.user.name}}</div></div>
+              <div><div style="color: #A3ABA2; font-size: 12px">Role</div><div>{{lg.user.role}}</div></div>
+              <div><div style="color: #A3ABA2; font-size: 12px">Last successful sign-in</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">{{lg.user.last}}, ENC2-WS-14</div></div>
+              <div><div style="color: #A3ABA2; font-size: 12px">Failed attempts since then</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">{{lg.failedSince}}</div></div>
+            </div>
+            <div style="padding: 12px; background: #0F1210; border-radius: 4px; font-size: 13px; color: #C4CAC1">If the last sign-in was not you, stop here and report it to the security officer. The session locks after 5 minutes idle and ends after 30 minutes.</div>
+            <button class="solid" type="button" onClick="{{lg.enter}}" style="min-height: 48px; background: #E8EAE4; color: #0F1210; border: 0; border-radius: 4px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px">{{lg.enterLabel}}<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+            <button class="ghost" type="button" onClick="{{lg.backToPassword}}" style="min-height: 44px; background: transparent; border: 1px solid #434B44; border-radius: 4px; font-weight: 500">Cancel and sign out</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{lg.is.locked}}" hint-placeholder-val="{{ false }}">
+          <div class="lg-step" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding: 12px 0">
+            <svg class="i" style="width: 44px; height: 44px; color: #FF9D94" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+            <h2 style="margin: 0; font-family: 'Saira Semi Condensed', sans-serif; font-size: 26px; font-weight: 600">Account locked</h2>
+            <p role="alert" style="margin: 0; color: #C4CAC1; max-width: 400px">Too many failed attempts, so this account is locked for 15 minutes. The attempts were logged. If this was not you, contact the security officer now.</p>
+            <button class="ghost" type="button" onClick="{{lg.restart}}" style="min-height: 44px; padding: 0 16px; background: transparent; border: 1px solid #434B44; border-radius: 4px; font-weight: 500">Prototype only: start over</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{lg.is.done}}" hint-placeholder-val="{{ false }}">
+          <div class="lg-step" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding: 12px 0">
+            <svg class="i lg-draw" style="width: 44px; height: 44px; color: #A8D8BC" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+            <h2 style="margin: 0; font-family: 'Saira Semi Condensed', sans-serif; font-size: 26px; font-weight: 600">Signed in</h2>
+            <p style="margin: 0; color: #C4CAC1; max-width: 400px">In the Login to Dashboard prototype, this opens the document registry.</p>
+            <button class="ghost" type="button" onClick="{{lg.restart}}" style="min-height: 44px; padding: 0 16px; background: transparent; border: 1px solid #434B44; border-radius: 4px; font-weight: 500">Start over</button>
+          </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{lg.showNote}}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 10px 12px; background: #1B1F2B; border: 1px dashed #6F7A9C; border-radius: 4px; font-size: 13px; color: #E2E5F1">{{lg.note}}</div>
+      </sc-if>
+    </div>
+  </section>
+</div>
+
+  <div style="position: sticky; bottom: 0; z-index: 20; background: #1E7B45; color: #FFFFFF; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; line-height: 28px; padding: 0 16px">GREEN // SIGN-IN, NO CONTROLLED CONTENT SHOWN // SAMPLE DATA, NOT A REAL MARKING</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["notice","password","passwordError","code","codeError","device","deviceDone","welcome","locked"],"default":"notice"},"persona":{"editor":"enum","options":["pratama","mahendra","adiwangsa","santoso"],"default":"pratama"},"$preview":{"width":1440,"height":900}}'>
+/*LG-JS-START*/
+var LG_STEPS = ['notice', 'password', 'code', 'device', 'welcome'];
+var LG_LABELS = ['Notice', 'Sign in', 'Code', 'Device', 'Confirm'];
+var LG_USERS = [
+  { id: 'pratama', username: 'b.pratama', name: 'Sgt. B. Pratama', short: 'B. Pratama', role: 'Infantry section leader', last: '07 Nov 2026, 16:42' },
+  { id: 'mahendra', username: 'h.mahendra', name: 'Gen. H. Mahendra', short: 'H. Mahendra', role: 'KESTREL commander', last: '08 Nov 2026, 08:15' },
+  { id: 'adiwangsa', username: 'w.adiwangsa', name: 'Lt. Gen. W. Adiwangsa', short: 'W. Adiwangsa', role: 'HARBOR commander', last: '06 Nov 2026, 19:03' },
+  { id: 'santoso', username: 'a.santoso', name: 'Capt. A. Santoso', short: 'A. Santoso', role: 'System security officer', last: '08 Nov 2026, 07:58' }
+];
+var LG_CHECKS = [
+  ['Network', 'Must be inside the isolated enclave', 'Enclave ENC-2'],
+  ['Authenticator code', 'Second factor for this session', 'Verified, Google Authenticator'],
+  ['Device hostname', 'Must be a registered workstation', 'ENC2-WS-14, registered'],
+  ['Clock', 'Needed for time-based codes', 'Synchronized, drift under 30 s']
+];
+var LG_PASSWORD = 'Secure#2026';
+var LG_CODE = '123456';
+var LG_MAX_FAILS = 5;
+
+function lgInit(step, persona) {
+  var s = { lgStep: 'notice', lgAccepted: false, lgUser: null, lgUsername: '', lgPassword: '', lgShowPw: false, lgCode: '', lgFails: 0, lgError: '', lgShake: 0, lgBusy: false, lgDevice: 0, lgLeaving: false };
+  if (!step || step === 'notice') return s;
+  s.lgAccepted = true;
+  var u = LG_USERS.filter(function (x) { return x.id === (persona || 'pratama'); })[0] || LG_USERS[0];
+  if (step === 'password') { s.lgStep = 'password'; return s; }
+  if (step === 'passwordError') { s.lgStep = 'password'; s.lgUsername = u.username; s.lgFails = 1; s.lgError = 'password'; return s; }
+  if (step === 'locked') { s.lgStep = 'locked'; s.lgFails = LG_MAX_FAILS; return s; }
+  s.lgUser = u.id;
+  s.lgUsername = u.username;
+  if (step === 'code') { s.lgStep = 'code'; return s; }
+  if (step === 'codeError') { s.lgStep = 'code'; s.lgFails = 1; s.lgError = 'code'; return s; }
+  if (step === 'device') { s.lgStep = 'device'; s.lgDevice = 2; return s; }
+  s.lgDevice = LG_CHECKS.length;
+  s.lgStep = step === 'deviceDone' ? 'device' : 'welcome';
+  return s;
+}
+
+function loginVals(self, st, onDone) {
+  var set = function (p) { self.setState(p); };
+  var later = function (ms, fn) { self.lgTimers = self.lgTimers || []; self.lgTimers.push(setTimeout(fn, ms)); };
+  var stopTimers = function () { (self.lgTimers || []).forEach(clearTimeout); self.lgTimers = []; };
+  var log = function (e) {
+    if (!self.addEvent) return {};
+    var ev = self.addEvent(self.state, e);
+    return { events: ev.events, nextSeq: ev.nextSeq, auditSel: ev.lastSeq };
+  };
+  var step = st.lgStep;
+  var locked = step === 'locked';
+  var idx = LG_STEPS.indexOf(step);
+  if (locked) idx = 1;
+  if (step === 'done') idx = 5;
+  var user = LG_USERS.filter(function (u) { return u.id === st.lgUser; })[0] || LG_USERS[0];
+  var left = LG_MAX_FAILS - st.lgFails;
+
+  var steps = LG_LABELS.map(function (label, i) {
+    var done = i < idx, now = i === idx;
+    return { label: label, cur: now ? 'step' : undefined, bar: locked && now ? '#FF9D94' : (done ? '#A8D8BC' : (now ? '#E8EAE4' : '#2E3530')), color: done || now ? '#E8EAE4' : '#A3ABA2' };
+  });
+  var fail = function (kind, who) {
+    var s = self.state;
+    var fails = s.lgFails + 1;
+    var actor = who ? who.short : (s.lgUsername || 'Unknown user');
+    if (fails >= LG_MAX_FAILS) {
+      set(Object.assign({ lgStep: 'locked', lgFails: fails, lgBusy: false, lgPassword: '', lgCode: '', lgError: '' }, log({ actor: actor, event: 'Account locked after ' + LG_MAX_FAILS + ' failed attempts', doc: 'Sign-in', level: 'GREEN', type: 'Deny', policy: 'POL-SIGNIN', control: 'AC-7', detail: 'Locked for 15 minutes. The security officer was notified.' })));
+      return;
+    }
+    var patch = { lgFails: fails, lgBusy: false, lgError: kind, lgShake: s.lgShake + 1 };
+    if (kind === 'password') patch.lgPassword = '';
+    if (kind === 'code') patch.lgCode = '';
+    set(Object.assign(patch, log({ actor: actor, event: kind === 'password' ? 'Failed sign-in: password' : 'Failed sign-in: authenticator code', doc: 'Sign-in', level: 'GREEN', type: 'Deny', policy: 'POL-SIGNIN', control: 'AC-7', detail: (LG_MAX_FAILS - fails) + ' attempts left before the account locks. Passwords and codes are never logged.' })));
+  };
+  var startDevice = function () {
+    set({ lgStep: 'device', lgDevice: 0 });
+    for (var i = 1; i <= LG_CHECKS.length; i++) {
+      (function (n) { later(550 * n, function () { set({ lgDevice: n }); }); })(i);
+    }
+  };
+  var dots = [];
+  for (var d = 0; d < 6; d++) dots.push({ bg: d < st.lgCode.length ? '#E8EAE4' : '#2E3530' });
+  var checks = LG_CHECKS.map(function (c, i) {
+    var done = i < st.lgDevice;
+    var checking = !done && i === st.lgDevice && step === 'device';
+    return { label: c[0], help: c[1], value: done ? c[2] : (checking ? 'Checking' : 'Waiting'), done: done, checking: checking, pending: !done && !checking, color: done ? '#A8D8BC' : '#A3ABA2', labelColor: done || checking ? '#E8EAE4' : '#A3ABA2' };
+  });
+  var deviceDone = st.lgDevice >= LG_CHECKS.length;
+  var pwReady = st.lgUsername.trim().length > 0 && st.lgPassword.length > 0 && !st.lgBusy;
+  var codeReady = st.lgCode.length === 6 && !st.lgBusy;
+  var notes = {
+    password: 'Prototype only: the password for every user is Secure#2026. Five failed attempts in total lock the account.',
+    code: 'Prototype only: the authenticator code is 123456.'
+  };
+
+  return {
+    is: { notice: step === 'notice', password: step === 'password', code: step === 'code', device: step === 'device', welcome: step === 'welcome', locked: locked, done: step === 'done' },
+    steps: steps,
+    stepLabel: 'Step ' + Math.min(idx + 1, 5) + ' of 5',
+    leaveClass: st.lgLeaving ? 'lg-leave' : '',
+    shakeClass: st.lgShake ? (st.lgShake % 2 ? 'lg-shake-a' : 'lg-shake-b') : '',
+    busy: st.lgBusy,
+
+    accepted: st.lgAccepted,
+    toggleAccept: function (e) { set({ lgAccepted: !!e.target.checked }); },
+    noticeBlocked: !st.lgAccepted,
+    noticeOpacity: st.lgAccepted ? 1 : 0.45,
+    acceptNotice: function () { if (self.state.lgAccepted) set({ lgStep: 'password' }); },
+
+    username: st.lgUsername,
+    password: st.lgPassword,
+    onUsername: function (e) { set({ lgUsername: String(e.target.value || '').slice(0, 64), lgError: '' }); },
+    onPassword: function (e) { set({ lgPassword: String(e.target.value || '').slice(0, 128), lgError: '' }); },
+    showPw: st.lgShowPw, pwHidden: !st.lgShowPw,
+    pwType: st.lgShowPw ? 'text' : 'password',
+    pwToggleLabel: st.lgShowPw ? 'Hide password' : 'Show password',
+    togglePw: function () { set({ lgShowPw: !self.state.lgShowPw }); },
+    fieldBorder: st.lgError === 'password' ? '#FF9D94' : '#434B44',
+    passwordError: st.lgError === 'password',
+    passwordBlocked: !pwReady,
+    passwordOpacity: pwReady || st.lgBusy ? 1 : 0.45,
+    passwordLabel: st.lgBusy ? 'Checking' : 'Continue',
+    triesLabel: left + (left === 1 ? ' attempt' : ' attempts') + ' left',
+    showFill: step === 'password' && !st.lgBusy,
+    users: LG_USERS.map(function (u) {
+      return { name: u.name, username: u.username, fill: function () { set({ lgUsername: u.username, lgPassword: LG_PASSWORD, lgError: '' }); } };
+    }),
+    submitPassword: function (e) {
+      if (e && e.preventDefault) e.preventDefault();
+      var s = self.state;
+      if (s.lgBusy || !s.lgUsername.trim() || !s.lgPassword) return;
+      set({ lgBusy: true });
+      later(700, function () {
+        var s2 = self.state;
+        var u = LG_USERS.filter(function (x) { return x.username === s2.lgUsername.trim().toLowerCase(); })[0];
+        if (u && s2.lgPassword === LG_PASSWORD) set({ lgBusy: false, lgUser: u.id, lgStep: 'code', lgPassword: '', lgCode: '', lgError: '' });
+        else fail('password', u);
+      });
+    },
+
+    user: user,
+    code: st.lgCode,
+    onCode: function (e) { set({ lgCode: String(e.target.value || '').replace(/\D/g, '').slice(0, 6), lgError: '' }); },
+    codeDots: dots,
+    codeBorder: st.lgError === 'code' ? '#FF9D94' : '#434B44',
+    codeError: st.lgError === 'code',
+    codeBlocked: !codeReady,
+    codeOpacity: codeReady || st.lgBusy ? 1 : 0.45,
+    codeLabel: st.lgBusy ? 'Verifying' : 'Verify code',
+    submitCode: function (e) {
+      if (e && e.preventDefault) e.preventDefault();
+      var s = self.state;
+      if (s.lgBusy || s.lgCode.length < 6) return;
+      set({ lgBusy: true });
+      later(600, function () {
+        if (self.state.lgCode === LG_CODE) { set({ lgBusy: false, lgCode: '', lgError: '' }); startDevice(); }
+        else fail('code', user);
+      });
+    },
+    backToPassword: function () { stopTimers(); set({ lgStep: 'password', lgUser: null, lgUsername: '', lgPassword: '', lgCode: '', lgError: '', lgBusy: false, lgDevice: 0, lgLeaving: false }); },
+
+    checks: checks,
+    deviceBlocked: !deviceDone,
+    deviceOpacity: deviceDone ? 1 : 0.45,
+    deviceContinue: function () { if (self.state.lgDevice >= LG_CHECKS.length) set({ lgStep: 'welcome' }); },
+
+    failedSince: String(st.lgFails),
+    enterLabel: st.lgLeaving ? 'Opening' : 'Enter Secure Asset Doc',
+    enter: function () {
+      if (self.state.lgLeaving) return;
+      set({ lgLeaving: true });
+      later(700, onDone);
+    },
+    restart: function () { stopTimers(); set(lgInit('notice')); },
+    showNote: !!notes[step] && !st.lgBusy,
+    note: notes[step] || ''
+  };
+}
+/*LG-JS-END*/
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = lgInit(props.step, props.persona);
+  }
+  componentDidUpdate(prev) {
+    if (prev.step !== this.props.step || prev.persona !== this.props.persona) {
+      (this.lgTimers || []).forEach(clearTimeout);
+      this.setState(lgInit(this.props.step, this.props.persona));
+    }
+  }
+  componentWillUnmount() {
+    (this.lgTimers || []).forEach(clearTimeout);
+  }
+  renderVals() {
+    var self = this;
+    return { lg: loginVals(this, this.state, function () { self.setState({ lgStep: 'done', lgLeaving: false }); }) };
+  }
+}
+</script>
+</body>
+</html>

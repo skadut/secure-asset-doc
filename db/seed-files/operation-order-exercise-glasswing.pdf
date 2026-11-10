@@ -1,0 +1,139 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R 7 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 2441 >>
+stream
+BT /F2 8 Tf 40 772 Td (TLP:AMBER+STRICT) Tj ET
+40 765 m 572 765 l S
+40 50 m 572 50 l S
+BT /F1 8 Tf 40 38 Td (FICTIONAL TRAINING DOCUMENT - no real operational detail) Tj ET
+BT /F1 8 Tf 500 38 Td (Page 1 of 2) Tj ET
+BT /F2 8 Tf 40 24 Td (TLP:AMBER+STRICT) Tj ET
+BT /F2 18 Tf 72 735 Td (OPERATION ORDER - EXERCISE GLASSWING) Tj ET
+BT /F1 9 Tf 72 714 Td (Document: DOC-0017  Version: 1.0  Status: approved  TLP: AMBER+STRICT) Tj ET
+BT /F1 9 Tf 72 700 Td (Owner: Tim Respons Insiden Simulasi  Approver: Dewan Pengarah Simulasi  Next review: 2027-04-28) Tj ET
+BT /F2 12 Tf 72 672 Td (1 Situation) Tj ET
+BT /F1 10 Tf 72 656 Td (Fictional tabletop scenario only. A simulated telemetry fault is reported at the) Tj ET
+BT /F1 10 Tf 72 642 Td (fictional relay site "Marlow Supply Depot Relay Site". Generic conditions only; no real) Tj ET
+BT /F1 10 Tf 72 628 Td (system, vendor, or network is described.) Tj ET
+BT /F2 12 Tf 72 600 Td (2 Mission) Tj ET
+BT /F1 10 Tf 72 584 Td (Validate notification and recovery procedures for fictional OT sites in a training exercise.) Tj ET
+BT /F2 12 Tf 72 552 Td (3 Execution) Tj ET
+72 536 m 540 536 l S
+72 518 m 540 518 l S
+72 500 m 540 500 l S
+72 482 m 540 482 l S
+72 464 m 540 464 l S
+72 446 m 540 446 l S
+72 428 m 540 428 l S
+72 536 m 72 428 l S
+132 536 m 132 428 l S
+212 536 m 212 428 l S
+432 536 m 432 428 l S
+540 536 m 540 428 l S
+BT /F2 9 Tf 76 523 Td (Phase) Tj ET
+BT /F2 9 Tf 136 523 Td (Window) Tj ET
+BT /F2 9 Tf 216 523 Td (Activity) Tj ET
+BT /F2 9 Tf 436 523 Td (Lead) Tj ET
+BT /F1 9 Tf 76 505 Td (P0 Notify) Tj ET
+BT /F1 9 Tf 136 505 Td (T+00:00) Tj ET
+BT /F1 9 Tf 216 505 Td (Issue exercise start notice) Tj ET
+BT /F1 9 Tf 436 505 Td (Exercise Control) Tj ET
+BT /F1 9 Tf 76 487 Td (P1 Assess) Tj ET
+BT /F1 9 Tf 136 487 Td (T+00:30) Tj ET
+BT /F1 9 Tf 216 487 Td (Simulated triage of fictional asset list) Tj ET
+BT /F1 9 Tf 436 487 Td (Control Cell Lead) Tj ET
+BT /F1 9 Tf 76 469 Td (P2 Contain) Tj ET
+BT /F1 9 Tf 136 469 Td (T+01:30) Tj ET
+BT /F1 9 Tf 216 469 Td (Tabletop containment decision) Tj ET
+BT /F1 9 Tf 436 469 Td (Incident Team) Tj ET
+BT /F1 9 Tf 76 451 Td (P3 Recover) Tj ET
+BT /F1 9 Tf 136 451 Td (T+03:00) Tj ET
+BT /F1 9 Tf 216 451 Td (Simulated restore walk-through) Tj ET
+BT /F1 9 Tf 436 451 Td (Recovery Team) Tj ET
+BT /F1 9 Tf 76 433 Td (P4 Debrief) Tj ET
+BT /F1 9 Tf 136 433 Td (T+04:30) Tj ET
+BT /F1 9 Tf 216 433 Td (Lessons recorded) Tj ET
+BT /F1 9 Tf 436 433 Td (Recorder) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 1975 >>
+stream
+BT /F2 8 Tf 40 772 Td (TLP:AMBER+STRICT) Tj ET
+40 765 m 572 765 l S
+40 50 m 572 50 l S
+BT /F1 8 Tf 40 38 Td (FICTIONAL TRAINING DOCUMENT - no real operational detail) Tj ET
+BT /F1 8 Tf 500 38 Td (Page 2 of 2) Tj ET
+BT /F2 8 Tf 40 24 Td (TLP:AMBER+STRICT) Tj ET
+BT /F2 12 Tf 72 735 Td (4 Sustainment / Logistics) Tj ET
+BT /F1 10 Tf 72 719 Td (- Printed checklists \(simulated, fictional\)) Tj ET
+BT /F1 10 Tf 72 705 Td (- Simulated tickets for the exercise board) Tj ET
+BT /F1 10 Tf 72 691 Td (- Exercise binders for each control cell) Tj ET
+BT /F1 10 Tf 72 677 Td (- Room booking for the tabletop session) Tj ET
+BT /F2 12 Tf 72 645 Td (5 Command & Signal) Tj ET
+BT /F1 10 Tf 72 629 Td (Exercise Control is led by Dewan Pengarah Simulasi \(Exercise Director role\).) Tj ET
+BT /F1 10 Tf 72 615 Td (Simulated message channel: EX-GLASS only. No other channel is used in this exercise.) Tj ET
+BT /F2 12 Tf 72 585 Td (Annex A - Linked assets) Tj ET
+72 569 m 540 569 l S
+72 551 m 540 551 l S
+72 533 m 540 533 l S
+72 515 m 540 515 l S
+72 497 m 540 497 l S
+72 569 m 72 497 l S
+162 569 m 162 497 l S
+342 569 m 342 497 l S
+540 569 m 540 497 l S
+BT /F2 9 Tf 76 556 Td (ID) Tj ET
+BT /F2 9 Tf 166 556 Td (Name) Tj ET
+BT /F2 9 Tf 346 556 Td (Site) Tj ET
+BT /F1 9 Tf 76 538 Td (AST-0003) Tj ET
+BT /F1 9 Tf 166 538 Td (Water SCADA Server A) Tj ET
+BT /F1 9 Tf 346 538 Td (Camp Halvard Operations Center) Tj ET
+BT /F1 9 Tf 76 520 Td (AST-0013) Tj ET
+BT /F1 9 Tf 166 520 Td (Energy SCADA Server) Tj ET
+BT /F1 9 Tf 346 520 Td (Kestrel Naval Station Operations Center) Tj ET
+BT /F1 9 Tf 76 502 Td (AST-0006) Tj ET
+BT /F1 9 Tf 166 502 Td (Water Zone Firewall) Tj ET
+BT /F1 9 Tf 346 502 Td (Camp Halvard Operations Center) Tj ET
+BT /F2 12 Tf 72 465 Td (Annex B - Points of contact \(roles only\)) Tj ET
+BT /F1 10 Tf 72 449 Td (- Exercise Director) Tj ET
+BT /F1 10 Tf 72 435 Td (- Control Cell Lead) Tj ET
+BT /F1 10 Tf 72 421 Td (- Incident Team Lead) Tj ET
+BT /F1 10 Tf 72 407 Td (- Recorder) Tj ET
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000127 00000 n 
+0000000197 00000 n 
+0000000272 00000 n 
+0000000408 00000 n 
+0000002900 00000 n 
+0000003036 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+5062
+%%EOF

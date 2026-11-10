@@ -1,0 +1,80 @@
+.ui-switch {
+  --ui-switch-track: rgb(135, 150, 165);
+  --ui-switch-thumb: rgb(0, 56, 146);
+  --ui-switch-focus: rgb(0, 56, 146);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+:root.dark .ui-switch {
+  --ui-switch-focus: rgb(147, 197, 253);
+}
+
+.ui-switch input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+}
+
+.ui-switch .slider {
+  position: relative;
+  width: 48px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--ui-switch-track);
+}
+
+.ui-switch input:focus-visible + .slider {
+  outline: 2px solid var(--ui-switch-focus);
+  outline-offset: 3px;
+}
+
+.ui-switch .circle {
+  position: absolute;
+  top: -6px;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--ui-switch-thumb);
+  color: #fff;
+  box-shadow:
+    0 2px 1px -1px rgba(0, 0, 0, 0.2),
+    0 1px 1px 0 rgba(0, 0, 0, 0.14),
+    0 1px 3px 0 rgba(0, 0, 0, 0.12);
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ui-switch input:checked + .slider .circle {
+  transform: translateX(16px);
+}
+
+.ui-switch .circle::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ui-switch input:active + .slider .circle::after {
+  opacity: 0.75;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-switch .circle {
+    transition: none;
+  }
+}

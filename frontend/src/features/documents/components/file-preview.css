@@ -1,0 +1,41 @@
+/* Two counter-rotating rings adapted from Uiverse.io loaders/AHMED-MIT_cold-ape-73 (see THIRD_PARTY_NOTICES.md). */
+.ui-file-spinner {
+  position: relative;
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: 0 0 1.5rem;
+}
+
+.ui-file-spinner::before,
+.ui-file-spinner::after {
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  content: '';
+  animation: ui-file-spin 900ms linear infinite;
+}
+
+.ui-file-spinner::before {
+  border-top-color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.ui-file-spinner::after {
+  inset: 4px;
+  border-right-color: var(--muted-foreground);
+  border-left-color: var(--muted-foreground);
+  animation-direction: reverse;
+}
+
+@keyframes ui-file-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-file-spinner::before,
+  .ui-file-spinner::after {
+    animation: none;
+  }
+}

@@ -1,0 +1,22 @@
+/* Deterrent only: hides the viewer when printing. Real control is server-side. */
+.viewer-print-note {
+  display: none;
+}
+
+@media print {
+  body.viewer-active * {
+    visibility: hidden !important;
+  }
+
+  body.viewer-active .viewer-print-note,
+  body.viewer-active .viewer-print-note * {
+    visibility: visible !important;
+  }
+
+  body.viewer-active .viewer-print-note {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+}

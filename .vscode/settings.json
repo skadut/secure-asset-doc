@@ -8,5 +8,7 @@
     "tdClassName:\\s*'([^']*)'",
     "thClassName:\\s*\"([^\"]*)\"",
     "thClassName:\\s*'([^']*)'"
-  ]
+  ],
+"git.enabled": false
 }
+

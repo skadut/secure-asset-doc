@@ -1,0 +1,182 @@
+import { StrictMode } from 'react'
+import ReactDOM from 'react-dom/client'
+import { AxiosError } from 'axios'
+import {
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
+import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { toast } from 'sonner'
+import { useAuthStore } from '@/stores/auth-store'
+import {
+  assets,
+  assetDocLinks,
+  auditEvents,
+  csfSubcategories,
+  documents,
+  evidenceLinks,
+  lockedDocuments,
+  type Asset,
+  type AssetDocLink,
+  type AuditEvent,
+  type CsfSubcategory,
+  type Document,
+  type EvidenceLink,
+  type LockedDocument,
+} from './data/grc'
+import { handleServerError } from '@/lib/handle-server-error'
+import { setMe, type Me } from '@/lib/session'
+import { SessionLogin } from '@/features/auth/session-login'
+import { DirectionProvider } from './context/direction-provider'
+import { FontProvider } from './context/font-provider'
+import { ThemeProvider } from './context/theme-provider'
+// Generated Routes
+import { routeTree } from './routeTree.gen'
+// Styles
+import './styles/index.css'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) => {
+        // eslint-disable-next-line no-console
+        if (import.meta.env.DEV) console.log({ failureCount, error })
+
+        if (failureCount >= 0 && import.meta.env.DEV) return false
+        if (failureCount > 3 && import.meta.env.PROD) return false
+
+        return !(
+          error instanceof AxiosError &&
+          [401, 403].includes(error.response?.status ?? 0)
+        )
+      },
+      refetchOnWindowFocus: import.meta.env.PROD,
+      staleTime: 10 * 1000, // 10s
+    },
+    mutations: {
+      onError: (error) => {
+        handleServerError(error)
+
+        if (error instanceof AxiosError) {
+          if (error.response?.status === 304) {
+            toast.error('Content not modified!')
+          }
+        }
+      },
+    },
+  },
+  queryCache: new QueryCache({
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          toast.error('Session expired!')
+          useAuthStore.getState().auth.reset()
+          setMe(null)
+          window.location.reload()
+        }
+        if (error.response?.status === 500) {
+          toast.error('Internal Server Error!')
+          // Only navigate to error page in production to avoid disrupting HMR in development
+          if (import.meta.env.PROD) {
+            router.navigate({ to: '/500' })
+          }
+        }
+        if (error.response?.status === 403) {
+          // router.navigate("/forbidden", { replace: true });
+        }
+      }
+    },
+  }),
+})
+
+// Create a new router instance
+const router = createRouter({
+  routeTree,
+  context: { queryClient },
+  defaultPreload: 'intent',
+  defaultPreloadStaleTime: 0,
+})
+
+// Register the router instance for type safety
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
+}
+
+// Render the app
+const rootElement = document.getElementById('root')!
+const root = ReactDOM.createRoot(rootElement)
+
+function renderLogin() {
+  root.render(
+    <ThemeProvider>
+      <SessionLogin onSuccess={() => void loadApp()} />
+    </ThemeProvider>
+  )
+}
+
+async function loadApp() {
+  root.render(<p>Loading…</p>)
+
+  try {
+    const response = await fetch('/api/grc')
+    if (response.status === 401) {
+      renderLogin()
+      return
+    }
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    const data: unknown = await response.json()
+    if (!data || typeof data !== 'object') throw new Error('Invalid API response')
+    const payload = data as Record<string, unknown>
+    const hydrate = <T,>(key: string, target: T[]) => {
+      const items = payload[key]
+      if (!Array.isArray(items)) throw new Error(`Invalid API response: ${key} must be an array`)
+      target.length = 0
+      for (const item of items) target.push(item as T)
+    }
+    hydrate<Asset>('assets', assets)
+    const rawDocs = payload.documents
+    if (!Array.isArray(rawDocs)) throw new Error('Invalid API response: documents must be an array')
+    documents.length = 0
+    lockedDocuments.length = 0
+    for (const item of rawDocs as (Document | LockedDocument)[]) {
+      if (item.locked === true) lockedDocuments.push(item)
+      else documents.push(item)
+    }
+    hydrate<CsfSubcategory>('csfSubcategories', csfSubcategories)
+    hydrate<EvidenceLink>('evidenceLinks', evidenceLinks)
+    hydrate<AssetDocLink>('assetDocLinks', assetDocLinks)
+    hydrate<AuditEvent>('auditEvents', auditEvents)
+    const meRes = await fetch('/api/me', { credentials: 'same-origin' })
+    if (meRes.status === 401) {
+      renderLogin()
+      return
+    }
+    if (!meRes.ok) throw new Error(`me ${meRes.status}`)
+    setMe((await meRes.json()) as Me)
+    root.render(
+      <StrictMode>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider>
+            <FontProvider>
+              <DirectionProvider>
+                <RouterProvider router={router} />
+              </DirectionProvider>
+            </FontProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </StrictMode>
+    )
+  } catch {
+    root.render(
+      <>
+        <p>Unable to load data. Please try again.</p>
+        <button onClick={() => void loadApp()}>Retry</button>
+      </>
+    )
+  }
+}
+
+void loadApp()

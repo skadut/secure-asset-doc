@@ -12,6 +12,9 @@ on:
 jobs:
   install-lint-build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
 
     steps:
       - name: Checkout code
@@ -45,3 +48,43 @@ jobs:
 
       - name: Build the project
         run: pnpm build
+
+  tpm-swtpm:
+    runs-on: ubuntu-latest
+    env:
+      TPM2TOOLS_TCTI: swtpm:host=127.0.0.1,port=2321
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start software TPM
+        run: |
+          docker compose -f cryptography-service/compose.ci.yaml up -d
+          timeout 30 bash -c 'until (echo > /dev/tcp/127.0.0.1/2321) 2>/dev/null; do sleep 1; done'
+
+      - name: Install TPM tools
+        run: sudo apt-get update && sudo apt-get install -y tpm2-tools libtss2-tcti-swtpm0
+
+      - name: Get TPM random bytes
+        run: tpm2_getrandom 8 --hex
+
+      - name: Seal and unseal round trip
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"
+          flush() { tpm2_flushcontext -t; tpm2_flushcontext -s; }
+          flush
+          tpm2_createprimary -C o -G ecc -c primary.ctx
+          flush
+          head -c 32 /dev/urandom > secret.bin
+          tpm2_create -C primary.ctx -u key.pub -r key.priv -i secret.bin
+          flush
+          tpm2_load -C primary.ctx -u key.pub -r key.priv -c key.ctx
+          flush
+          tpm2_unseal -c key.ctx -o out.bin
+          flush
+          cmp secret.bin out.bin
+
+      - name: Stop software TPM
+        if: always()
+        run: docker compose -f cryptography-service/compose.ci.yaml down -v

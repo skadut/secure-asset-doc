@@ -1,0 +1,5 @@
+*.exe
+README.md
+Dockerfile
+.dockerignore
+.env*

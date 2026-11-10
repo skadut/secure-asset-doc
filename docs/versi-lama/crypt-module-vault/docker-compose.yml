@@ -1,0 +1,8 @@
+services:
+  crypt-module:
+    build: .
+    image: crypt-module
+    env_file: .env
+    ports:
+      - "2796:2796"
+    restart: unless-stopped

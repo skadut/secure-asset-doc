@@ -1,0 +1,8 @@
+# CI-only software TPM used to exercise the TPM 2.0 path on runners without /dev/tpmrm0; not for production and not for local runtime.
+services:
+  swtpm:
+    image: ghcr.io/stefanberger/swtpm:v0.10.0
+    command: socket --tpm2 --server type=tcp,port=2321,bindaddr=0.0.0.0 --ctrl type=tcp,port=2322,bindaddr=0.0.0.0 --flags not-need-init,startup-clear --tpmstate dir=/tmp
+    ports:
+      - "127.0.0.1:2321:2321"
+      - "127.0.0.1:2322:2322"

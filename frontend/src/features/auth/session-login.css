@@ -1,0 +1,666 @@
+/* Hallmark · macrostructure: Split Workbench · tone: austere technical · anchor hue: moss green */
+.lg-root {
+  --lg-grid: #e4e4dc;
+  --lg-scan: rgba(47, 107, 74, 0.25);
+  --lg-input-bg: #fbfbf8;
+  min-height: 100vh;
+  overflow-x: clip;
+  background: var(--background);
+  color: var(--foreground);
+  font: 14px/1.45 var(--font-sans);
+}
+.dark .lg-root {
+  --lg-grid: #1a1f1b;
+  --lg-scan: rgba(168, 216, 188, 0.3);
+  --lg-input-bg: #0f1210;
+}
+.lg-root * {
+  box-sizing: border-box;
+}
+:where(.lg-root) button,
+:where(.lg-root) input {
+  font: inherit;
+  color: inherit;
+}
+.lg-root button {
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease;
+}
+.lg-root button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.lg-root button:disabled {
+  cursor: not-allowed;
+}
+.lg-root button:focus-visible,
+.lg-root input:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 2px;
+}
+.lg-root input::placeholder {
+  color: var(--muted-foreground);
+}
+@keyframes lgIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes lgStepIn {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes lgScan {
+  0% {
+    top: -2px;
+  }
+  100% {
+    top: 100%;
+  }
+}
+@keyframes lgSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes lgDraw {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes lgTotp {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: 100.5;
+  }
+}
+@keyframes lgShakeA {
+  0%,
+  100% {
+    transform: none;
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(8px);
+  }
+  60% {
+    transform: translateX(-5px);
+  }
+  80% {
+    transform: translateX(5px);
+  }
+}
+@keyframes lgShakeB {
+  0%,
+  100% {
+    transform: none;
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(8px);
+  }
+  60% {
+    transform: translateX(-5px);
+  }
+  80% {
+    transform: translateX(5px);
+  }
+}
+@keyframes lgOut {
+  to {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+}
+.lg-in {
+  animation: lgIn 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.lg-in2 {
+  animation: lgIn 0.5s 0.1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.lg-in3 {
+  animation: lgIn 0.5s 0.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.lg-step {
+  animation: lgStepIn 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.lg-row {
+  animation: lgIn 0.3s ease-out both;
+}
+.lg-root .lg-about {
+  background-color: var(--sidebar);
+  background-image:
+    linear-gradient(var(--lg-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--lg-grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.lg-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--lg-scan);
+  animation: lgScan 6s linear infinite;
+}
+.lg-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: lgSpin 0.9s linear infinite;
+  vertical-align: -3px;
+}
+.lg-draw {
+  stroke-dasharray: 24;
+  animation: lgDraw 0.4s ease-out both;
+}
+.lg-totp {
+  stroke-dasharray: 100.5;
+  animation: lgTotp 30s linear infinite;
+}
+.lg-shake-a {
+  animation: lgShakeA 0.4s;
+}
+.lg-shake-b {
+  animation: lgShakeB 0.4s;
+}
+.lg-leave {
+  animation: lgOut 0.6s 0.1s ease-in both;
+}
+.lg-glyph {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.lg-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-wrap: wrap;
+}
+.lg-about {
+  position: relative;
+  overflow: hidden;
+  flex: 1 1 420px;
+  min-width: 0;
+  padding: 48px 40px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.lg-brand,
+.lg-intro,
+.lg-facts,
+.lg-help {
+  position: relative;
+}
+.lg-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.lg-shield {
+  width: 40px;
+  height: 40px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+.lg-brand-name {
+  font: 700 26px/1.1 var(--font-heading);
+}
+.lg-brand-sub {
+  font-size: 13px;
+}
+.lg-muted {
+  color: var(--muted-foreground);
+}
+.lg-intro {
+  max-width: 460px;
+}
+.lg-intro h1 {
+  margin: 0;
+  font: 600 44px/1.05 var(--font-heading);
+}
+.lg-intro p {
+  margin: 14px 0 0;
+  color: var(--text-2);
+  font-size: 15px;
+}
+.lg-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+  gap: 8px;
+  max-width: 480px;
+}
+.lg-fact {
+  padding: 12px;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  min-width: 0;
+}
+.lg-fact-label {
+  font-size: 12px;
+}
+.lg-mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.lg-help {
+  margin-top: auto;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  max-width: 480px;
+}
+.lg-main {
+  flex: 1 1 520px;
+  min-width: 0;
+  padding: 48px 24px;
+}
+.lg-column {
+  max-width: 520px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.lg-toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+.lg-progress {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 6px;
+}
+.lg-progress li {
+  border-top: 3px solid var(--border);
+  padding-top: 8px;
+  color: var(--muted-foreground);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.lg-progress li.done {
+  border-color: var(--pass);
+  color: var(--foreground);
+}
+.lg-progress li.current {
+  border-color: var(--foreground);
+  color: var(--foreground);
+}
+.lg-progress li.locked {
+  border-color: var(--fail);
+}
+.lg-card {
+  background: var(--card);
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  min-width: 0;
+}
+.lg-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.lg-eyebrow {
+  color: var(--muted-foreground);
+  font: 12px var(--font-mono);
+}
+.lg-card h2 {
+  margin: 2px 0 0;
+  font: 600 26px/1.15 var(--font-heading);
+}
+.lg-card header p {
+  margin: 6px 0 0;
+  color: var(--text-2);
+}
+.lg-note {
+  margin: 0;
+  color: var(--muted-foreground);
+}
+.lg-notice {
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--line-strong);
+  background: var(--background);
+  border-radius: 4px;
+  padding: 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+.lg-notice p {
+  margin: 0 0 8px;
+}
+.lg-notice p:last-child {
+  margin-bottom: 0;
+}
+.lg-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 44px;
+}
+.lg-consent input {
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  accent-color: var(--foreground);
+  flex: none;
+}
+.lg-form label,
+.lg-form > div > label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.lg-form input {
+  width: 100%;
+  height: 48px;
+  background: var(--lg-input-bg);
+  border: 1px solid var(--input);
+  border-radius: 4px;
+  padding: 0 12px;
+  font: 15px var(--font-mono);
+}
+.lg-form input.invalid {
+  border-color: var(--fail);
+}
+.lg-password-row {
+  display: flex;
+  gap: 8px;
+}
+.lg-password-row input {
+  min-width: 0;
+}
+.lg-toggle {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  border-radius: 4px;
+}
+.lg-primary,
+.lg-ghost {
+  min-height: 44px;
+  border-radius: 4px;
+  padding: 10px 16px;
+}
+.lg-primary {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  border: 1px solid var(--foreground);
+  background: var(--foreground);
+  color: var(--background);
+}
+.lg-primary:hover:not(:disabled) {
+  background: var(--text-2);
+}
+.lg-primary:disabled {
+  opacity: 0.45;
+}
+.lg-ghost {
+  font-weight: 500;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+}
+.lg-ghost:hover:not(:disabled),
+.lg-toggle:hover {
+  background: var(--accent);
+}
+.lg-error {
+  border-left: 2px solid var(--fail);
+  color: var(--fail);
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--fail) 8%, transparent);
+}
+.lg-account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--background);
+  border-radius: 4px;
+}
+.lg-account svg {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  transform: rotate(-90deg);
+  fill: none;
+}
+.lg-account circle {
+  stroke-width: 3;
+}
+.lg-account .track {
+  stroke: var(--line-strong);
+}
+.lg-account .lg-totp {
+  stroke: var(--pass);
+}
+.lg-account-caption {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.lg-account-caption .lg-muted {
+  font-size: 12px;
+}
+.lg-account-name {
+  overflow-wrap: anywhere;
+}
+.lg-form .lg-code-input {
+  min-height: 56px;
+  text-align: center;
+  font: 500 26px var(--font-mono);
+  letter-spacing: 0.5em;
+  padding-left: 0.5em;
+}
+.lg-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.lg-dots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+.lg-dots span.filled {
+  background: var(--foreground);
+}
+.lg-check-list {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border);
+}
+.lg-check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 58px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.lg-check-mark {
+  width: 22px;
+  flex: none;
+  color: var(--muted-foreground);
+}
+.lg-icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: var(--pass);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.lg-neutral-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  margin: 7px;
+  border-radius: 50%;
+  background: var(--muted-foreground);
+}
+.lg-check-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.lg-check-status {
+  font: 12px var(--font-mono);
+  color: var(--muted-foreground);
+}
+.lg-check-status.pass {
+  color: var(--pass);
+}
+.lg-check-status.warn,
+.lg-check-status.unverified {
+  color: var(--warn);
+}
+.lg-check-status.fail {
+  color: var(--fail);
+}
+.lg-verified {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--pass);
+  border-radius: 4px;
+}
+.lg-verified div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.lg-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 12px;
+}
+.lg-details small {
+  display: block;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  margin-bottom: 3px;
+}
+.lg-warning {
+  color: var(--warn);
+  margin: 0;
+}
+.lg-session-note {
+  padding: 12px;
+  background: var(--background);
+  border-radius: 4px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+.lg-locked {
+  text-align: center;
+}
+.lg-lock-icon {
+  width: 48px;
+  height: 48px;
+  fill: none;
+  stroke: var(--fail);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.lg-locked h2 {
+  margin: 12px 0 0;
+}
+.lg-locked p {
+  color: var(--text-2);
+}
+@media (max-width: 960px) {
+  .lg-about {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+}
+@media (max-width: 480px) {
+  .lg-about {
+    padding: 32px 16px;
+  }
+  .lg-main {
+    padding: 32px 16px;
+  }
+  .lg-intro h1 {
+    font-size: 32px;
+  }
+  .lg-card {
+    padding: 20px;
+  }
+  .lg-progress {
+    gap: 4px;
+  }
+  .lg-progress li {
+    font-size: 10px;
+  }
+  .lg-form .lg-code-input {
+    font-size: 22px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lg-root *,
+  .lg-root {
+    animation: none !important;
+    transition: none !important;
+  }
+}

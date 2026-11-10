@@ -27,8 +27,28 @@ dist-ssr
 *.sw?
 
 # Test coverage
-/coverage
+coverage
 
 # Vitest artifacts (browser screenshots/attachments)
 **/__screenshots__/
 .vitest-attachments/
+frontend/demo/*.webm
+cryptography-service/encryption-services/crypt-module
+cryptography-service/encryption-services/crypt-module.exe
+docs/versi-lama/crypt-module-vault/crypt-module
+docs/versi-lama/crypt-module-vault/crypt-module.exe
+cryptography-service/tpm-services/bin/
+
+# Secrets and local key material (never commit)
+db/CREDENTIALS.md
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+cryptography-service/run/
+cryptography-service/run-e2e/
+
+# Agent worktrees
+.claude/worktrees/

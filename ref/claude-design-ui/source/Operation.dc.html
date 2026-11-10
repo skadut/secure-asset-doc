@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Operation Access</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Saira+Semi+Condensed:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#0F1210}
+@keyframes screenIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+main{animation:screenIn .28s cubic-bezier(.2,.7,.2,1) both}
+a,button{transition:background-color .15s ease,border-color .15s ease,color .15s ease,transform .1s ease}
+a:active,button:active:not(:disabled){transform:scale(.98)}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+a{color:#E8EAE4;text-decoration:none}a:hover{color:#FFFFFF}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed}
+select{background:#0F1210}
+.i{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;width:18px;height:18px;flex:none}
+.nav:hover,.cell:hover,.ghost:hover,.who:hover{background:#262C27}
+.solid:hover{background:#FFFFFF}
+a:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid #E8EAE4;outline-offset:2px}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-direction: column; background: #0F1210; color: #E8EAE4; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.45">
+
+  <div style="position: sticky; top: 0; z-index: 20; background: #B3261E; color: #FFFFFF; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; line-height: 28px; padding: 0 16px">RED // SAMPLE DATA, NOT A REAL MARKING</div>
+
+  <div style="flex: 1 1 auto; display: flex; flex-wrap: wrap; align-items: stretch">
+
+    <nav aria-label="Primary" style="flex: 1 1 224px; box-sizing: border-box; padding: 20px 16px; border-right: 1px solid #2E3530; display: flex; flex-direction: column; gap: 24px; background: #131714">
+      <div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+        <svg class="i" style="width: 26px; height: 26px" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V6z"></path><path d="M9 11h6M9 14.5h6"></path></svg>
+        <div style="font-family: 'Saira Semi Condensed', sans-serif; font-weight: 700; font-size: 18px; line-height: 1.1; letter-spacing: 0.01em">Secure Asset Doc</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <a class="nav" href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 4px; color: #C4CAC1"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h16"></path></svg>Registry</a>
+        <a class="nav" href="Operation.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 4px; background: #262C27; font-weight: 600"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"></path></svg>Operation access</a>
+        <a class="nav" href="Viewer.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 4px; color: #C4CAC1"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"></path><path d="M15 3v4h4M9 12h7M9 16h7"></path></svg>Secure viewer</a>
+        <a class="nav" href="Release.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 4px; color: #C4CAC1"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"></circle><circle cx="16" cy="8" r="3"></circle><path d="M3 20c0-3 2-5 5-5s5 2 5 5M13 15.3c.9-.2 2-.3 3-.3 3 0 5 2 5 5"></path></svg>Dual authorization</a>
+        <a class="nav" href="Audit.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 4px; color: #C4CAC1"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7a3 3 0 0 1 3-3h4a3 3 0 0 1 0 6h-1M15 17a3 3 0 0 1-3 3H8a3 3 0 0 1 0-6h1"></path><path d="M9 12h6"></path></svg>Audit ledger</a>
+        <a class="nav" href="Controls.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 4px; color: #C4CAC1"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V6z"></path><path d="M8.5 12l2.5 2.5 4.5-5"></path></svg>NIST controls</a>
+      </div>
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 12px; padding: 12px; border: 1px solid #2E3530; border-radius: 4px">
+        <div>
+          <div style="font-weight: 600">Gen. H. Mahendra</div>
+          <div style="color: #A3ABA2; font-size: 12px">KESTREL commander</div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; font-size: 12px">
+          <div><div style="color: #A3ABA2">Base level</div><div style="font-family: 'IBM Plex Mono', monospace">AMBER</div></div>
+          <div><div style="color: #A3ABA2">RED scope</div><div style="font-family: 'IBM Plex Mono', monospace">Named docs</div></div>
+          <div><div style="color: #A3ABA2">Assurance</div><div style="font-family: 'IBM Plex Mono', monospace">AAL3</div></div>
+          <div><div style="color: #A3ABA2">Enclave</div><div style="font-family: 'IBM Plex Mono', monospace">ENC-2</div></div>
+        </div>
+      </div>
+    </nav>
+
+    <main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 24px; display: flex; flex-direction: column; gap: 20px">
+      <header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+        <div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #A3ABA2">OP-KESTREL / Active / Closes 31 Jan 2027</div>
+          <h1 style="margin: 2px 0 0; font-family: 'Saira Semi Condensed', sans-serif; font-size: 34px; line-height: 1.1; font-weight: 600">Operation KESTREL access</h1>
+          <p style="margin: 4px 0 0; color: #A3ABA2; max-width: 680px">Each person sees only the documents they are named in. A sergeant and a general follow the same rule, and rank is never checked.</p>
+        </div>
+        <sc-if value="{{hasPending}}" hint-placeholder-val="{{ false }}">
+          <a class="solid" href="Release.dc.html" style="min-height: 44px; padding: 0 16px; display: inline-flex; align-items: center; background: #E8EAE4; color: #0F1210; border-radius: 4px; font-weight: 600">Submit {{pendingCount}} for dual authorization</a>
+        </sc-if>
+      </header>
+
+      <section aria-label="Participant and document matrix" style="border: 1px solid #2E3530; border-radius: 4px; background: #171B18">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 12px; border-bottom: 1px solid #2E3530">
+          <h2 style="margin: 0; font-size: 13px; font-weight: 600">Who is named in which document</h2>
+          <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: #C4CAC1">
+            <span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 14px; height: 14px; background: #E8EAE4; border-radius: 2px"></span>Named</span>
+            <span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 14px; height: 14px; border: 1px dashed #E8C877; border-radius: 2px"></span>Change pending</span>
+            <span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 14px; height: 14px; border: 1px solid #434B44; border-radius: 2px"></span>Not named</span>
+          </div>
+        </div>
+        <div style="overflow-x: auto">
+          <div style="min-width: 860px">
+            <div style="display: grid; grid-template-columns: 216px repeat(4, minmax(0, 1fr)) 120px; gap: 8px; padding: 10px 12px; border-bottom: 1px solid #2E3530; align-items: end; font-size: 12px; color: #C4CAC1">
+              <div style="color: #A3ABA2">Participant</div>
+              <sc-for list="{{docs}}" as="d" hint-placeholder-count="4">
+                <div style="text-align: center"><div style="font-weight: 600; color: #E8EAE4">{{d.short}}</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">{{d.code}}</div></div>
+              </sc-for>
+              <div style="color: #A3ABA2; text-align: right">Read-in</div>
+            </div>
+            <sc-for list="{{matrix}}" as="r" hint-placeholder-count="6">
+              <div style="display: grid; grid-template-columns: 216px repeat(4, minmax(0, 1fr)) 120px; gap: 8px; padding: 6px 12px; border-bottom: 1px solid #252B26; align-items: center; background: {{r.bg}}">
+                <button class="who" type="button" aria-pressed="{{r.on}}" onClick="{{r.pick}}" style="min-height: 44px; padding: 2px 8px; margin-left: -8px; text-align: left; background: transparent; border: 0; border-radius: 4px; display: flex; flex-direction: column; justify-content: center">
+                  <span style="font-weight: 500; color: {{r.nameColor}}; text-decoration: {{r.strike}}">{{r.name}}</span>
+                  <span style="font-size: 12px; color: #A3ABA2">{{r.task}}</span>
+                </button>
+                <sc-for list="{{r.cells}}" as="c" hint-placeholder-count="4">
+                  <button class="cell" type="button" aria-label="{{c.aria}}" aria-pressed="{{c.named}}" disabled="{{c.locked}}" onClick="{{c.toggle}}" style="height: 44px; background: {{c.bg}}; border: 1px {{c.lineStyle}} {{c.line}}; border-radius: 4px; color: {{c.fg}}; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500">{{c.text}}</button>
+                </sc-for>
+                <span style="text-align: right; font-size: 13px; color: {{r.readColor}}">{{r.read}}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: stretch">
+
+        <section aria-label="Selected participant" style="flex: 1 1 380px; min-width: 0; padding: 20px; background: #171B18; border: 1px solid #2E3530; border-radius: 4px; display: flex; flex-direction: column; gap: 16px">
+          <div>
+            <h2 style="margin: 0; font-family: 'Saira Semi Condensed', sans-serif; font-size: 24px; line-height: 1.15; font-weight: 600">{{cur.name}}</h2>
+            <div style="color: #A3ABA2">{{cur.task}}</div>
+          </div>
+          <div>
+            <h3 style="margin: 0 0 8px; font-size: 13px; font-weight: 600">Effective RED access</h3>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <sc-for list="{{curAccess}}" as="a" hint-placeholder-count="4">
+                <div style="display: flex; justify-content: space-between; gap: 12px">
+                  <span style="color: {{a.titleColor}}">{{a.title}}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{a.color}}">{{a.effect}}</span>
+                </div>
+              </sc-for>
+              <div style="display: flex; justify-content: space-between; gap: 12px">
+                <span style="color: #A3ABA2">All other operations</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #FF9D94">Deny, hidden</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top: auto; display: flex; flex-direction: column; gap: 6px">
+            <sc-if value="{{curActive}}" hint-placeholder-val="{{ true }}">
+              <button class="ghost" type="button" onClick="{{revoke}}" style="min-height: 44px; background: transparent; border: 1px solid #FF9D94; color: #FFD2CD; border-radius: 4px; font-weight: 500">Revoke all access now</button>
+            </sc-if>
+            <sc-if value="{{curRevoked}}" hint-placeholder-val="{{ false }}">
+              <div role="status" style="padding: 12px; border: 1px solid #FF9D94; border-radius: 4px"><strong style="display: block">Access revoked</strong>Open sessions were ended and key handles destroyed. The next decision for this person is Deny. Reinstating needs dual authorization.</div>
+            </sc-if>
+            <div style="font-size: 12px; color: #A3ABA2">Revocation needs one person and applies at once. Adding access always needs two.</div>
+          </div>
+        </section>
+
+        <section aria-label="Access decision test" style="flex: 1 1 380px; min-width: 0; padding: 20px; background: #171B18; border: 1px solid #2E3530; border-radius: 4px; display: flex; flex-direction: column; gap: 12px">
+          <div>
+            <h2 style="margin: 0; font-size: 13px; font-weight: 600">Test an access decision</h2>
+            <p style="margin: 2px 0 0; font-size: 12px; color: #A3ABA2">Runs the live policy without opening anything. The result is logged.</p>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px">
+            <div>
+              <label for="t-subject" style="display: block; font-size: 12px; color: #A3ABA2; margin-bottom: 4px">Subject</label>
+              <select id="t-subject" value="{{tSubject}}" onChange="{{onSubject}}" style="box-sizing: border-box; width: 100%; min-height: 44px; padding: 0 8px; border: 1px solid #434B44; border-radius: 4px">
+                <option value="mahendra">Gen. H. Mahendra</option><option value="sutanto">Brig. Gen. R. Sutanto</option><option value="suryadi">Col. M. Suryadi</option><option value="wibowo">Maj. R. Wibowo</option><option value="pratama">Sgt. B. Pratama</option><option value="lestari">Cpl. T. Lestari</option><option value="adiwangsa">Lt. Gen. W. Adiwangsa (not in KESTREL)</option><option value="santoso">Capt. A. Santoso (security officer)</option>
+              </select>
+            </div>
+            <div>
+              <label for="t-doc" style="display: block; font-size: 12px; color: #A3ABA2; margin-bottom: 4px">Document</label>
+              <select id="t-doc" value="{{tDoc}}" onChange="{{onDoc}}" style="box-sizing: border-box; width: 100%; min-height: 44px; padding: 0 8px; border: 1px solid #434B44; border-radius: 4px">
+                <option value="d1">Operation Order (00501)</option><option value="d2">Movement Annex (00502)</option><option value="d3">Command Assessment (00503)</option><option value="d4">Medical Annex (00504)</option><option value="harbor">HARBOR Operation Order (00611)</option>
+              </select>
+            </div>
+          </div>
+          <div style="padding: 12px; border: 1px solid {{test.color}}; border-radius: 4px">
+            <div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 600; color: {{test.color}}">{{test.effect}}</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A3ABA2">POL-RED-NAMED</span>
+            </div>
+            <div style="margin-top: 4px">{{test.reason}}</div>
+          </div>
+          <div style="padding: 10px 12px; background: #0F1210; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 1.7; overflow-x: auto; white-space: pre">PERMIT IF subject.id IN resource.named
+  AND subject.read_in = signed
+  AND operation.state = active
+  AND session.assurance = AAL3
+  AND device.managed = true</div>
+          <div style="font-size: 12px; color: #A3ABA2">Attributes come from the personnel system. Rank is not in the policy.</div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div style="position: sticky; bottom: 0; z-index: 20; background: #B3261E; color: #FFFFFF; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; line-height: 28px; padding: 0 16px">RED // SAMPLE DATA, NOT A REAL MARKING</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1400}}'>
+var DOCS = [
+  { id: 'd1', short: 'Operation Order', code: '00501' },
+  { id: 'd2', short: 'Movement Annex', code: '00502' },
+  { id: 'd3', short: 'Command Assessment', code: '00503' },
+  { id: 'd4', short: 'Medical Annex', code: '00504' }
+];
+var TEAM = [
+  { id: 'mahendra', name: 'Gen. H. Mahendra', task: 'Commander', named: ['d1', 'd2', 'd3', 'd4'], read: 'Signed', commander: true },
+  { id: 'sutanto', name: 'Brig. Gen. R. Sutanto', task: 'Deputy commander', named: ['d1', 'd3'], read: 'Signed' },
+  { id: 'suryadi', name: 'Col. M. Suryadi', task: 'Movement officer', named: ['d1', 'd2'], read: 'Signed' },
+  { id: 'wibowo', name: 'Maj. R. Wibowo', task: 'Medical officer', named: ['d1', 'd4'], read: 'Signed' },
+  { id: 'pratama', name: 'Sgt. B. Pratama', task: 'Lead section, movement', named: ['d1', 'd2'], read: 'Signed' },
+  { id: 'lestari', name: 'Cpl. T. Lestari', task: 'Signals support', named: ['d1'], read: 'Signed' }
+];
+var OUTSIDERS = [
+  { id: 'adiwangsa', name: 'Lt. Gen. W. Adiwangsa (not in KESTREL)' },
+  { id: 'santoso', name: 'Capt. A. Santoso (security officer)' }
+];
+var ORDER = { d1: 'SAD-2026-00501', d2: 'SAD-2026-00502', d3: 'SAD-2026-00503', d4: 'SAD-2026-00504' };
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { selected: 'pratama', pending: {}, revoked: {}, tSubject: 'pratama', tDoc: 'd3' };
+  }
+  renderVals() {
+    var self = this;
+    var st = this.state;
+    var matrix = TEAM.map(function (p) {
+      var rev = !!st.revoked[p.id];
+      var on = st.selected === p.id;
+      return {
+        name: p.name, task: p.task, on: on,
+        bg: on ? '#262C27' : 'transparent',
+        nameColor: rev ? '#A3ABA2' : '#E8EAE4',
+        strike: rev ? 'line-through' : 'none',
+        read: rev ? 'Revoked' : p.read,
+        readColor: rev ? '#FF9D94' : '#A8D8BC',
+        pick: function () { self.setState({ selected: p.id }); },
+        cells: DOCS.map(function (d) {
+          var key = p.id + ':' + d.id;
+          var base = p.named.indexOf(d.id) >= 0;
+          var isPending = !!st.pending[key];
+          var locked = rev || !!p.commander;
+          var bg = 'transparent', line = '#434B44', lineStyle = 'solid', fg = '#A3ABA2', text = 'No';
+          if (rev) { line = '#2E3530'; text = 'None'; }
+          else if (isPending) { line = '#E8C877'; lineStyle = 'dashed'; fg = '#E8C877'; text = base ? 'Remove' : 'Add'; }
+          else if (base) { bg = '#E8EAE4'; line = '#E8EAE4'; fg = '#0F1210'; text = 'Named'; }
+          return {
+            named: base && !rev, locked: locked, bg: bg, line: line, lineStyle: lineStyle, fg: fg, text: text,
+            aria: p.name + ', ' + d.short + ': ' + text,
+            toggle: function () {
+              var next = Object.assign({}, st.pending);
+              if (next[key]) delete next[key]; else next[key] = true;
+              self.setState({ pending: next, selected: p.id });
+            }
+          };
+        })
+      };
+    });
+    var cur = TEAM.filter(function (p) { return p.id === st.selected; })[0];
+    var curRev = !!st.revoked[cur.id];
+    var curAccess = DOCS.map(function (d) {
+      var yes = cur.named.indexOf(d.id) >= 0 && !curRev;
+      return { title: d.short, titleColor: yes ? '#E8EAE4' : '#A3ABA2', effect: yes ? 'Permit' : 'Deny, hidden', color: yes ? '#A8D8BC' : '#FF9D94' };
+    });
+    var pendingCount = Object.keys(st.pending).length;
+
+    var subjects = TEAM.map(function (p) { return { id: p.id, name: p.name }; }).concat(OUTSIDERS);
+    var testDocs = DOCS.map(function (d) { return { id: d.id, label: d.short + ' (' + d.code + ')' }; }).concat([{ id: 'harbor', label: 'HARBOR Operation Order (00611)' }]);
+    var tp = TEAM.filter(function (p) { return p.id === st.tSubject; })[0];
+    var sName = subjects.filter(function (s) { return s.id === st.tSubject; })[0].name.replace(/ \(.*\)$/, '');
+    var test;
+    if (st.tDoc === 'harbor') test = { effect: 'DENY', color: '#FF9D94', reason: sName + ' is not named in this document. It does not appear in their registry or search.' };
+    else if (st.tSubject === 'santoso') test = { effect: 'METADATA ONLY', color: '#E8C877', reason: 'Security officers manage access but cannot read content. Separation of duties applies.' };
+    else if (st.revoked[st.tSubject]) test = { effect: 'DENY', color: '#FF9D94', reason: 'Access was revoked. The binding no longer applies.' };
+    else if (tp && tp.named.indexOf(st.tDoc) >= 0) test = { effect: 'PERMIT', color: '#A8D8BC', reason: sName + ' is named in this document, the read-in is signed and all session conditions pass.' };
+    else test = { effect: 'DENY', color: '#FF9D94', reason: sName + ' is not named in this document, so it stays hidden. Rank and other KESTREL documents do not change this.' };
+
+    return {
+      docs: DOCS, matrix: matrix, cur: cur, curAccess: curAccess,
+      curActive: !curRev && !cur.commander, curRevoked: curRev,
+      revoke: function () { var r = Object.assign({}, st.revoked); r[cur.id] = true; self.setState({ revoked: r }); },
+      hasPending: pendingCount > 0, pendingCount: pendingCount + (pendingCount === 1 ? ' change' : ' changes'),
+      subjects: subjects, testDocs: testDocs, tSubject: st.tSubject, tDoc: st.tDoc, test: test,
+      onSubject: function (e) { self.setState({ tSubject: e.target.value }); },
+      onDoc: function (e) { self.setState({ tDoc: e.target.value }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

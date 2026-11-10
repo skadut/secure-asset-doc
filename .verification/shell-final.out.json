@@ -1,0 +1,189 @@
+{
+ "errors": [],
+ "layer": {
+  "pseudo": {
+   "position": "fixed",
+   "zIndex": "0",
+   "pointerEvents": "none",
+   "backgroundImage": "url(\"http://127.0.0.1:8088/patterns/cracked-earth-light.svg\"",
+   "inset": "0"
+  },
+  "rootZ": "1",
+  "rootPos": "relative",
+  "insetPattern": "none",
+  "bodyBg": "rgba(0, 0, 0, 0)",
+  "patternLayers": 0
+ },
+ "hit": [
+  {
+   "sel": "[data-slot=\"sidebar-trigger\"]",
+   "hitInside": true
+  },
+  {
+   "sel": "h1",
+   "hitInside": true
+  },
+  {
+   "sel": "header button[aria-keyshortcuts]",
+   "hitInside": true
+  }
+ ],
+ "bgRegionPng": ".verification/bg-region-open.png",
+ "openBgPng": {
+  "region": {
+   "x": 1100,
+   "y": 120,
+   "width": 200,
+   "height": 40
+  },
+  "path": ".verification/bg-region-open.png"
+ },
+ "bgPixels": {
+  "pixels": 8000,
+  "differingPixels": 0,
+  "fractionDiffering": 0,
+  "patternLumaRangeInRegion": [
+   219,
+   245
+  ]
+ },
+ "contrast": {
+  "desktop-light": {
+   "def": {
+    "fg": [
+     2,
+     6,
+     24
+    ],
+    "worstRatio": 1.13,
+    "pass": false
+   },
+   "active": {
+    "fg": [
+     15,
+     23,
+     43
+    ],
+    "worstRatio": 16.28,
+    "pass": true
+   }
+  },
+  "mobile-light": {
+   "def": {
+    "fg": [
+     15,
+     23,
+     43
+    ],
+    "worstRatio": 1,
+    "pass": false
+   },
+   "active": {
+    "fg": [
+     15,
+     23,
+     43
+    ],
+    "worstRatio": 15.59,
+    "pass": true
+   }
+  },
+  "desktop-dark": {
+   "def": {
+    "fg": [
+     248,
+     250,
+     252
+    ],
+    "worstRatio": 1.18,
+    "pass": false
+   },
+   "active": {
+    "fg": [
+     248,
+     250,
+     252
+    ],
+    "worstRatio": 13.97,
+    "pass": true
+   }
+  },
+  "mobile-dark": {
+   "def": {
+    "fg": [
+     248,
+     250,
+     252
+    ],
+    "worstRatio": 1.18,
+    "pass": false
+   },
+   "active": {
+    "fg": [
+     248,
+     250,
+     252
+    ],
+    "worstRatio": 13.97,
+    "pass": true
+   }
+  }
+ },
+ "keyboard": {
+  "focusRing": {
+   "sidebarTrigger": {
+    "visible": true,
+    "outline": "none 3px oklab(0.704 -0.00914218 -0.0389412 / 0.5)",
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0",
+    "w": 44,
+    "h": 44
+   },
+   "search": {
+    "visible": true,
+    "outline": "none 3px oklab(0.704 -0.00914218 -0.0389412 / 0.5)",
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0",
+    "w": 256,
+    "h": 44
+   },
+   "themeSwitch": {
+    "visible": true,
+    "outline": "auto 1px oklab(0.704 -0.00914218 -0.0389412 / 0.5)",
+    "boxShadow": "none",
+    "w": 1,
+    "h": 1
+   },
+   "avatar": {
+    "visible": true,
+    "outline": "none 3px oklab(0.704 -0.00914218 -0.0389412 / 0.5)",
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0",
+    "w": 44,
+    "h": 44
+   }
+  },
+  "searchInputHeight": 48,
+  "searchClosedOnEscape": true,
+  "menuOpened": true,
+  "menuClosedOnEscape": true,
+  "sheetClosedOnEscape": true
+ },
+ "frames": {
+  "frames": 121,
+  "over16_7": 47,
+  "over33": 2,
+  "longestMs": 66.5
+ },
+ "print": {
+  "print": {
+   "backdrop": "none",
+   "bg": "rgb(245, 245, 244)",
+   "pseudoDisplay": "none",
+   "insetImg": "none"
+  },
+  "forced": {
+   "backdrop": "none",
+   "bg": "rgb(255, 255, 255)",
+   "pseudoDisplay": "none",
+   "insetImg": "none"
+  }
+ }
+}

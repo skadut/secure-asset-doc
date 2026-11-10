@@ -1,0 +1,19 @@
+/* Static label above a search input. Floating-label idea from Uiverse.io Inputs/Alanav29_tough-ape-65 was rejected: it shifts layout (see THIRD_PARTY_NOTICES.md). */
+.ui-search {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.ui-search-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+/* Overrides h-8 on the owning Input via the .ui-search-input class; min-height wins over a fixed height. */
+.ui-search-input.ui-search-input {
+  height: auto;
+  min-height: 44px;
+}

@@ -1,0 +1,93 @@
+include:
+  - cryptography-service/compose.yaml
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      additional_contexts:
+        root: .
+    ports: ["127.0.0.1:8088:8080"]
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+      start_interval: 2s
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sad}
+      POSTGRES_DB: ${POSTGRES_DB:-secure_asset_doc}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    ports: ["127.0.0.1:5432:5432"]  # loopback only, for local DB clients (DBx)
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  backend:
+    build: ./backend
+    init: true
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGDATABASE: ${POSTGRES_DB:-secure_asset_doc}
+      PGUSER: sad_app
+      PGPASSWORD: ${APP_DB_PASSWORD}
+      APP_ORIGINS: ${APP_ORIGINS:-http://127.0.0.1:8088,http://localhost:8088,http://localhost:5173}
+      CRYPTO_URL: https://crypto-api:2796
+      CRYPTO_CERT: /run/crypto-pki/app-cert.pem
+      CRYPTO_KEY: /run/crypto-pki/app-cert-key.pem
+      CRYPTO_CA: /run/crypto-pki/ca.pem
+    volumes:
+      - type: bind
+        source: ./cryptography-service/run/pki/api/app-cert.pem
+        target: /run/crypto-pki/app-cert.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./cryptography-service/run/pki/api/app-cert-key.pem
+        target: /run/crypto-pki/app-cert-key.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./cryptography-service/run/pki/api/ca.pem
+        target: /run/crypto-pki/ca.pem
+        read_only: true
+        bind:
+          create_host_path: false
+    networks:
+      default:
+      crypto-tpm-net:
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  pgdata: {}

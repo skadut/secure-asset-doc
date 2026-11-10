@@ -1,0 +1,33 @@
+/* Checkbox checkmark appearance adapted from Uiverse.io Checkboxes/G4b413l_smooth-duck-62 (see THIRD_PARTY_NOTICES.md). */
+.ui-facet-options [data-slot='command-item'] {
+  min-height: 44px;
+  gap: 0.625rem;
+}
+
+.ui-facet-check {
+  display: inline-flex;
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 1rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  color: var(--primary-foreground);
+  transition: background-color 150ms ease-out, border-color 150ms ease-out;
+}
+
+.ui-facet-check[data-checked='true'] {
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+.ui-facet-check[data-checked='false'] svg {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-facet-check {
+    transition: none;
+  }
+}

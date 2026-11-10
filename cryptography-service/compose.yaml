@@ -1,0 +1,115 @@
+# Standalone blueprint topology (TPM-rooted KEK). Not part of the root compose.yaml.
+name: crypto-tpm
+
+services:
+  keyd:
+    build: ./key-container
+    pull_policy: never
+    image: crypto-tpm-keyd
+    read_only: true
+    cap_drop: [ALL]
+    cap_add: [IPC_LOCK]
+    security_opt: ["no-new-privileges:true"]
+    ulimits:
+      core: 0
+      memlock:
+        soft: 67108864
+        hard: 67108864
+    mem_limit: 256m
+    memswap_limit: 256m
+    init: true
+    # No pid: host. Bridge network, not internal: keyd must reach the TPM service on the host.
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    # KEK_VERSION dan KEYD_DEK_TTL hard-coded. Mengubahnya recreate keyd, butuh fingerprint approval. Rotasi KEK = ceremony sengaja.
+    environment:
+      KEK_ID: kek-01
+      KEK_VERSION: "1"
+      # KEYD_DEK_TTL 60 detik (1 menit, sebelumnya 5 menit).
+      KEYD_DEK_TTL: "60"
+      TPM_SERVICE_ADDR: host.docker.internal:${TPM_SERVICE_PORT:-2798}
+    volumes:
+      # keyd-sock is the socket channel: keyd creates it, crypto-api connects to it.
+      - keyd-sock:/run/keyd
+      - keyd-deks:/var/lib/keyd
+      # ponytail: audit log bind-mount ke host, tetap bisa ditulis container. Upgrade: collector host append-only atau syslog remote.
+      # Linux Docker: dir bind dibuat root-owned bisa blokir write uid 65532. Docker Desktop Windows aman.
+      - type: bind
+        source: ${CRYPTO_TPM_RUN:-./run}/audit/keyd
+        target: /var/log/keyd
+      - ${CRYPTO_TPM_RUN:-./run}/keyd-pub:/run/keyd-pub
+      - type: bind
+        source: ${CRYPTO_TPM_RUN:-./run}/pki/keyzone/ca.pem
+        target: /pki/ca.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${CRYPTO_TPM_RUN:-./run}/pki/keyzone/crypto-service.pem
+        target: /pki/crypto-service.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${CRYPTO_TPM_RUN:-./run}/pki/keyzone/crypto-service-key.pem
+        target: /pki/crypto-service-key.pem
+        read_only: true
+        bind:
+          create_host_path: false
+    networks: [crypto-tpm-net]
+
+  crypto-api:
+    build: ./encryption-services
+    image: crypto-tpm-api
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    ulimits:
+      core: 0
+    environment:
+      CRYPTO_MODE: tpm
+      KEYD_SOCKET: /run/keyd/keyd.sock
+      AUDIT_FILE: /var/log/crypto-api/audit.jsonl
+      TLS_CERT_FILE: /pki/crypto-api.pem
+      TLS_KEY_FILE: /pki/crypto-api-key.pem
+      TLS_CLIENT_CA_FILE: /pki/ca.pem
+    volumes:
+      - keyd-sock:/run/keyd:ro
+      # ponytail: audit log bind-mount ke host, tetap bisa ditulis container. Upgrade: collector host append-only atau syslog remote.
+      # Linux Docker: dir bind dibuat root-owned bisa blokir write uid 65532. Docker Desktop Windows aman.
+      - type: bind
+        source: ${CRYPTO_TPM_RUN:-./run}/audit/crypto-api
+        target: /var/log/crypto-api
+      - type: bind
+        source: ${CRYPTO_TPM_RUN:-./run}/pki/api/ca.pem
+        target: /pki/ca.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${CRYPTO_TPM_RUN:-./run}/pki/api/crypto-api.pem
+        target: /pki/crypto-api.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${CRYPTO_TPM_RUN:-./run}/pki/api/crypto-api-key.pem
+        target: /pki/crypto-api-key.pem
+        read_only: true
+        bind:
+          create_host_path: false
+    # Host port 2896, not 2796: the root stack's crypto-service already publishes 2796.
+    ports: ["127.0.0.1:${CRYPTO_API_PORT:-2896}:2796"]
+    # Setelah ubah crypto-api, jalankan: docker compose up -d --build --no-deps crypto-api
+    depends_on:
+      keyd:
+        condition: service_started
+        restart: false
+    networks: [crypto-tpm-net]
+
+networks:
+  crypto-tpm-net:
+    driver: bridge
+
+volumes:
+  keyd-sock: {}
+  keyd-deks: {}

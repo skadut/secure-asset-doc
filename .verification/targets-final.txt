@@ -1,0 +1,147 @@
+{
+ "1440-light": {
+  "url": "http://127.0.0.1:8088/",
+  "sidebarTrigger": {
+   "w": 44,
+   "h": 44
+  },
+  "search": {
+   "w": 256,
+   "h": 44
+  },
+  "themeLabel": {
+   "w": 48,
+   "h": 44
+  },
+  "themeSettings": {
+   "w": 44,
+   "h": 44
+  },
+  "avatar": {
+   "w": 44,
+   "h": 44
+  },
+  "hOverflow": 0
+ },
+ "375-light": {
+  "url": "http://127.0.0.1:8088/",
+  "sidebarTrigger": {
+   "w": 44,
+   "h": 44
+  },
+  "search": {
+   "w": 44,
+   "h": 44
+  },
+  "themeLabel": {
+   "w": 48,
+   "h": 44
+  },
+  "themeSettings": {
+   "w": 44,
+   "h": 44
+  },
+  "avatar": {
+   "w": 44,
+   "h": 44
+  },
+  "hOverflow": 0
+ },
+ "320-light": {
+  "url": "http://127.0.0.1:8088/",
+  "sidebarTrigger": {
+   "w": 44,
+   "h": 44
+  },
+  "search": {
+   "w": 44,
+   "h": 44
+  },
+  "themeLabel": {
+   "w": 48,
+   "h": 44
+  },
+  "themeSettings": {
+   "w": 44,
+   "h": 44
+  },
+  "avatar": {
+   "w": 44,
+   "h": 44
+  },
+  "hOverflow": 0
+ },
+ "1440-dark": {
+  "url": "http://127.0.0.1:8088/",
+  "sidebarTrigger": {
+   "w": 44,
+   "h": 44
+  },
+  "search": {
+   "w": 256,
+   "h": 44
+  },
+  "themeLabel": {
+   "w": 48,
+   "h": 44
+  },
+  "themeSettings": {
+   "w": 44,
+   "h": 44
+  },
+  "avatar": {
+   "w": 44,
+   "h": 44
+  },
+  "hOverflow": 0
+ },
+ "375-dark": {
+  "url": "http://127.0.0.1:8088/",
+  "sidebarTrigger": {
+   "w": 44,
+   "h": 44
+  },
+  "search": {
+   "w": 44,
+   "h": 44
+  },
+  "themeLabel": {
+   "w": 48,
+   "h": 44
+  },
+  "themeSettings": {
+   "w": 44,
+   "h": 44
+  },
+  "avatar": {
+   "w": 44,
+   "h": 44
+  },
+  "hOverflow": 0
+ },
+ "320-dark": {
+  "url": "http://127.0.0.1:8088/",
+  "sidebarTrigger": {
+   "w": 44,
+   "h": 44
+  },
+  "search": {
+   "w": 44,
+   "h": 44
+  },
+  "themeLabel": {
+   "w": 48,
+   "h": 44
+  },
+  "themeSettings": {
+   "w": 44,
+   "h": 44
+  },
+  "avatar": {
+   "w": 44,
+   "h": 44
+  },
+  "hOverflow": 0
+ }
+}
+ERRORS []
