@@ -1,0 +1,190 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-vps
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  APP_DIR: /opt/secure-asset-doc
+  COMPOSE_FILE: compose.yaml:cryptography-service/compose.vps.yaml
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, linux, vps]
+    # Required secrets: POSTGRES_PASSWORD, APP_DB_PASSWORD, DEMO_USER_PASSWORD, TPM_MSK_PIN.
+    # Secrets and variables below live in Settings > Environments > production (like GitLab CI/CD variables).
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync code (keep server-only files)
+        run: |
+          rsync -a --delete \
+            --exclude '.git/' --exclude '.env' \
+            --exclude 'cryptography-service/run/' \
+            --exclude 'db/CREDENTIALS.md' \
+            ./ "$APP_DIR/"
+
+      - name: Write .env from GitHub secrets and variables
+        # Values come in through env, never through ${{ }} inside the script, so they are not expanded into shell code.
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          APP_DB_PASSWORD: ${{ secrets.APP_DB_PASSWORD }}
+          DEMO_USER_PASSWORD: ${{ secrets.DEMO_USER_PASSWORD }}
+          POSTGRES_USER: ${{ vars.POSTGRES_USER }}
+          POSTGRES_DB: ${{ vars.POSTGRES_DB }}
+          APP_ORIGINS: ${{ vars.APP_ORIGINS }}
+          MSK_CRYPTOPERIOD_DAYS: ${{ vars.MSK_CRYPTOPERIOD_DAYS }}
+        run: |
+          set -euo pipefail
+          required="POSTGRES_PASSWORD APP_DB_PASSWORD DEMO_USER_PASSWORD POSTGRES_USER POSTGRES_DB"
+          optional="DEMO_USER_PASSWORD APP_ORIGINS MSK_CRYPTOPERIOD_DAYS"
+          for k in $required; do
+            [ -n "${!k:-}" ] || { echo "::error::$k is not set in the production environment"; exit 1; }
+          done
+          umask 077
+          tmp="$(mktemp "$APP_DIR/.env.XXXXXX")"
+          for k in $required $optional; do
+            v="${!k:-}"
+            [ -n "$v" ] || continue
+            # Single-quoted .env values are literal in Docker Compose; reject the two characters that would break that.
+            case "$v" in *"'"*|*$'\n'*) echo "::error::$k contains a single quote or newline"; rm -f "$tmp"; exit 1;; esac
+            printf "%s='%s'\n" "$k" "$v" >> "$tmp"
+          done
+          mv -f "$tmp" "$APP_DIR/.env"
+          echo "wrote .env with $(wc -l < "$APP_DIR/.env") keys"
+
+      - name: Prepare TPM zone (first run only)
+        working-directory: ${{ env.APP_DIR }}
+        env:
+          TPM_MSK_PIN: ${{ secrets.TPM_MSK_PIN }}
+        run: |
+          set -euo pipefail
+          [ -n "${TPM_MSK_PIN:-}" ] || { echo "::error::TPM_MSK_PIN is not set in the production environment"; exit 1; }
+          # tpm-msk counts PIN length in bytes, so count bytes here too.
+          [ "$(printf '%s' "$TPM_MSK_PIN" | LC_ALL=C wc -c)" -ge 6 ] || { echo "::error::TPM_MSK_PIN must be at least 6 bytes"; exit 1; }
+          umask 077
+          run=cryptography-service/run
+          mkdir -p "$run/secrets" "$run/pki" "$run/keyd-pub" "$run/audit/keyd" "$run/audit/crypto-api" "$run/audit/tpm-msk"
+          # A previous deploy leaves the file owned by 65532 with mode 400, so remove it before rewriting.
+          rm -f "$run/secrets/tpm_pin"
+          printf '%s' "$TPM_MSK_PIN" > "$run/secrets/tpm_pin"
+          unset TPM_MSK_PIN
+          docker compose build tpm-msk
+          # Runner has no sudo: ownership and modes are set from a throwaway root container.
+          # Runs before pki generation so the generator (uid 65532, cap_drop ALL) can write into pki/.
+          docker run --rm -v "$PWD/$run:/run" alpine:3.20 sh -ec '
+            chown 65532:65532 /run/secrets/tpm_pin && chmod 400 /run/secrets/tpm_pin
+            chown 65532:65532 /run/pki /run/keyd-pub /run/audit/keyd /run/audit/crypto-api /run/audit/tpm-msk
+            chmod 700 /run/pki /run/keyd-pub /run/audit/keyd /run/audit/crypto-api /run/audit/tpm-msk
+          '
+          if [ ! -f "$run/pki/keyzone/ca.pem" ]; then
+            # Writes to a separate /gen target, so the read-only /run/pki mount of the service is not overridden.
+            docker compose run --rm --no-deps -v "$PWD/$run/pki:/gen" tpm-msk pki --out /gen >/dev/null
+          fi
+          # Second pass: fix modes on the generated files.
+          docker run --rm -v "$PWD/$run:/run" alpine:3.20 sh -ec '
+            chown -R 65532:65532 /run/pki
+            find /run/pki -name "*-key.pem" -exec chmod 600 {} +
+            find /run/pki -name "*.pem" ! -name "*-key.pem" -exec chmod 644 {} +
+            # backend runs as node (uid 1000) and reads the app client cert and key.
+            chown 1000:1000 /run/pki/api/app-cert.pem /run/pki/api/app-cert-key.pem
+            chmod 600 /run/pki/api/app-cert.pem /run/pki/api/app-cert-key.pem
+          '
+          docker compose up -d swtpm
+          # swtpm may still be starting; retry selftest up to 30s.
+          for i in $(seq 1 30); do
+            docker compose run --rm --no-deps tpm-msk selftest >/dev/null 2>&1 && break
+            [ "$i" = 30 ] && { echo "::error::tpm-msk selftest failed; see swtpm logs"; exit 1; }
+            sleep 1
+          done
+          info="$(docker compose run --rm --no-deps tpm-msk info)"
+          if printf '%s\n' "$info" | grep -qx 'keyFile: no'; then
+            docker compose run --rm --no-deps tpm-msk init >/dev/null
+          elif ! printf '%s\n' "$info" | grep -qx 'keyFile: yes'; then
+            echo "::error::Could not read TPM key-file state"; exit 1
+          fi
+          # Checked on every deploy so a failed KEK create is retried next time. Captured first to avoid grep -q SIGPIPE under pipefail.
+          kek_list="$(docker compose run --rm --no-deps tpm-msk kek list 2>/dev/null || true)"
+          if ! printf '%s\n' "$kek_list" | grep -q '^kek-01 '; then
+            docker compose run --rm --no-deps tpm-msk kek create --id kek-01 >/dev/null
+          fi
+
+      - name: Build and start
+        working-directory: ${{ env.APP_DIR }}
+        # Never add down -v here: it deletes the pgdata and swtpm-state volumes.
+        # Only swtpm and keyd start here. tpm-msk starts in the next step, once keyd's fingerprint is known.
+        run: |
+          set -euo pipefail
+          docker compose build
+          docker compose up -d swtpm keyd
+
+      - name: Approve keyd delivery key
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          set -euo pipefail
+          fp=""
+          for i in $(seq 1 60); do
+            fp="$(docker compose logs keyd 2>&1 | sed -nE 's/.*delivery key fingerprint: (sha256:[0-9a-fA-F]{64})[[:space:]]*$/\1/p' | tail -n 1)"
+            [ -n "$fp" ] && break
+            sleep 1
+          done
+          [[ "$fp" =~ ^sha256:[0-9a-fA-F]{64}$ ]] || { echo "::error::No valid keyd delivery fingerprint within 60s"; docker compose logs --tail 50 keyd; exit 1; }
+          # --force-recreate gives tpm-msk fresh logs, so the check below cannot match an earlier run.
+          TPM_MSK_APPROVE_FP="$fp" docker compose up -d --no-deps --force-recreate tpm-msk
+          approved=""
+          for i in $(seq 1 60); do
+            out="$(docker compose logs tpm-msk 2>&1 || true)"
+            case "$out" in *"Delivery key approved by --approve-fingerprint"*) approved=1; break;; esac
+            sleep 1
+          done
+          if [ -z "$approved" ]; then echo "::error::tpm-msk did not approve the keyd delivery key"; docker compose logs --tail 50 tpm-msk keyd; exit 1; fi
+          # Same fingerprint in the env, so this up does not recreate tpm-msk without the pin.
+          # No --build: images were built in the previous step. A rebuild here could recreate keyd and change its key.
+          TPM_MSK_APPROVE_FP="$fp" docker compose up -d --remove-orphans
+
+      - name: Health check
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:8088/api/health && exit 0
+            sleep 2
+          done
+          docker compose ps
+          docker compose logs --tail 50 backend keyd crypto-api tpm-msk swtpm
+          exit 1
+
+      - name: Seed and protect database
+        working-directory: ${{ env.APP_DIR }}
+        env:
+          PGUSER: ${{ vars.POSTGRES_USER }}
+          PGDATABASE: ${{ vars.POSTGRES_DB }}
+          PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          DEMO_USER_PASSWORD: ${{ secrets.DEMO_USER_PASSWORD }}
+        run: |
+          set -euo pipefail
+          users=$(docker compose exec -T db psql -v ON_ERROR_STOP=1 -U "$PGUSER" -d "$PGDATABASE" -tAc "select count(*) from users")
+          # Seed data and users only on an empty database. Protect and tokenize always run: both skip rows that are already done.
+          if [ "${users:-0}" = "0" ]; then
+            for f in db/seed/*.sql; do echo "applying $f"; docker compose exec -T db psql -v ON_ERROR_STOP=1 -U "$PGUSER" -d "$PGDATABASE" < "$f"; done
+            docker compose run --rm --no-deps -v "$PWD/db/scripts/seed-users.mjs:/app/seed-users.mjs:ro" -v "$PWD/db/scripts/demo-users.mjs:/app/demo-users.mjs:ro" -e PGUSER -e PGDATABASE -e PGPASSWORD -e DEMO_USER_PASSWORD backend node /app/seed-users.mjs
+          else
+            echo "users=$users, skipping seed data and users"
+          fi
+          if ! docker compose run --rm --no-deps -v "$PWD/db/scripts/protect-documents.mjs:/app/protect-documents.mjs:ro" -v "$PWD/db/scripts/demo-users.mjs:/app/demo-users.mjs:ro" -e PGUSER -e PGDATABASE -e PGPASSWORD -e DEMO_USER_PASSWORD backend node /app/protect-documents.mjs; then
+            echo "::error::protect-documents failed. If it reports crypto unreachable, keyd/crypto-api or the swtpm/tpm-msk chain is down. Documents stay plaintext; inspect the swtpm and tpm-msk logs, fix crypto, then re-run."
+            exit 1
+          fi
+          docker compose run --rm --no-deps -v "$PWD/db/scripts/tokenize-titles.mjs:/app/tokenize-titles.mjs:ro" -v "$PWD/db/scripts/demo-users.mjs:/app/demo-users.mjs:ro" -e PGUSER -e PGDATABASE -e PGPASSWORD -e DEMO_USER_PASSWORD backend node /app/tokenize-titles.mjs
+
+      - name: Prune dangling images
+        if: success()
+        run: docker image prune -f

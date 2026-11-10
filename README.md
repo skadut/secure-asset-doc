@@ -88,6 +88,13 @@ flowchart TB
 | Key zone native host | `tpm-msk serve`, TPM 2.0, MSK | Host loopback | `tpm-msk serve` 127.0.0.1:2798 |
 | keyd | Docker, socket volume `keyd-sock` | See `cryptography-service/compose.yaml` | No host port |
 
+The TPM key zone runs in two modes.
+
+| Mode | TPM | Where it runs |
+| --- | --- | --- |
+| Demo deployment (VPS, via GitHub Actions) | vTPM: software TPM 2.0 (swtpm). The rented VPS has no hardware TPM. The MSK is sealed to the vTPM state, which lives in a persistent Docker volume. | VPS |
+| Video recording and native run | Hardware TPM 2.0 on the laptop in [Hardware used](#hardware-used) | `tpm-msk` runs natively on Windows 11 through TBS |
+
 ## Crypto API
 
 `crypto-api` (Go, Gin; `CRYPTO_MODE=tpm`) serves mTLS on container port 2796, published as 127.0.0.1:2896. See the [TPM blueprint](docs/tpm-development-crypto-service.md).
@@ -568,6 +575,16 @@ Maps each section of [docs/tpm-development-crypto-service.md](docs/tpm-developme
 | TPM service port | **Set**: 2798. |
 | Peak decrypt TPS target | **Open**: undefined. |
 | Separate production hosts | **Open**. |
+
+## Hardware used
+
+| Item | Detail |
+| --- | --- |
+| Laptop | Lenovo ThinkPad X1 Carbon, Intel Core Ultra 7 265U |
+| TPM | Discrete TPM 2.0 (dTPM), built in from the factory |
+| OS | Windows 11 |
+| RAM | 64 GB |
+| Storage | SSD 1 TB |
 
 ## Quick start
 

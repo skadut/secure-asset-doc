@@ -1,5 +1,9 @@
 #folder
-.github/
+.github/*
+!.github/workflows/
+.github/workflows/*
+!.github/workflows/ci.yml
+!.github/workflows/deploy.yml
 .verification/
 .vscode/
 
@@ -57,3 +61,8 @@ cryptography-service/run-e2e/
 
 # Agent worktrees
 .claude/worktrees/
+
+# Local reference and report material
+/ref/
+/reports/
+/reposrts/

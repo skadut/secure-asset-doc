@@ -1,0 +1,67 @@
+# VPS-only override. Used by deploy.yml via COMPOSE_FILE. Native laptop path does not load this file.
+# Paths here resolve against the first file's dir (repo root).
+services:
+  swtpm:
+    image: ghcr.io/stefanberger/swtpm:v0.10.0
+    command: ["socket", "--tpm2", "--server", "type=tcp,port=2321,bindaddr=0.0.0.0", "--ctrl", "type=tcp,port=2322,bindaddr=0.0.0.0", "--flags", "not-need-init,startup-clear", "--tpmstate", "dir=/state"]
+    # Image runs as root (no USER), so the named volume is writable without an init service.
+    volumes:
+      - swtpm-state:/state
+    restart: unless-stopped
+    # Own internal network: backend also joins crypto-tpm-net, so swtpm stays off it.
+    networks: [tpm-internal]
+
+  tpm-msk:
+    build: ./cryptography-service/tpm-services
+    command: ["serve", "--listen", "0.0.0.0:2798", "--pki-dir", "/run/pki", "--pubkey-file", "/run/keyd-pub/delivery.pub.pem", "--audit-file", "/var/log/tpm-msk/audit.jsonl", "--demo-ceremony=false"]
+    environment:
+      TPM_MSK_TCP: swtpm:2321
+      TPM_MSK_PIN_FILE: /run/secrets/tpm_pin
+      TPM_MSK_APPROVE_FP: ${TPM_MSK_APPROVE_FP:-}
+    secrets: [tpm_pin]
+    volumes:
+      - tpm-msk-data:/data
+      - type: bind
+        source: ./cryptography-service/run/pki
+        target: /run/pki
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./cryptography-service/run/keyd-pub
+        target: /run/keyd-pub
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./cryptography-service/run/audit/tpm-msk
+        target: /var/log/tpm-msk
+        bind:
+          create_host_path: false
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+    depends_on:
+      swtpm:
+        condition: service_started
+    networks: [crypto-tpm-net, tpm-internal]
+
+  keyd:
+    # Server cert SANs (internal/pki/pki.go:34) are host.docker.internal, localhost, 127.0.0.1; "tpm-msk" is not a SAN.
+    # keyd verifies TLS against hard-coded SERVER_NAME "host.docker.internal" (key-container/src/tls.rs:11), not the dial host,
+    # so dialing tpm-msk:2798 still passes verification. No Go change, no alias needed.
+    environment:
+      TPM_SERVICE_ADDR: tpm-msk:2798
+
+secrets:
+  tpm_pin:
+    file: ./cryptography-service/run/secrets/tpm_pin
+
+networks:
+  tpm-internal:
+    internal: true
+
+volumes:
+  swtpm-state: {}
+  tpm-msk-data: {}

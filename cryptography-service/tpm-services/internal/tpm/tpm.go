@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -58,11 +59,56 @@ func zero(b []byte) {
 }
 
 func openTPM() (transport.TPMCloser, error) {
+	if addr := os.Getenv("TPM_MSK_TCP"); addr != "" {
+		conn, err := net.Dial("tcp", addr)
+		if err != nil {
+			return nil, wrapTPMError("open TPM", err)
+		}
+		t := transport.FromReadWriteCloser(conn)
+		if err := flushLeftovers(t); err != nil {
+			_ = t.Close()
+			return nil, wrapTPMError("open TPM", err)
+		}
+		return t, nil
+	}
 	t, err := transport.OpenTPM()
 	if err != nil {
 		return nil, wrapTPMError("open TPM", err)
 	}
 	return t, nil
+}
+
+// ponytail: swtpm has no resource manager; leftovers flushed on open. Upgrade: tpm2-abrmd or a TPM with RM.
+// flushLeftovers flushes transient objects and loaded sessions left by a crashed process. TCP path only.
+func flushLeftovers(t transport.TPM) error {
+	for _, base := range []tpm2.TPMHandle{
+		tpm2.TPMHandle(uint32(tpm2.TPMHTTransient) << 24),
+		tpm2.TPMHandle(uint32(tpm2.TPMHTLoadedSession) << 24),
+	} {
+		typeBase := uint32(base) >> 24
+		property := uint32(base)
+		for {
+			r, err := (tpm2.GetCapability{Capability: tpm2.TPMCapHandles, Property: property, PropertyCount: 64}).Execute(t)
+			if err != nil {
+				return err
+			}
+			handles, err := r.CapabilityData.Data.Handles()
+			if err != nil {
+				return err
+			}
+			for _, handle := range handles.Handle {
+				if uint32(handle)>>24 != typeBase {
+					break
+				}
+				_, _ = (tpm2.FlushContext{FlushHandle: handle}).Execute(t)
+				property = uint32(handle) + 1
+			}
+			if !r.MoreData || len(handles.Handle) == 0 || uint32(handles.Handle[len(handles.Handle)-1])>>24 != typeBase {
+				break
+			}
+		}
+	}
+	return nil
 }
 
 // parent returns a usable parent handle. Persistent SRK if present, otherwise a transient

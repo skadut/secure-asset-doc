@@ -520,8 +520,37 @@ func checkImportHex(h []byte) error {
 	return nil
 }
 
+// pinFilePath returns the PIN file path from TPM_MSK_PIN_FILE and whether it is set.
+func pinFilePath() (string, bool) {
+	p := os.Getenv("TPM_MSK_PIN_FILE")
+	return p, p != ""
+}
+
+// readPINFile reads a PIN file, strips exactly one trailing "\n" or "\r\n", and enforces the minimum length.
+// Errors never include file contents.
+func readPINFile(path string) ([]byte, error) {
+	pin, err := readLimited(path, 1024)
+	if err != nil {
+		return nil, fmt.Errorf("cannot read PIN file %s", path)
+	}
+	if bytes.HasSuffix(pin, []byte("\r\n")) {
+		pin = pin[:len(pin)-2]
+	} else if bytes.HasSuffix(pin, []byte("\n")) {
+		pin = pin[:len(pin)-1]
+	}
+	if len(pin) < 6 {
+		zero(pin)
+		return nil, errors.New("PIN must be at least 6 bytes")
+	}
+	return pin, nil
+}
+
 // readPIN prompts on stderr and reads a PIN without echo. Uses CONIN$ when stdin is not a terminal.
+// If TPM_MSK_PIN_FILE is set, the PIN is read from that file and no prompt is shown.
 func readPIN(stderr io.Writer, prompt string) ([]byte, error) {
+	if p, ok := pinFilePath(); ok {
+		return readPINFile(p)
+	}
 	fmt.Fprint(stderr, prompt)
 	var pin []byte
 	var err error

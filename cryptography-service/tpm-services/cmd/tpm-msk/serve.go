@@ -57,6 +57,9 @@ func cmdServe(args []string, stdout, stderr io.Writer) int {
 	if *pubkeyFile == "" {
 		*pubkeyFile = filepath.Join(filepath.Dir(filepath.Clean(*pkiDir)), "keyd-pub", "delivery.pub.pem")
 	}
+	if *approveFP == "" {
+		*approveFP = os.Getenv("TPM_MSK_APPROVE_FP")
+	}
 	pinnedFP := strings.ToLower(strings.TrimSpace(*approveFP))
 	if pinnedFP != "" {
 		hexPart, ok := strings.CutPrefix(pinnedFP, "sha256:")
@@ -178,23 +181,31 @@ func cmdServe(args []string, stdout, stderr io.Writer) int {
 	var console *os.File
 	var consoleFile *os.File = os.Stdin
 	var source io.Reader = os.Stdin
+	noConsole := false
 	if !term.IsTerminal(int(os.Stdin.Fd())) {
 		console, err = os.OpenFile("CONIN$", os.O_RDWR, 0)
-		if err != nil {
+		if err != nil && os.Getenv("TPM_MSK_TCP") != "" && pinnedFP != "" {
+			noConsole = true
+			source = strings.NewReader("")
+			fmt.Fprintln(stderr, "no console input; manual approval disabled, --approve-fingerprint still applies")
+		} else if err != nil {
 			closeResources()
 			fmt.Fprintln(stderr, "cannot open console")
 			return 1
+		} else {
+			// Do not close CONIN$: closing during a blocked read can hang on Windows; process exit releases it.
+			source = console
+			consoleFile = console
 		}
-		// Do not close CONIN$: closing during a blocked read can hang on Windows; process exit releases it.
-		source = console
-		consoleFile = console
 	}
 	reader := bufio.NewReader(source)
-	restore, err := keyModeEnter(consoleFile)
-	if err != nil {
-		fmt.Fprintf(stderr, "single-key approval unavailable (%v); press y then Enter\n", err)
-	} else {
-		defer restore()
+	if !noConsole {
+		restore, err := keyModeEnter(consoleFile)
+		if err != nil {
+			fmt.Fprintf(stderr, "single-key approval unavailable (%v); press y then Enter\n", err)
+		} else {
+			defer restore()
+		}
 	}
 
 	kekPath, err := kek.DefaultPath()
