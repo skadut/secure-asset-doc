@@ -1,7 +1,7 @@
 #folder
-.github
-.verification
-.vscode
+.github/
+.verification/
+.vscode/
 
 # Logs
 logs
