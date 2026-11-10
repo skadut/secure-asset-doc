@@ -28,7 +28,7 @@ type AuthUser = {
 }
 
 const labels = ['Pemberitahuan', 'Masuk', 'Kode', 'Perangkat', 'Konfirmasi']
-const rowNames = ['Jaringan', 'Kode autentikator', 'Layanan kripto', 'Jam']
+const rowNames = ['Jaringan', 'Kode autentikator', 'Modul Enkripsi', 'Jam']
 const jsonFetch = (url: string, body?: unknown) =>
   fetch(url, {
     method: body === undefined ? 'GET' : 'POST',
@@ -708,8 +708,8 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                       <div className='lg-eyebrow'>Tahap 4 dari 5</div>
                       <h2>Memeriksa perangkat ini</h2>
                       <p>
-                        Sistem memeriksa jaringan, kode autentikator, layanan
-                        kripto, dan jam perangkat ini sebelum sesi dibuka.
+                        Sistem memeriksa jaringan, kode autentikator, modul
+                        enkripsi, dan jam perangkat ini sebelum sesi dibuka.
                       </p>
                     </header>
                     {deviceError && (
