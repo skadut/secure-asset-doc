@@ -110,8 +110,8 @@ export function DocumentsTable({ data, selectedId, onSelect }: DocumentsTablePro
       </div>
 
       <div className='focus-strong min-w-0 overflow-x-auto rounded-sm border bg-card'>
-        {/* ponytail: phones below md scroll horizontally; upgrade path = card layout below md. */}
-        <Table className='doc-table table-fixed w-full min-w-[720px] md:min-w-0'>
+        {/* ponytail: table fixed 1024px, scrolls inside wrapper on narrow screens; upgrade path = card layout below md. */}
+        <Table className='doc-table table-fixed w-full min-w-[1024px]'>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -143,7 +143,7 @@ export function DocumentsTable({ data, selectedId, onSelect }: DocumentsTablePro
                 className={cn('h-14 cursor-pointer', row.original.id === selectedId && 'bg-accent ring-1 ring-inset ring-ring')}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} className={cell.column.id === 'title' ? 'align-middle' : 'whitespace-nowrap align-middle'}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

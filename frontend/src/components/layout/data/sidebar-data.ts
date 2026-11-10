@@ -79,6 +79,7 @@ const gates: Record<string, (me: Me) => boolean> = {
   '/controls': (me) => me.securityOfficer === true || me.superAdmin === true,
   '/audit-log': (me) => me.securityOfficer === true || me.superAdmin === true,
   '/database': (me) => me.superAdmin === true,
+  '/traffic': (me) => me.superAdmin === true,
 }
 
 export function navGroupsFor(me: Me | null): NavGroup[] {

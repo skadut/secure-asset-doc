@@ -539,6 +539,7 @@ const ROUTES = [
   { re: /^\/api\/me$/, methods: ['GET'], run: (req, res) => authRoutes.me(req, res) },
   { re: /^\/api\/ranks$/, methods: ['GET'], run: (req, res) => authRoutes.ranks(req, res) },
   { re: /^\/api\/traffic$/, methods: ['GET'], run: async (req, res) => {
+    if (req.me?.superAdmin !== true) return forbid(res, req.me, 'traffic', 'view', 'traffic view denied');
     if (!takeToken()) return send(res, 429, { error: 'rate_limited' });
     return send(res, 200, await traffic(req.me?.superAdmin === true));
   } },

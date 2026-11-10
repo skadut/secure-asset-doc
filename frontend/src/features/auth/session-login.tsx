@@ -464,7 +464,7 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                     </header>
                     <div className='lg-notice'>
                       <p>
-                        Anda mengakses sistem terbatas milik [NAMA ORGANISASI].
+                        Anda mengakses sistem terbatas milik Arasaka Corporation.
                         Penggunaan hanya untuk pengguna berwenang dan keperluan
                         resmi.
                       </p>
@@ -581,6 +581,18 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                         {busy ? 'Memeriksa' : 'Lanjutkan'}
                       </button>
                     </form>
+                    <button
+                      className='lg-ghost'
+                      type='button'
+                      disabled={busy}
+                      onClick={() => {
+                        setError('')
+                        setPassword('')
+                        go('notice')
+                      }}
+                    >
+                      Kembali
+                    </button>
                   </div>
                 )}
                 {step === 'code' && (
@@ -663,12 +675,27 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                     <button
                       className='lg-ghost'
                       type='button'
+                      disabled={busy}
                       onClick={() => {
                         go('password')
                         setPassword('')
                         setCode('')
                         setChallenge('')
                         setError('')
+                      }}
+                    >
+                      Kembali
+                    </button>
+                    <button
+                      className='lg-ghost'
+                      type='button'
+                      onClick={() => {
+                        go('password')
+                        setPassword('')
+                        setCode('')
+                        setChallenge('')
+                        setError('')
+                        setUsername('')
                       }}
                     >
                       Masuk sebagai orang lain

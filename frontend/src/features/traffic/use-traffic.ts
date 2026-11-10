@@ -5,6 +5,7 @@ export type TrafficState = {
   data: TrafficResponse | null
   history: HistoryPoint[]
   error: boolean
+  forbidden: boolean
   loading: boolean
 }
 
@@ -13,12 +14,14 @@ export function useTraffic(intervalMs = 2000): TrafficState {
   const [data, setData] = useState<TrafficResponse | null>(null)
   const [history, setHistory] = useState<HistoryPoint[]>([])
   const [error, setError] = useState(false)
+  const [forbidden, setForbidden] = useState(false)
 
   useEffect(() => {
     let active = true
     let inFlight = false
+    let denied = false
     const tick = async () => {
-      if (inFlight || document.visibilityState === 'hidden') return
+      if (denied || inFlight || document.visibilityState === 'hidden') return
       inFlight = true
       try {
         const res = await fetch('/api/traffic', { credentials: 'include' })
@@ -29,7 +32,11 @@ export function useTraffic(intervalMs = 2000): TrafficState {
         setData(parsed)
         setHistory((h) => pushHistory(h, { ts: parsed.ts, edges: parsed.edges }, HISTORY_MAX))
         setError(false)
-      } catch {
+      } catch (err) {
+        if (err instanceof Error && err.message === 'HTTP 403') {
+          denied = true
+          if (active) setForbidden(true)
+        }
         if (active) setError(true)
       } finally {
         inFlight = false
@@ -48,5 +55,5 @@ export function useTraffic(intervalMs = 2000): TrafficState {
     }
   }, [intervalMs])
 
-  return { data, history, error, loading: data === null && !error }
+  return { data, history, error, forbidden, loading: data === null && !error }
 }

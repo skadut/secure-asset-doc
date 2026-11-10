@@ -6,6 +6,10 @@ The sample content is in Indonesian and is framed as the documents of a simulate
 
 > **Disclaimer.** All data is fictional. The app is not an official document, not a NIST compliance or assessment tool, and its cryptography is not FIPS 140-3 validated. Do not enter real personal, operational, or classified information.
 
+## Live demo
+
+Open [https://skadut-hack.tail9e496c.ts.net/](https://skadut-hack.tail9e496c.ts.net/). The demo is served through Tailscale Funnel from the VPS in vTPM mode. Log in with a demo account. Account names and the shared password (`<DEMO_USER_PASSWORD>`) are provided separately.
+
 ## Preview
 
 <table>
@@ -48,7 +52,7 @@ flowchart TB
     backend["backend<br/>Node"]
   end
   db[("db<br/>PostgreSQL 17")]
-  subgraph TPM["Key zone (native Windows host)"]
+  subgraph TPM["Key zone (native Windows host; VPS uses the vTPM overlay)"]
     tpmsvc["tpm-msk serve<br/>127.0.0.1:2798, mTLS"]
     tpm["TPM 2.0, MSK non-exportable"]
     kekfile["Wrapped KEK file"]
@@ -88,7 +92,7 @@ flowchart TB
 | Key zone native host | `tpm-msk serve`, TPM 2.0, MSK | Host loopback | `tpm-msk serve` 127.0.0.1:2798 |
 | keyd | Docker, socket volume `keyd-sock` | See `cryptography-service/compose.yaml` | No host port |
 
-The TPM key zone runs in two modes.
+The TPM key zone runs in two modes. The VPS deployment loads `cryptography-service/compose.vps.yaml`, which runs `swtpm` and `tpm-msk` in containers. The native laptop path does not load that overlay.
 
 | Mode | TPM | Where it runs |
 | --- | --- | --- |
@@ -268,7 +272,7 @@ The read path `/api/files/:doc/:ver` verifies the tag over the recovered base64:
 
 For TLP other than CLEAR, `documents.title` and `document_versions.file_name` are stored as `<masked>:<sealed>` tokens. The mask keeps the first 3 characters, spaces, and punctuation, and hides the rest. The sealed part is the original value, sealed by crypto-api.
 
-- `db/scripts/tokenize-titles.mjs` tokenizes plaintext rows. It is run by hand (see [Fresh start](#fresh-start)). Rows that are already tokens are skipped. New rows need a re-run.
+- `db/scripts/tokenize-titles.mjs` tokenizes plaintext rows. The VPS deployment runs it on every deploy; local runs are manual (see [Fresh start](#fresh-start)). Rows that are already tokens are skipped. New rows need a re-run.
 - `/api/grc` detokenizes readable documents in one `/detokenize` call. If crypto-api is unavailable or returns an error, readable documents fall back to the masked part, never the token. Unreadable documents are dropped from the payload (`filterGrc` in `backend/grc-filter.mjs`); their evidence links, asset links, and audit references are removed too.
 - The tokenize script uses crypto-api `/tokenize` and `/detokenize` for each row and reports failures by row. A crypto-api error causes the script to exit 1 if any row fails.
 
@@ -318,7 +322,7 @@ Crypto-api internal port 2797 serves only `GET /internal/traffic` and is not pub
 | --- | --- |
 | `frontend/` | Vite, React 19, TanStack Router and Table, Tailwind CSS 4, shadcn/ui on Radix, Recharts. `nginx.conf` proxies `/api/` to `backend:3000`. Dockerfile builds to nginx-unprivileged. Ships no sample data; hydrates from `/api/grc`. Also `public/`, `scripts/` (`make-sample-xlsx.py`), `demo/` |
 | `backend/` | Node 24 `node:http` API (`server.mjs`), `pg` client, traffic recorder (`traffic.mjs`), file protection (`protection.mjs`), uploads (`uploads.mjs`), self-checks |
-| `db/` | `init/001_schema.sql` to `init/012_unit_head.sql`. `compose.yaml` mounts `init/` to `/docker-entrypoint-initdb.d`. The postgres image runs these on first init of an empty `pgdata` volume (image behavior; `001` and `003` headers have no run-timing statement. `004` header says it runs after `002_seed`). All init files `001`-`012` run on first init of an empty `pgdata` volume; `010_red_strict_dual_auth.sql`, `011_level_change.sql`, and `012_unit_head.sql` are also applied to an existing volume by hand as admin (their headers say so). `006_rbac.sql`, `007_audit_purge.sql`, and `008_access_levels.sql` are also applied on fresh-volume init (see Audit log retention). `scripts/seed-db.mjs` (regenerates the seed), `scripts/protect-documents.mjs` (protection migration), `scripts/seed-users.mjs` (demo accounts, access levels, DOC-0017 grants), `scripts/tokenize-titles.mjs` (title and file name tokenization) |
+| `db/` | `init/001_schema.sql` to `init/015_field_protection.sql`. `compose.yaml` mounts `init/` to `/docker-entrypoint-initdb.d`; the postgres image runs these scripts only on first init of an empty `pgdata` volume. Files whose headers say "Manual apply" must also be applied to existing volumes as admin. `scripts/seed-db.mjs` (regenerates the seed), `scripts/protect-documents.mjs` (document protection), `scripts/protect-fields.mjs` (field protection), `scripts/seed-users.mjs` (demo accounts), `scripts/tokenize-titles.mjs` (title and file name tokenization) |
 | `db/seed-files/` | Sample files used by the seed (`db/scripts/seed-db.mjs`). Not served by the app |
 | `cryptography-service/encryption-services/` | TPM-only Go crypto API, tests, `Dockerfile`, `README.md` |
 | `docs/versi-lama/crypt-module-vault/` | Legacy Vault crypto module, `docker-compose.yml`, `functional.ps1`, `setup.sh`, and README |
@@ -331,7 +335,7 @@ Crypto-api internal port 2797 serves only `GET /internal/traffic` and is not pub
 | `docs/` | `service-traffic-visualization.md` (traffic map guide), `tpm-development-crypto-service.md` (TPM blueprint), `screenshots/`, `versi-lama/` (pre-blueprint Vault docs) |
 | `ref/` | Reference image (`details style.jpg`) |
 | `.verification/` | Review screenshots and their capture scripts (`access-capture.mjs`, `contrast-probe.mjs`) |
-| `.github/` | CI and stale workflows, issue and PR templates, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` |
+| `.github/` | CI, deploy, and stale workflows, issue and PR templates, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` |
 | `compose.yaml` | Root compose includes `cryptography-service/compose.yaml`; TPM-only stack, no Vault services |
 | `DEMO.md` | Five-minute demo script (Indonesian) |
 | `.env.example` | Template for root `.env`, copied in Quick start |
@@ -357,6 +361,14 @@ This single-laptop setup is for development and demonstrations, with no zone sep
 The backend calls crypto-api in TPM mode through the root compose. `cryptography-service/e2e.sh` exercises the path with a software TPM harness. A real-TPM run via `cryptography-service/hw-acceptance.ps1` has not been done yet.
 
 Never paste real PIN values or secrets into docs, commands, or shell history.
+
+### Container-mode `tpm-msk` environment
+
+These three variables are for the vTPM/container mode only (`cryptography-service/compose.vps.yaml`). When they are unset, native Windows/TBS behavior is unchanged.
+
+- `TPM_MSK_TCP`: dial a TCP TPM (for example `swtpm:2321`) instead of the platform TPM transport (`internal/tpm/tpm.go`).
+- `TPM_MSK_PIN_FILE`: read the PIN from this file instead of prompting. The file must hold at least 6 bytes (`cmd/tpm-msk/main.go`).
+- `TPM_MSK_APPROVE_FP`: auto-approve the delivery key only when its fingerprint equals this `sha256:<64 hex>` value; otherwise manual approval is still required (`cmd/tpm-msk/serve.go`).
 
 ## Blueprint conformance
 
@@ -586,6 +598,43 @@ Maps each section of [docs/tpm-development-crypto-service.md](docs/tpm-developme
 | RAM | 64 GB |
 | Storage | SSD 1 TB |
 
+## Deployment (CI/CD)
+
+`.github/workflows/deploy.yml` runs on pushes to `main` and on manual dispatch. It uses a self-hosted runner with labels `self-hosted`, `linux`, and `vps`, and deploys to `/opt/secure-asset-doc`. The VPS compose setup is root `compose.yaml` plus `cryptography-service/compose.vps.yaml` (vTPM overlay).
+The CI workflow (`.github/workflows/ci.yml`) also has a `tpm-swtpm` job using `cryptography-service/compose.ci.yaml`. This CI-only software TPM is separate from both the VPS overlay and the native laptop path.
+
+Job graph:
+
+1. `sync`: copies the checkout to `APP_DIR`, excluding `.git/`, `.env`, `cryptography-service/run/`, and `db/CREDENTIALS.md`.
+2. `build-frontend`, `build-backend`, `build-keyd-tpm` (keyd and tpm-msk), `build-crypto-api`: run in parallel after `sync`.
+3. `deploy` (environment `production`): writes `.env`, prepares the TPM zone, starts services, approves keyd's delivery key, runs the health check, and seeds the database.
+
+GitHub `production` environment settings:
+
+- Secrets, required: `POSTGRES_PASSWORD`, `APP_DB_PASSWORD`, `DEMO_USER_PASSWORD`, `TPM_MSK_PIN`.
+- Variables, required: `POSTGRES_USER`, `POSTGRES_DB`.
+- Variables, optional: `APP_ORIGINS`, `MSK_CRYPTOPERIOD_DAYS`.
+
+What `deploy` does:
+
+- Writes `.env` from these values. Values containing a single quote or newline fail the run.
+- Prepares the TPM zone. PKI is generated only when `run/pki/keyzone/ca.pem` is missing. `tpm-msk init` runs when no key file exists. `kek-01` is created if it is missing, checked on every deploy.
+- Reads keyd's `delivery key fingerprint` from its logs and starts `tpm-msk` with `TPM_MSK_APPROVE_FP` set to that value.
+- Polls `http://127.0.0.1:8088/api/health`.
+- Seeds data and demo users only when the `users` table is empty. On later deploys, existing data is kept. `protect-documents` and `tokenize-titles` run on every deploy and skip rows already done.
+
+What persists across deploys on the server:
+
+- PostgreSQL data (`pgdata` volume).
+- `swtpm-state` (vTPM state) and `tpm-msk-data` (TPM service data) volumes.
+- `cryptography-service/run/` (PKI, PIN file, audit logs, keyd public key).
+
+Warnings:
+
+- Never run `docker compose down -v` on the VPS. It deletes the vTPM and MSK state, so all wrapped keys become unrecoverable, and it deletes the database volume.
+- `TPM_MSK_PIN` must not change after the first deploy. The MSK is bound to the PIN.
+- After a VPS reboot, re-run the deploy workflow. keyd generates a new delivery key on each start, and `tpm-msk` approves that key only during a deploy.
+
 ## Quick start
 
 ### First-time setup (once)
@@ -619,7 +668,7 @@ On a fresh install, follow [Fresh start](#fresh-start).
 
 All data starts from zero. The stack is TPM-only; there is no rekey and no migration from Vault. Operator steps (optional backup, `docker compose down -v`, seeding, SQL checks) are in [TUTORIAL step 5, Reset data dari nol](cryptography-service/tpm-services/TUTORIAL.md#5-reset-data-dari-nol).
 
-> **Warning:** `docker compose down -v` deletes all DB data and old Vault volumes. Run it only for a deliberate reset. For normal stops, use `docker compose down` (data kept).
+> **Warning:** `docker compose down -v` deletes all DB data and named volumes. Use it only for a deliberate local reset. Never run it on the VPS; see [Deployment (CI/CD)](#deployment-cicd). For normal stops, use `docker compose down` (data kept).
 
 ### Stop
 

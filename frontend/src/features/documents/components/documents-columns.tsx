@@ -32,8 +32,8 @@ function TitleCell({ doc }: { doc: DocRow }) {
         params={{ documentId: doc.id }}
         title={doc.title}
         className={expanded
-          ? 'block min-w-0 flex-1 font-medium whitespace-normal break-words underline underline-offset-4'
-          : 'block min-w-0 flex-1 truncate font-medium underline underline-offset-4'}
+          ? 'min-w-0 flex-1 whitespace-normal break-words font-medium underline underline-offset-4'
+          : 'min-w-0 flex-1 line-clamp-2 whitespace-normal break-words font-medium underline underline-offset-4'}
       >
         {doc.title}
       </Link>
@@ -41,16 +41,16 @@ function TitleCell({ doc }: { doc: DocRow }) {
         type='button'
         variant='ghost'
         size='icon'
-        className='shrink-0 size-11 md:size-8'
+        className='shrink-0 flex-none whitespace-nowrap size-11 md:size-8'
         aria-label={expanded ? 'Sembunyikan judul lengkap' : 'Tampilkan judul lengkap'}
         aria-expanded={expanded}
         onClick={() => setExpanded((value) => !value)}
       >
         <Icon />
       </Button>
-      {doc.tokenOnly && <Badge variant='outline' className='shrink-0'>Terkunci</Badge>}
-      {doc.granted && <Badge variant='outline' className='shrink-0'>Diberikan</Badge>}
-      <span className='shrink-0'>
+      {doc.tokenOnly && <Badge variant='outline' className='shrink-0 flex-none whitespace-nowrap'>Terkunci</Badge>}
+      {doc.granted && <Badge variant='outline' className='shrink-0 flex-none whitespace-nowrap'>Diberikan</Badge>}
+      <span className='shrink-0 flex-none whitespace-nowrap'>
         <DocStatusBadge status={doc.status} />
       </span>
     </span>
@@ -60,7 +60,7 @@ function TitleCell({ doc }: { doc: DocRow }) {
 export const documentColumns: ColumnDef<DocRow>[] = [
   {
     accessorKey: 'id',
-    size: 110,
+    size: 120,
     header: ({ column }) => <DataTableColumnHeader column={column} title='ID' />,
     cell: ({ row }) => (
       <Link
@@ -74,18 +74,19 @@ export const documentColumns: ColumnDef<DocRow>[] = [
   },
   {
     accessorKey: 'title',
+    size: 360,
     header: ({ column }) => <DataTableColumnHeader column={column} title='Judul dan status' />,
     cell: ({ row }) => <TitleCell doc={row.original} />,
   },
   {
     accessorKey: 'tlp',
-    size: 150,
+    size: 168,
     header: 'TLP',
     cell: ({ row }) => <TlpBadge tlp={row.original.tlp} />,
   },
   {
     id: 'version',
-    size: 72,
+    size: 80,
     accessorFn: (doc) => doc.versions[0]?.version ?? '',
     header: 'Versi',
     cell: ({ getValue }) => <span className='font-mono'>{String(getValue()) || DASH}</span>,
@@ -96,7 +97,7 @@ export const documentColumns: ColumnDef<DocRow>[] = [
     size: 200,
     header: ({ column }) => <DataTableColumnHeader column={column} title='Tinjauan berikutnya' />,
     cell: ({ row }) => (
-      <span className='flex min-w-0 flex-wrap items-center gap-2 whitespace-normal break-words'>
+      <span className='flex min-w-0 items-center gap-2 whitespace-nowrap overflow-hidden'>
         <span className='font-mono tabular-nums'>{row.original.nextReview}</span>
         <ReviewStatusBadge days={daysUntil(row.original.nextReview)} date={reviewLabel(row.original.nextReview)} />
       </span>
@@ -104,7 +105,7 @@ export const documentColumns: ColumnDef<DocRow>[] = [
   },
   {
     id: 'access',
-    size: 80,
+    size: 96,
     accessorFn: (doc) => {
       const access = accessFor(doc)
       return access ? (access.permit ? 'Izin' : 'Tolak') : ''

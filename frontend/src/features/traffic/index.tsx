@@ -447,7 +447,7 @@ function Detail({
 }
 
 export function Traffic() {
-  const { data, history, error, loading } = useTraffic(2000)
+  const { data, history, error, forbidden, loading } = useTraffic(2000)
   const isSuperAdmin = getMe()?.superAdmin === true
   const [sel, setSel] = useState<Selection | null>(null)
   const reduced = useReducedMotion()
@@ -467,6 +467,12 @@ export function Traffic() {
       </Header>
 
       <Main className='focus-strong flex flex-1 flex-col gap-6'>
+        {forbidden ? (
+          <Alert variant='destructive' role='alert'>
+            <TriangleAlert />
+            <AlertTitle>Hanya super admin</AlertTitle>
+          </Alert>
+        ) : <>
         <div>
           <h1 className='text-2xl font-bold tracking-tight'>Service traffic</h1>
           <p className='text-muted-foreground'>
@@ -606,6 +612,7 @@ export function Traffic() {
         <p className='text-sm text-muted-foreground'>
           In-memory, 10 s window, resets on restart. Endpoint has no auth (app has no auth yet).
         </p>
+        </>}
       </Main>
     </>
   )

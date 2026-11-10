@@ -17,14 +17,10 @@ env:
   COMPOSE_FILE: compose.yaml:cryptography-service/compose.vps.yaml
 
 jobs:
-  deploy:
+  sync:
     runs-on: [self-hosted, linux, vps]
-    # Required secrets: POSTGRES_PASSWORD, APP_DB_PASSWORD, DEMO_USER_PASSWORD, TPM_MSK_PIN.
-    # Secrets and variables below live in Settings > Environments > production (like GitLab CI/CD variables).
-    environment: production
     steps:
       - uses: actions/checkout@v4
-
       - name: Sync code (keep server-only files)
         run: |
           rsync -a --delete \
@@ -33,6 +29,54 @@ jobs:
             --exclude 'db/CREDENTIALS.md' \
             ./ "$APP_DIR/"
 
+  build-frontend:
+    needs: sync
+    runs-on: [self-hosted, linux, vps]
+    env:
+      # Dummy value only so compose can interpolate the file. Images do not contain it.
+      POSTGRES_PASSWORD: build-only-placeholder
+    steps:
+      - name: Build frontend
+        working-directory: ${{ env.APP_DIR }}
+        run: docker compose build frontend
+
+  build-backend:
+    needs: sync
+    runs-on: [self-hosted, linux, vps]
+    env:
+      POSTGRES_PASSWORD: build-only-placeholder
+    steps:
+      - name: Build backend
+        working-directory: ${{ env.APP_DIR }}
+        run: docker compose build backend
+
+  build-keyd-tpm:
+    needs: sync
+    runs-on: [self-hosted, linux, vps]
+    env:
+      POSTGRES_PASSWORD: build-only-placeholder
+    steps:
+      - name: Build keyd and tpm-msk
+        working-directory: ${{ env.APP_DIR }}
+        run: docker compose build keyd tpm-msk
+
+  build-crypto-api:
+    needs: sync
+    runs-on: [self-hosted, linux, vps]
+    env:
+      POSTGRES_PASSWORD: build-only-placeholder
+    steps:
+      - name: Build crypto-api
+        working-directory: ${{ env.APP_DIR }}
+        run: docker compose build crypto-api
+
+  deploy:
+    needs: [build-frontend, build-backend, build-keyd-tpm, build-crypto-api]
+    runs-on: [self-hosted, linux, vps]
+    # Required secrets: POSTGRES_PASSWORD, APP_DB_PASSWORD, DEMO_USER_PASSWORD, TPM_MSK_PIN.
+    # Secrets and variables below live in Settings > Environments > production (like GitLab CI/CD variables).
+    environment: production
+    steps:
       - name: Write .env from GitHub secrets and variables
         # Values come in through env, never through ${{ }} inside the script, so they are not expanded into shell code.
         env:
@@ -78,7 +122,6 @@ jobs:
           rm -f "$run/secrets/tpm_pin"
           printf '%s' "$TPM_MSK_PIN" > "$run/secrets/tpm_pin"
           unset TPM_MSK_PIN
-          docker compose build tpm-msk
           # Runner has no sudo: ownership and modes are set from a throwaway root container.
           # Runs before pki generation so the generator (uid 65532, cap_drop ALL) can write into pki/.
           docker run --rm -v "$PWD/$run:/run" alpine:3.20 sh -ec '
@@ -124,7 +167,6 @@ jobs:
         # Only swtpm and keyd start here. tpm-msk starts in the next step, once keyd's fingerprint is known.
         run: |
           set -euo pipefail
-          docker compose build
           docker compose up -d swtpm keyd
 
       - name: Approve keyd delivery key
