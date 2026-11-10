@@ -224,6 +224,8 @@ jobs:
           else
             echo "users=$users, skipping seed data and users"
           fi
+          # Older versions ship without a file in 002_seed.sql. This fills each one with its own PDF (doc id, version, date, summary). Skips rows that already have content.
+          docker compose run --rm --no-deps -v "$PWD/db/scripts/seed-version-files.mjs:/app/seed-version-files.mjs:ro" -e PGUSER -e PGDATABASE -e PGPASSWORD backend node /app/seed-version-files.mjs
           if ! docker compose run --rm --no-deps -v "$PWD/db/scripts/protect-documents.mjs:/app/protect-documents.mjs:ro" -v "$PWD/db/scripts/demo-users.mjs:/app/demo-users.mjs:ro" -e PGUSER -e PGDATABASE -e PGPASSWORD -e DEMO_USER_PASSWORD backend node /app/protect-documents.mjs; then
             echo "::error::protect-documents failed. If it reports crypto unreachable, keyd/crypto-api or the swtpm/tpm-msk chain is down. Documents stay plaintext; inspect the swtpm and tpm-msk logs, fix crypto, then re-run."
             exit 1
