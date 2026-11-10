@@ -1,5 +1,5 @@
-import { useLayout } from '@/context/layout-provider'
 import { getMe } from '@/lib/session'
+import { useLayout } from '@/context/layout-provider'
 import {
   Sidebar,
   SidebarContent,
@@ -34,7 +34,9 @@ export function AppSidebar() {
         <NavUser
           user={{
             name: me?.name ?? '',
-            email: me ? `${me.superAdmin ? 'Super Admin · ' : ''}${me.rank} · Level ${me.accessLevel} · ${me.golongan}` : '',
+            email: me
+              ? `${me.superAdmin ? 'Super Admin · ' : ''}${me.rank} · Level ${me.accessLevel} · ${me.golongan}`
+              : '',
             avatar: '',
           }}
         />

@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { type ColumnDef } from '@tanstack/react-table'
+import { type Document as GrcDocument } from '@/data/grc'
 import { Eye, EyeOff } from 'lucide-react'
+import { explainAccess } from '@/lib/access-api'
+import { getMe } from '@/lib/session'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { DocStatusBadge, ReviewStatusBadge } from '@/components/status-badge'
 import { TlpBadge } from '@/components/tlp-badge'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { type Document as GrcDocument } from '@/data/grc'
-import { explainAccess } from '@/lib/access-api'
-import { getMe } from '@/lib/session'
 import { daysUntil, reviewLabel } from '../helpers'
 
 export type DocRow = GrcDocument
@@ -31,9 +31,11 @@ function TitleCell({ doc }: { doc: DocRow }) {
         to='/documents/$documentId'
         params={{ documentId: doc.id }}
         title={doc.title}
-        className={expanded
-          ? 'min-w-0 flex-1 whitespace-normal break-words font-medium underline underline-offset-4'
-          : 'min-w-0 flex-1 line-clamp-2 whitespace-normal break-words font-medium underline underline-offset-4'}
+        className={
+          expanded
+            ? 'min-w-0 flex-1 font-medium break-words whitespace-normal underline underline-offset-4'
+            : 'line-clamp-2 min-w-0 flex-1 font-medium break-words whitespace-normal underline underline-offset-4'
+        }
       >
         {doc.title}
       </Link>
@@ -41,16 +43,32 @@ function TitleCell({ doc }: { doc: DocRow }) {
         type='button'
         variant='ghost'
         size='icon'
-        className='shrink-0 flex-none whitespace-nowrap size-11 md:size-8'
-        aria-label={expanded ? 'Sembunyikan judul lengkap' : 'Tampilkan judul lengkap'}
+        className='size-11 flex-none shrink-0 whitespace-nowrap md:size-8'
+        aria-label={
+          expanded ? 'Sembunyikan judul lengkap' : 'Tampilkan judul lengkap'
+        }
         aria-expanded={expanded}
         onClick={() => setExpanded((value) => !value)}
       >
         <Icon />
       </Button>
-      {doc.tokenOnly && <Badge variant='outline' className='shrink-0 flex-none whitespace-nowrap'>Terkunci</Badge>}
-      {doc.granted && <Badge variant='outline' className='shrink-0 flex-none whitespace-nowrap'>Diberikan</Badge>}
-      <span className='shrink-0 flex-none whitespace-nowrap'>
+      {doc.tokenOnly && (
+        <Badge
+          variant='outline'
+          className='flex-none shrink-0 whitespace-nowrap'
+        >
+          Terkunci
+        </Badge>
+      )}
+      {doc.granted && (
+        <Badge
+          variant='outline'
+          className='flex-none shrink-0 whitespace-nowrap'
+        >
+          Diberikan
+        </Badge>
+      )}
+      <span className='flex-none shrink-0 whitespace-nowrap'>
         <DocStatusBadge status={doc.status} />
       </span>
     </span>
@@ -61,7 +79,9 @@ export const documentColumns: ColumnDef<DocRow>[] = [
   {
     accessorKey: 'id',
     size: 120,
-    header: ({ column }) => <DataTableColumnHeader column={column} title='ID' />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='ID' />
+    ),
     cell: ({ row }) => (
       <Link
         to='/documents/$documentId'
@@ -75,7 +95,9 @@ export const documentColumns: ColumnDef<DocRow>[] = [
   {
     accessorKey: 'title',
     size: 360,
-    header: ({ column }) => <DataTableColumnHeader column={column} title='Judul dan status' />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Judul dan status' />
+    ),
     cell: ({ row }) => <TitleCell doc={row.original} />,
   },
   {
@@ -89,17 +111,26 @@ export const documentColumns: ColumnDef<DocRow>[] = [
     size: 80,
     accessorFn: (doc) => doc.versions[0]?.version ?? '',
     header: 'Versi',
-    cell: ({ getValue }) => <span className='font-mono'>{String(getValue()) || DASH}</span>,
+    cell: ({ getValue }) => (
+      <span className='font-mono'>{String(getValue()) || DASH}</span>
+    ),
   },
   {
     id: 'nextReview',
     accessorFn: (doc) => doc.nextReview,
     size: 200,
-    header: ({ column }) => <DataTableColumnHeader column={column} title='Tinjauan berikutnya' />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Tinjauan berikutnya' />
+    ),
     cell: ({ row }) => (
-      <span className='flex min-w-0 items-center gap-2 whitespace-nowrap overflow-hidden'>
-        <span className='font-mono tabular-nums'>{row.original.nextReview}</span>
-        <ReviewStatusBadge days={daysUntil(row.original.nextReview)} date={reviewLabel(row.original.nextReview)} />
+      <span className='flex min-w-0 items-center gap-2 overflow-hidden whitespace-nowrap'>
+        <span className='font-mono tabular-nums'>
+          {row.original.nextReview}
+        </span>
+        <ReviewStatusBadge
+          days={daysUntil(row.original.nextReview)}
+          date={reviewLabel(row.original.nextReview)}
+        />
       </span>
     ),
   },
@@ -115,7 +146,9 @@ export const documentColumns: ColumnDef<DocRow>[] = [
       const access = accessFor(row.original)
       if (!access) return DASH
       return (
-        <span className={access.permit ? 'text-sm text-pass' : 'text-sm text-fail'}>
+        <span
+          className={access.permit ? 'text-sm text-pass' : 'text-sm text-fail'}
+        >
           {access.permit ? 'Izin' : 'Tolak'}
         </span>
       )

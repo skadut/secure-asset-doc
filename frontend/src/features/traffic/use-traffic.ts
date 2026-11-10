@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react'
-import { HISTORY_MAX, parseTraffic, pushHistory, type HistoryPoint, type TrafficResponse } from './graph'
+import {
+  HISTORY_MAX,
+  parseTraffic,
+  pushHistory,
+  type HistoryPoint,
+  type TrafficResponse,
+} from './graph'
 
 export type TrafficState = {
   data: TrafficResponse | null
@@ -30,7 +36,9 @@ export function useTraffic(intervalMs = 2000): TrafficState {
         if (!parsed) throw new Error('bad payload')
         if (!active) return
         setData(parsed)
-        setHistory((h) => pushHistory(h, { ts: parsed.ts, edges: parsed.edges }, HISTORY_MAX))
+        setHistory((h) =>
+          pushHistory(h, { ts: parsed.ts, edges: parsed.edges }, HISTORY_MAX)
+        )
         setError(false)
       } catch (err) {
         if (err instanceof Error && err.message === 'HTTP 403') {

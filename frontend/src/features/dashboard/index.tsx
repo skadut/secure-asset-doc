@@ -1,21 +1,5 @@
 import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { CoverageBadge, DocStatusBadge, ReviewStatusBadge } from '@/components/status-badge'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { TlpBadge } from '@/components/tlp-badge'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import {
   assets,
   auditEvents,
@@ -26,6 +10,26 @@ import {
   type AuditEvent,
 } from '@/data/grc'
 import { coverage } from '@/lib/grc'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { ConfigDrawer } from '@/components/config-drawer'
+import { Header } from '@/components/layout/header'
+import { Main } from '@/components/layout/main'
+import { ProfileDropdown } from '@/components/profile-dropdown'
+import { Search } from '@/components/search'
+import {
+  CoverageBadge,
+  DocStatusBadge,
+  ReviewStatusBadge,
+} from '@/components/status-badge'
+import { ThemeSwitch } from '@/components/theme-switch'
+import { TlpBadge } from '@/components/tlp-badge'
 import { DocumentCharts } from './components/document-charts'
 import { StatisticsCharts } from './components/statistics'
 import { UploadsSection } from './components/uploads'
@@ -69,7 +73,12 @@ const recentActivity: AuditEvent[] = [...auditEvents]
   .sort((a, b) => b.at.localeCompare(a.at))
   .slice(0, 8)
 
-const assetTiles = assetTileStats(assets, evidenceLinks, csfSubcategories, TODAY)
+const assetTiles = assetTileStats(
+  assets,
+  evidenceLinks,
+  csfSubcategories,
+  TODAY
+)
 
 const summary = [
   `${docsToReview.length} documents need review`,
@@ -93,8 +102,8 @@ export function Dashboard() {
         <div className='mb-3 space-y-1'>
           <h1 className='page-title tracking-tight'>Overview</h1>
           <p className='text-sm text-muted-foreground'>
-            What needs attention across assets, documents and CSF 2.0
-            evidence. Sample data.
+            What needs attention across assets, documents and CSF 2.0 evidence.
+            Sample data.
           </p>
         </div>
         <p className='mb-6 text-sm tabular-nums'>
@@ -102,22 +111,45 @@ export function Dashboard() {
           <span className='text-muted-foreground'>(as of {TODAY})</span>
         </p>
 
-        <section aria-labelledby='managed-documents' className='mb-10 min-w-0 space-y-4'>
+        <section
+          aria-labelledby='managed-documents'
+          className='mb-10 min-w-0 space-y-4'
+        >
           <div className='space-y-1'>
             <div className='flex flex-wrap items-baseline gap-x-3 gap-y-1'>
-              <h2 id='managed-documents' className='font-heading text-2xl leading-[1.15] font-semibold'>Managed documents</h2>
-              <span className='font-mono text-xs font-semibold tracking-wide uppercase text-muted-foreground'>{asOfLabel(TODAY)}</span>
+              <h2
+                id='managed-documents'
+                className='font-heading text-2xl leading-[1.15] font-semibold'
+              >
+                Managed documents
+              </h2>
+              <span className='font-mono text-xs font-semibold tracking-wide text-muted-foreground uppercase'>
+                {asOfLabel(TODAY)}
+              </span>
             </div>
-            <p className='text-sm text-muted-foreground'>TLP marking, status, review timing and version activity across the document register.</p>
+            <p className='text-sm text-muted-foreground'>
+              TLP marking, status, review timing and version activity across the
+              document register.
+            </p>
           </div>
           <DocumentCharts />
         </section>
 
-        <section aria-labelledby='assets-coverage' className='mb-8 min-w-0 space-y-4'>
+        <section
+          aria-labelledby='assets-coverage'
+          className='mb-8 min-w-0 space-y-4'
+        >
           <div className='space-y-1'>
             <div className='flex flex-wrap items-baseline gap-x-3 gap-y-1'>
-              <h2 id='assets-coverage' className='font-heading text-2xl leading-[1.15] font-semibold'>Assets and CSF 2.0 coverage</h2>
-              <span className='font-mono text-xs font-semibold tracking-wide uppercase text-muted-foreground'>{asOfLabel(TODAY)}</span>
+              <h2
+                id='assets-coverage'
+                className='font-heading text-2xl leading-[1.15] font-semibold'
+              >
+                Assets and CSF 2.0 coverage
+              </h2>
+              <span className='font-mono text-xs font-semibold tracking-wide text-muted-foreground uppercase'>
+                {asOfLabel(TODAY)}
+              </span>
             </div>
           </div>
           <div className='grid min-w-0 grid-cols-2 gap-3 min-[700px]:grid-cols-4'>
@@ -130,14 +162,24 @@ export function Dashboard() {
               state={
                 assetTiles.reviewed === assetTiles.total && assetTiles.total > 0
                   ? { tone: 'pass', text: 'All reviewed' }
-                  : { tone: 'fail', text: `${assetTiles.total - assetTiles.reviewed} overdue` }
+                  : {
+                      tone: 'fail',
+                      text: `${assetTiles.total - assetTiles.reviewed} overdue`,
+                    }
               }
             />
-            <StatTile label='With monitoring evidence' value={assetTiles.monitoring} of={assetTiles.total} meter />
+            <StatTile
+              label='With monitoring evidence'
+              value={assetTiles.monitoring}
+              of={assetTiles.total}
+              meter
+            />
           </div>
         </section>
 
-        <div className='mb-10'><UploadsSection /></div>
+        <div className='mb-10'>
+          <UploadsSection />
+        </div>
 
         <div className='mb-10 grid gap-6 lg:grid-cols-2'>
           <Section
@@ -148,54 +190,67 @@ export function Dashboard() {
               <Empty>Nothing overdue or due soon.</Empty>
             ) : (
               <>
-              <div className='overflow-x-auto rounded-md border'>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>Title</TableHead>
-                      <TableHead>TLP</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Next review</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {docsToReview.slice(0, LIMIT).map(({ doc, days }) => (
-                      <TableRow key={doc.id}>
-                        <TableCell className='font-mono text-xs tabular-nums'>
-                          <Link
-                            to='/documents/$documentId'
-                            params={{ documentId: doc.id }}
-                            className='underline underline-offset-4'
-                          >
-                            {doc.id}
-                          </Link>
-                        </TableCell>
-                        <TableCell>
-                          <div className='max-w-48 truncate' title={doc.title}>
-                            {doc.title}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <TlpBadge tlp={doc.tlp} />
-                        </TableCell>
-                        <TableCell>
-                          <DocStatusBadge status={doc.status} />
-                        </TableCell>
-                        <TableCell className='text-xs tabular-nums'>
-                          <span className='flex flex-wrap items-center gap-2'>
-                            <span className='font-mono'>{doc.nextReview}</span>
-                            <ReviewStatusBadge days={days} date={dueLabel(days)} />
-                          </span>
-                        </TableCell>
+                <div className='overflow-x-auto rounded-md border'>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Title</TableHead>
+                        <TableHead>TLP</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Next review</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-              {docsToReview.length > LIMIT && (
-                <Link to='/documents' className='w-fit text-sm underline underline-offset-4'>+{docsToReview.length - LIMIT} lagi</Link>
-              )}
+                    </TableHeader>
+                    <TableBody>
+                      {docsToReview.slice(0, LIMIT).map(({ doc, days }) => (
+                        <TableRow key={doc.id}>
+                          <TableCell className='font-mono text-xs tabular-nums'>
+                            <Link
+                              to='/documents/$documentId'
+                              params={{ documentId: doc.id }}
+                              className='underline underline-offset-4'
+                            >
+                              {doc.id}
+                            </Link>
+                          </TableCell>
+                          <TableCell>
+                            <div
+                              className='max-w-48 truncate'
+                              title={doc.title}
+                            >
+                              {doc.title}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <TlpBadge tlp={doc.tlp} />
+                          </TableCell>
+                          <TableCell>
+                            <DocStatusBadge status={doc.status} />
+                          </TableCell>
+                          <TableCell className='text-xs tabular-nums'>
+                            <span className='flex flex-wrap items-center gap-2'>
+                              <span className='font-mono'>
+                                {doc.nextReview}
+                              </span>
+                              <ReviewStatusBadge
+                                days={days}
+                                date={dueLabel(days)}
+                              />
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                {docsToReview.length > LIMIT && (
+                  <Link
+                    to='/documents'
+                    className='w-fit text-sm underline underline-offset-4'
+                  >
+                    +{docsToReview.length - LIMIT} lagi
+                  </Link>
+                )}
               </>
             )}
           </Section>
@@ -208,46 +263,51 @@ export function Dashboard() {
               <Empty>Every subcategory has current evidence.</Empty>
             ) : (
               <>
-              <div className='overflow-x-auto rounded-md border'>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>Outcome</TableHead>
-                      <TableHead>Coverage</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {csfGaps.slice(0, LIMIT).map(({ subcategory, cov }) => (
-                      <TableRow key={subcategory.id}>
-                        <TableCell className='font-mono text-xs'>
-                          <Link
-                            to='/evidence'
-                            hash={`subcategory-${subcategory.id}`}
-                            className='underline underline-offset-4'
-                          >
-                            {subcategory.id}
-                          </Link>
-                        </TableCell>
-                        <TableCell>
-                          <div
-                            className='max-w-xs truncate'
-                            title={subcategory.outcome}
-                          >
-                            {subcategory.outcome}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <CoverageBadge coverage={cov} />
-                        </TableCell>
+                <div className='overflow-x-auto rounded-md border'>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Outcome</TableHead>
+                        <TableHead>Coverage</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-              {csfGaps.length > LIMIT && (
-                <Link to='/evidence' className='w-fit text-sm underline underline-offset-4'>+{csfGaps.length - LIMIT} lagi</Link>
-              )}
+                    </TableHeader>
+                    <TableBody>
+                      {csfGaps.slice(0, LIMIT).map(({ subcategory, cov }) => (
+                        <TableRow key={subcategory.id}>
+                          <TableCell className='font-mono text-xs'>
+                            <Link
+                              to='/evidence'
+                              hash={`subcategory-${subcategory.id}`}
+                              className='underline underline-offset-4'
+                            >
+                              {subcategory.id}
+                            </Link>
+                          </TableCell>
+                          <TableCell>
+                            <div
+                              className='max-w-xs truncate'
+                              title={subcategory.outcome}
+                            >
+                              {subcategory.outcome}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <CoverageBadge coverage={cov} />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                {csfGaps.length > LIMIT && (
+                  <Link
+                    to='/evidence'
+                    className='w-fit text-sm underline underline-offset-4'
+                  >
+                    +{csfGaps.length - LIMIT} lagi
+                  </Link>
+                )}
               </>
             )}
           </Section>
@@ -260,44 +320,49 @@ export function Dashboard() {
               <Empty>Nothing overdue.</Empty>
             ) : (
               <>
-              <div className='overflow-x-auto rounded-md border'>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Site</TableHead>
-                      <TableHead>Last reviewed</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {staleHighAssets.slice(0, LIMIT).map((asset) => (
-                      <TableRow key={asset.id}>
-                        <TableCell className='font-mono text-xs'>
-                          <Link
-                            to='/assets/$assetId'
-                            params={{ assetId: asset.id }}
-                            className='underline underline-offset-4'
-                          >
-                            {asset.id}
-                          </Link>
-                        </TableCell>
-                        <TableCell>{asset.name}</TableCell>
-                        <TableCell>{asset.site}</TableCell>
-                        <TableCell className='font-mono text-xs tabular-nums'>
-                          <span className='flex flex-wrap items-center gap-2'>
-                            {asset.lastReviewed}
-                            <ReviewStatusBadge days={-1} />
-                          </span>
-                        </TableCell>
+                <div className='overflow-x-auto rounded-md border'>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Site</TableHead>
+                        <TableHead>Last reviewed</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-              {staleHighAssets.length > LIMIT && (
-                <Link to='/assets' className='w-fit text-sm underline underline-offset-4'>+{staleHighAssets.length - LIMIT} lagi</Link>
-              )}
+                    </TableHeader>
+                    <TableBody>
+                      {staleHighAssets.slice(0, LIMIT).map((asset) => (
+                        <TableRow key={asset.id}>
+                          <TableCell className='font-mono text-xs'>
+                            <Link
+                              to='/assets/$assetId'
+                              params={{ assetId: asset.id }}
+                              className='underline underline-offset-4'
+                            >
+                              {asset.id}
+                            </Link>
+                          </TableCell>
+                          <TableCell>{asset.name}</TableCell>
+                          <TableCell>{asset.site}</TableCell>
+                          <TableCell className='font-mono text-xs tabular-nums'>
+                            <span className='flex flex-wrap items-center gap-2'>
+                              {asset.lastReviewed}
+                              <ReviewStatusBadge days={-1} />
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                {staleHighAssets.length > LIMIT && (
+                  <Link
+                    to='/assets'
+                    className='w-fit text-sm underline underline-offset-4'
+                  >
+                    +{staleHighAssets.length - LIMIT} lagi
+                  </Link>
+                )}
               </>
             )}
           </Section>
@@ -326,7 +391,10 @@ export function Dashboard() {
                         {event.actor}
                       </TableCell>
                       <TableCell>
-                        <div className='max-w-xs truncate' title={event.summary}>
+                        <div
+                          className='max-w-xs truncate'
+                          title={event.summary}
+                        >
                           {event.summary}
                         </div>
                       </TableCell>
@@ -339,7 +407,12 @@ export function Dashboard() {
               </Table>
             </div>
             {auditEvents.length > recentActivity.length && (
-              <Link to='/audit-log' className='w-fit text-sm underline underline-offset-4'>+{auditEvents.length - recentActivity.length} lagi</Link>
+              <Link
+                to='/audit-log'
+                className='w-fit text-sm underline underline-offset-4'
+              >
+                +{auditEvents.length - recentActivity.length} lagi
+              </Link>
             )}
           </Section>
         </div>

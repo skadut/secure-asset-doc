@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
+import { documents, TODAY, type Tlp } from '@/data/grc'
 import { Clock, TriangleAlert } from 'lucide-react'
 import { TlpBadge } from '@/components/tlp-badge'
-import { documents, TODAY, type Tlp } from '@/data/grc'
 import {
   documentTileStats,
   documentTypeRows,
@@ -27,7 +27,9 @@ const TLP_TOKEN: Record<Tlp, string> = {
 }
 
 // AMBER bars get the 1px light-theme edge so they reach 3:1 against the card.
-const TLP_EDGE: Partial<Record<Tlp, string>> = { AMBER: 'var(--viz-amber-edge)' }
+const TLP_EDGE: Partial<Record<Tlp, string>> = {
+  AMBER: 'var(--viz-amber-edge)',
+}
 
 const STATUS_SERIES = [
   { key: 'approved', label: 'Approved', color: 'var(--pass)', icon: 'pass' },
@@ -37,7 +39,11 @@ const STATUS_SERIES = [
 ] as const
 
 const reviewColor = (key: string) =>
-  key === 'overdue' ? 'var(--fail)' : key === 'd0_30' ? 'var(--warn)' : 'var(--chart-4)'
+  key === 'overdue'
+    ? 'var(--fail)'
+    : key === 'd0_30'
+      ? 'var(--warn)'
+      : 'var(--chart-4)'
 
 // StatTile has no colour prop. The value span inherits colour, so the wrapper sets it.
 function Tile({ color, children }: { color?: string; children: ReactNode }) {
@@ -132,12 +138,30 @@ export function DocumentCharts() {
             title='Document status by TLP'
             caption={`Status within each TLP marking · ${total} documents`}
             state='ready'
-            legend={STATUS_SERIES.map((s) => ({ label: s.label, color: s.color, icon: s.icon }))}
+            legend={STATUS_SERIES.map((s) => ({
+              label: s.label,
+              color: s.color,
+              icon: s.icon,
+            }))}
             isEmpty={isEmpty}
             emptyMessage={`${NO_DOCS} Every TLP marking still shows 0.`}
             table={{
-              columns: ['TLP', 'Approved', 'In review', 'Draft', 'Expired', 'Total'],
-              rows: status.map((row) => [row.label, row.approved, row.inReview, row.draft, row.expired, row.total]),
+              columns: [
+                'TLP',
+                'Approved',
+                'In review',
+                'Draft',
+                'Expired',
+                'Total',
+              ],
+              rows: status.map((row) => [
+                row.label,
+                row.approved,
+                row.inReview,
+                row.draft,
+                row.expired,
+                row.total,
+              ]),
             }}
           >
             <BarList
@@ -178,13 +202,23 @@ export function DocumentCharts() {
               labelWidth={104}
               rows={review.map((row) => {
                 const color = reviewColor(row.key)
-                const Icon = row.key === 'overdue' ? TriangleAlert : row.key === 'd0_30' ? Clock : null
+                const Icon =
+                  row.key === 'overdue'
+                    ? TriangleAlert
+                    : row.key === 'd0_30'
+                      ? Clock
+                      : null
                 return {
                   key: row.key,
                   label: (
                     <span className='inline-flex items-center gap-1.5'>
                       {Icon && (
-                        <Icon aria-hidden='true' size={13} strokeWidth={2.2} style={{ color, flexShrink: 0 }} />
+                        <Icon
+                          aria-hidden='true'
+                          size={13}
+                          strokeWidth={2.2}
+                          style={{ color, flexShrink: 0 }}
+                        />
                       )}
                       {row.label}
                     </span>
@@ -245,7 +279,9 @@ export function DocumentCharts() {
                 label: row.month,
                 value: row.value,
                 axisLabel:
-                  i === 0 || i === months.length - 1 || row.month.endsWith('-01')
+                  i === 0 ||
+                  i === months.length - 1 ||
+                  row.month.endsWith('-01')
                     ? row.month
                     : undefined,
               }))}

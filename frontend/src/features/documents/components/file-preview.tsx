@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { type DocFile } from '@/data/grc'
 import { type Sheet, readXlsx } from '@/lib/xlsx'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import './file-preview.css'
 
 // Loader ring appearance adapted from Uiverse.io (see THIRD_PARTY_NOTICES.md). Shown only while the query is pending.
@@ -21,9 +21,15 @@ const WIDE = '(min-width: 640px)'
 
 export function FilePreview({ file }: { file?: DocFile }) {
   if (!file) {
-    return <p className='text-muted-foreground'>Belum ada berkas pada versi ini.</p>
+    return (
+      <p className='text-muted-foreground'>Belum ada berkas pada versi ini.</p>
+    )
   }
-  return file.mime === PDF ? <PdfPreview file={file} /> : <XlsxPreview file={file} />
+  return file.mime === PDF ? (
+    <PdfPreview file={file} />
+  ) : (
+    <XlsxPreview file={file} />
+  )
 }
 
 function PdfPreview({ file }: { file: DocFile }) {
@@ -34,7 +40,10 @@ function PdfPreview({ file }: { file: DocFile }) {
       const res = await fetch(file.url)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const type = res.headers.get('content-type') ?? ''
-      if (!type.startsWith(PDF)) throw new Error(`server returned ${type || 'no content type'}, not a PDF`)
+      if (!type.startsWith(PDF))
+        throw new Error(
+          `server returned ${type || 'no content type'}, not a PDF`
+        )
       const length = Number(res.headers.get('content-length'))
       await res.body?.cancel()
       return { size: length > 0 ? length : undefined }
@@ -46,12 +55,16 @@ function PdfPreview({ file }: { file: DocFile }) {
     <div className='flex flex-col gap-3'>
       <FileHeader file={file} label='PDF' size={head.data?.size} />
       {!wide ? (
-        <p className='text-sm text-muted-foreground'>Inline preview is available on larger screens.</p>
+        <p className='text-sm text-muted-foreground'>
+          Inline preview is available on larger screens.
+        </p>
       ) : (
         <>
           {head.isPending && <LoadingStatus name={file.name} />}
           {head.isError && (
-            <p role='alert'>Could not load {file.name}: {reason(head.error)}.</p>
+            <p role='alert'>
+              Could not load {file.name}: {reason(head.error)}.
+            </p>
           )}
           {head.isSuccess && (
             <iframe
@@ -83,24 +96,45 @@ function XlsxPreview({ file }: { file: DocFile }) {
       <FileHeader file={file} label='Excel workbook' size={sheets.data?.size} />
       {sheets.isPending && <LoadingStatus name={file.name} />}
       {sheets.isError && (
-        <p role='alert'>Could not load {file.name}: {reason(sheets.error)}.</p>
+        <p role='alert'>
+          Could not load {file.name}: {reason(sheets.error)}.
+        </p>
       )}
       {sheets.data && <SheetList sheets={sheets.data.sheets} />}
     </div>
   )
 }
 
-function FileHeader({ file, label, size }: { file: DocFile; label: string; size?: number }) {
+function FileHeader({
+  file,
+  label,
+  size,
+}: {
+  file: DocFile
+  label: string
+  size?: number
+}) {
   return (
     <div className='flex flex-wrap items-center gap-x-4 gap-y-2 text-sm'>
       <span className='font-mono break-all'>{file.name}</span>
       <span>{label}</span>
-      {size !== undefined && <span className='font-mono tabular-nums'>{formatSize(size)}</span>}
-      <a href={file.url} download={file.name} className='underline underline-offset-4'>
+      {size !== undefined && (
+        <span className='font-mono tabular-nums'>{formatSize(size)}</span>
+      )}
+      <a
+        href={file.url}
+        download={file.name}
+        className='underline underline-offset-4'
+      >
         Download
       </a>
       {file.mime === PDF && (
-        <a href={file.url} target='_blank' rel='noopener' className='underline underline-offset-4'>
+        <a
+          href={file.url}
+          target='_blank'
+          rel='noopener'
+          className='underline underline-offset-4'
+        >
           Open in new tab
         </a>
       )}
@@ -109,7 +143,8 @@ function FileHeader({ file, label, size }: { file: DocFile; label: string; size?
 }
 
 function SheetList({ sheets }: { sheets: Sheet[] }) {
-  if (!sheets.length) return <p className='text-muted-foreground'>This workbook has no sheets.</p>
+  if (!sheets.length)
+    return <p className='text-muted-foreground'>This workbook has no sheets.</p>
   if (sheets.length === 1) return <SheetTable sheet={sheets[0]} />
   return (
     <Tabs defaultValue='0'>
@@ -130,7 +165,8 @@ function SheetList({ sheets }: { sheets: Sheet[] }) {
 }
 
 function SheetTable({ sheet }: { sheet: Sheet }) {
-  if (sheet.rows.length === 0) return <p className='text-muted-foreground'>This sheet has no rows.</p>
+  if (sheet.rows.length === 0)
+    return <p className='text-muted-foreground'>This sheet has no rows.</p>
 
   const notice = sheet.rows[0].filter(Boolean).join(' ')
   const header = sheet.rows[1] ?? []
@@ -139,16 +175,23 @@ function SheetTable({ sheet }: { sheet: Sheet }) {
 
   return (
     <div className='flex flex-col gap-2'>
-      <div data-glass-panel className='max-h-[70vh] overflow-x-auto overflow-y-auto rounded-md border'>
+      <div
+        data-glass-panel
+        className='max-h-[70vh] overflow-x-auto overflow-y-auto rounded-md border'
+      >
         <table className='w-full caption-top text-sm'>
-          {notice && <caption className='p-2 text-start text-muted-foreground'>{notice}</caption>}
+          {notice && (
+            <caption className='p-2 text-start text-muted-foreground'>
+              {notice}
+            </caption>
+          )}
           <thead>
             <tr>
               {header.map((cell, i) => (
                 <th
                   key={i}
                   scope='col'
-                  className='sticky top-0 whitespace-nowrap border-b bg-(--table-header) px-3 py-2 text-start font-medium'
+                  className='sticky top-0 border-b bg-(--table-header) px-3 py-2 text-start font-medium whitespace-nowrap'
                 >
                   {cell}
                 </th>
@@ -159,7 +202,10 @@ function SheetTable({ sheet }: { sheet: Sheet }) {
             {body.map((row, r) => (
               <tr key={r} className='border-b last:border-0'>
                 {row.map((cell, c) => (
-                  <td key={c} className='whitespace-nowrap px-3 py-2 tabular-nums'>
+                  <td
+                    key={c}
+                    className='px-3 py-2 whitespace-nowrap tabular-nums'
+                  >
                     {cell}
                   </td>
                 ))}
@@ -168,7 +214,9 @@ function SheetTable({ sheet }: { sheet: Sheet }) {
           </tbody>
         </table>
       </div>
-      {rest.length === 0 && <p className='text-muted-foreground'>This sheet has no rows.</p>}
+      {rest.length === 0 && (
+        <p className='text-muted-foreground'>This sheet has no rows.</p>
+      )}
       {rest.length > MAX_ROWS && (
         <p className='text-sm'>
           Showing {MAX_ROWS} of {rest.length} rows. Download for the full sheet.

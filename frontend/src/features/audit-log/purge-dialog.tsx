@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
+import { auditEvents } from '@/data/grc'
 import { toast } from 'sonner'
-import { ConfirmDialog } from '@/components/confirm-dialog'
+import { setMe } from '@/lib/session'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
-import { auditEvents } from '@/data/grc'
-import { setMe } from '@/lib/session'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { toCsv } from './csv'
 
 type Preview = { before: string; count: number; oldest: string | null }
@@ -16,7 +16,11 @@ type PurgeDialogProps = {
   onPurged: () => void
 }
 
-export function PurgeDialog({ open, onOpenChange, onPurged }: PurgeDialogProps) {
+export function PurgeDialog({
+  open,
+  onOpenChange,
+  onPurged,
+}: PurgeDialogProps) {
   const [before, setBefore] = useState('')
   const [preview, setPreview] = useState<Preview | null>(null)
   const [previewError, setPreviewError] = useState<string | null>(null)
@@ -31,9 +35,12 @@ export function PurgeDialog({ open, onOpenChange, onPurged }: PurgeDialogProps) 
     let stale = false
     ;(async () => {
       try {
-        const res = await fetch(`/api/audit/purge-preview?before=${encodeURIComponent(before)}`, {
-          credentials: 'same-origin',
-        })
+        const res = await fetch(
+          `/api/audit/purge-preview?before=${encodeURIComponent(before)}`,
+          {
+            credentials: 'same-origin',
+          }
+        )
         if (stale) return
         if (res.status === 401) {
           toast.error('Session expired')
@@ -62,10 +69,14 @@ export function PurgeDialog({ open, onOpenChange, onPurged }: PurgeDialogProps) 
   }, [before])
 
   const cutoff = preview ? Date.parse(preview.before) : NaN
-  const rows = auditEvents.filter((e) => e.action !== 'purge' && Date.parse(e.at) < cutoff)
+  const rows = auditEvents.filter(
+    (e) => e.action !== 'purge' && Date.parse(e.at) < cutoff
+  )
 
   function download() {
-    const url = URL.createObjectURL(new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }))
+    const url = URL.createObjectURL(
+      new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' })
+    )
     const a = document.createElement('a')
     a.href = url
     a.download = `audit-before-${before}.csv`
@@ -76,7 +87,8 @@ export function PurgeDialog({ open, onOpenChange, onPurged }: PurgeDialogProps) 
   }
 
   const phrase = `PURGE AUDIT BEFORE ${before}`
-  const canDelete = !!preview && preview.count > 0 && typed === phrase && !pending
+  const canDelete =
+    !!preview && preview.count > 0 && typed === phrase && !pending
 
   const close = (o: boolean) => {
     if (!o) {
@@ -99,7 +111,9 @@ export function PurgeDialog({ open, onOpenChange, onPurged }: PurgeDialogProps) 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ before, confirm: phrase }),
       })
-      const json: { deleted?: number; error?: string } = await res.json().catch(() => ({}))
+      const json: { deleted?: number; error?: string } = await res
+        .json()
+        .catch(() => ({}))
       if (res.status === 200) {
         const n = typeof json.deleted === 'number' ? json.deleted : 0
         toast.success(`Deleted ${n} entries`)
@@ -127,20 +141,20 @@ export function PurgeDialog({ open, onOpenChange, onPurged }: PurgeDialogProps) 
     <ConfirmDialog
       open={open}
       onOpenChange={close}
-      title="Purge old entries"
-      desc="Permanently delete audit entries older than a date. Purge records are kept."
+      title='Purge old entries'
+      desc='Permanently delete audit entries older than a date. Purge records are kept.'
       destructive
-      confirmText="Delete"
+      confirmText='Delete'
       isLoading={pending}
       disabled={!canDelete}
       handleConfirm={handleDelete}
     >
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="purge-before">Delete entries older than</Label>
+      <div className='flex flex-col gap-4'>
+        <div className='flex flex-col gap-1.5'>
+          <Label htmlFor='purge-before'>Delete entries older than</Label>
           <Input
-            id="purge-before"
-            type="date"
+            id='purge-before'
+            type='date'
             max={today}
             value={before}
             onChange={(e) => {
@@ -155,7 +169,7 @@ export function PurgeDialog({ open, onOpenChange, onPurged }: PurgeDialogProps) 
           />
         </div>
 
-        <p aria-live="polite" className="text-sm text-muted-foreground">
+        <p aria-live='polite' className='text-sm text-muted-foreground'>
           {loading
             ? 'Loading preview…'
             : previewError
@@ -165,20 +179,25 @@ export function PurgeDialog({ open, onOpenChange, onPurged }: PurgeDialogProps) 
                 : null}
         </p>
 
-        <Button type="button" variant="outline" disabled={!before || rows.length === 0} onClick={download}>
+        <Button
+          type='button'
+          variant='outline'
+          disabled={!before || rows.length === 0}
+          onClick={download}
+        >
           Download CSV ({rows.length} entries)
         </Button>
 
         {before && (
           <>
-            <p className="text-sm">
+            <p className='text-sm'>
               Type <code>{phrase}</code> to confirm.
             </p>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="purge-confirm">Confirmation phrase</Label>
+            <div className='flex flex-col gap-1.5'>
+              <Label htmlFor='purge-confirm'>Confirmation phrase</Label>
               <Input
-                id="purge-confirm"
-                autoComplete="off"
+                id='purge-confirm'
+                autoComplete='off'
                 value={typed}
                 onChange={(e) => setTyped(e.target.value)}
                 disabled={!before}

@@ -464,9 +464,9 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                     </header>
                     <div className='lg-notice'>
                       <p>
-                        Anda mengakses sistem terbatas milik Arasaka Corporation.
-                        Penggunaan hanya untuk pengguna berwenang dan keperluan
-                        resmi.
+                        Anda mengakses sistem terbatas milik Arasaka
+                        Corporation. Penggunaan hanya untuk pengguna berwenang
+                        dan keperluan resmi.
                       </p>
                       <p>
                         Semua aktivitas dipantau dan dicatat, termasuk setiap
@@ -708,7 +708,8 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                       <div className='lg-eyebrow'>Tahap 4 dari 5</div>
                       <h2>Memeriksa perangkat ini</h2>
                       <p>
-                        Sistem memeriksa jaringan, kode autentikator, layanan kripto, dan jam perangkat ini sebelum sesi dibuka.
+                        Sistem memeriksa jaringan, kode autentikator, layanan
+                        kripto, dan jam perangkat ini sebelum sesi dibuka.
                       </p>
                     </header>
                     {deviceError && (

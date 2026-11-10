@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ConfirmDialog } from '@/components/confirm-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 
 type Grant = {
   username: string
@@ -32,9 +32,15 @@ type Grant = {
   active: boolean
 }
 
-type GrantUser = { username: string; rankName: string; golongan: string; accessLevel: number }
+type GrantUser = {
+  username: string
+  rankName: string
+  golongan: string
+  accessLevel: number
+}
 
-const errorMessage = (error: unknown) => (error instanceof Error ? error.message : 'Request failed')
+const errorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : 'Request failed'
 
 async function request(url: string, init: RequestInit = {}): Promise<Response> {
   const res = await fetch(url, {
@@ -44,7 +50,9 @@ async function request(url: string, init: RequestInit = {}): Promise<Response> {
   })
   if (!res.ok) {
     const json: { error?: string } = await res.json().catch(() => ({}))
-    throw new Error(res.status === 403 ? 'Not allowed' : (json.error ?? `HTTP ${res.status}`))
+    throw new Error(
+      res.status === 403 ? 'Not allowed' : (json.error ?? `HTTP ${res.status}`)
+    )
   }
   return res
 }
@@ -52,7 +60,8 @@ async function request(url: string, init: RequestInit = {}): Promise<Response> {
 const grantsUrl = (documentId: string) =>
   `/api/documents/${encodeURIComponent(documentId)}/grants`
 
-const getJson = async <T,>(url: string): Promise<T> => (await request(url)).json() as Promise<T>
+const getJson = async <T,>(url: string): Promise<T> =>
+  (await request(url)).json() as Promise<T>
 
 export function AccessGrants({ documentId }: { documentId: string }) {
   const queryClient = useQueryClient()
@@ -94,7 +103,9 @@ export function AccessGrants({ documentId }: { documentId: string }) {
     mutationFn: () =>
       request(grantsUrl(documentId), {
         method: 'POST',
-        body: JSON.stringify(expiresAt ? { username, expiresAt } : { username }),
+        body: JSON.stringify(
+          expiresAt ? { username, expiresAt } : { username }
+        ),
       }),
     onSuccess: () => {
       toast.success(`Grant added for ${username}`)
@@ -107,7 +118,9 @@ export function AccessGrants({ documentId }: { documentId: string }) {
 
   const revoke = useMutation({
     mutationFn: (target: string) =>
-      request(`${grantsUrl(documentId)}/${encodeURIComponent(target)}`, { method: 'DELETE' }),
+      request(`${grantsUrl(documentId)}/${encodeURIComponent(target)}`, {
+        method: 'DELETE',
+      }),
     onSuccess: () => {
       toast.success('Grant revoked')
       setRevokeTarget(null)
@@ -142,11 +155,19 @@ export function AccessGrants({ documentId }: { documentId: string }) {
                 <TableRow key={grant.username}>
                   <TableCell className='font-mono'>{grant.username}</TableCell>
                   <TableCell>{grant.rankName}</TableCell>
-                  <TableCell className='font-mono tabular-nums'>{grant.accessLevel}</TableCell>
                   <TableCell className='font-mono tabular-nums'>
-                    {grant.expiresAt ? grant.expiresAt.slice(0, 10) : 'No expiry'}
+                    {grant.accessLevel}
                   </TableCell>
-                  <TableCell>{!grant.active && <Badge variant='destructive'>Expired</Badge>}</TableCell>
+                  <TableCell className='font-mono tabular-nums'>
+                    {grant.expiresAt
+                      ? grant.expiresAt.slice(0, 10)
+                      : 'No expiry'}
+                  </TableCell>
+                  <TableCell>
+                    {!grant.active && (
+                      <Badge variant='destructive'>Expired</Badge>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <Button
                       variant='outline'
@@ -175,9 +196,15 @@ export function AccessGrants({ documentId }: { documentId: string }) {
       >
         <div className='flex min-w-0 flex-col gap-1.5 sm:min-w-56 sm:flex-1'>
           <Label htmlFor='grant-user'>User</Label>
-          <Select value={username} onValueChange={setUsername} disabled={users.isPending}>
+          <Select
+            value={username}
+            onValueChange={setUsername}
+            disabled={users.isPending}
+          >
             <SelectTrigger id='grant-user' className='w-full'>
-              <SelectValue placeholder={users.isPending ? 'Loading users…' : 'Select user'} />
+              <SelectValue
+                placeholder={users.isPending ? 'Loading users…' : 'Select user'}
+              />
             </SelectTrigger>
             <SelectContent>
               {(users.data ?? []).map((user) => (

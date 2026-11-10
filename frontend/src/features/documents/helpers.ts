@@ -1,12 +1,22 @@
 import { TODAY, type Document, type Tlp } from '@/data/grc'
 
-export const TLP_LEVELS: Tlp[] = ['CLEAR', 'GREEN', 'AMBER', 'AMBER+STRICT', 'RED', 'RED+STRICT']
+export const TLP_LEVELS: Tlp[] = [
+  'CLEAR',
+  'GREEN',
+  'AMBER',
+  'AMBER+STRICT',
+  'RED',
+  'RED+STRICT',
+]
 
 export const TLP_NOTES: Record<Tlp, string> = {
   RED: 'Terbatas untuk penerima yang dituju. Jangan meneruskan di luar kewenangan penerima.',
-  'RED+STRICT': 'Terbatas untuk penerima yang dituju saja. Dilarang meneruskan kepada pihak mana pun.',
-  AMBER: 'Bagikan hanya kepada pihak yang memerlukan informasi sesuai kebijakan organisasi.',
-  'AMBER+STRICT': 'Bagikan hanya kepada pihak yang memerlukan informasi di dalam organisasi.',
+  'RED+STRICT':
+    'Terbatas untuk penerima yang dituju saja. Dilarang meneruskan kepada pihak mana pun.',
+  AMBER:
+    'Bagikan hanya kepada pihak yang memerlukan informasi sesuai kebijakan organisasi.',
+  'AMBER+STRICT':
+    'Bagikan hanya kepada pihak yang memerlukan informasi di dalam organisasi.',
   GREEN: 'Dapat dibagikan di lingkungan komunitas penerima sesuai kebijakan.',
   CLEAR: 'Tidak ada pembatasan tambahan dari label TLP ini.',
 }

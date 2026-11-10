@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { ArrowRight, ChevronRight, Laptop, Moon, Sun } from 'lucide-react'
+import { getMe } from '@/lib/session'
 import { useSearch } from '@/context/search-provider'
 import { useTheme } from '@/context/theme-provider'
 import {
@@ -12,7 +13,6 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command'
-import { getMe } from '@/lib/session'
 import { navGroupsFor } from './layout/data/sidebar-data'
 import { ScrollArea } from './ui/scroll-area'
 

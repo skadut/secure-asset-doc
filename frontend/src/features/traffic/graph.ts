@@ -7,11 +7,24 @@ export type EdgeStat = {
   errorRate: number // fraction: 0.012 = 1.2%
   avgMs: number
 }
-export type CryptoCall = { at: number; path: string; status: number | 'timeout' | 'error'; ms: number; probe?: boolean }
-export type TrafficResponse = { ts: number; edges: EdgeStat[]; down: string[]; cryptoCalls: CryptoCall[] }
+export type CryptoCall = {
+  at: number
+  path: string
+  status: number | 'timeout' | 'error'
+  ms: number
+  probe?: boolean
+}
+export type TrafficResponse = {
+  ts: number
+  edges: EdgeStat[]
+  down: string[]
+  cryptoCalls: CryptoCall[]
+}
 export type HistoryPoint = { ts: number; edges: EdgeStat[] }
 export type Level = 'idle' | 'good' | 'warning' | 'danger'
-export type Selection = { kind: 'edge'; source: string; target: string } | { kind: 'node'; id: string }
+export type Selection =
+  | { kind: 'edge'; source: string; target: string }
+  | { kind: 'node'; id: string }
 
 export type GraphNode = { id: string; label: string; x: number; y: number }
 
@@ -71,7 +84,9 @@ export function seriesFor(history: HistoryPoint[], sel: Selection) {
   return history.map((h) => {
     const list =
       sel.kind === 'edge'
-        ? h.edges.filter((e) => e.source === sel.source && e.target === sel.target)
+        ? h.edges.filter(
+            (e) => e.source === sel.source && e.target === sel.target
+          )
         : h.edges.filter((e) => e.target === sel.id) // node = inbound traffic
     const rps = list.reduce((s, e) => s + e.rps, 0)
     const fails = list.reduce((s, e) => s + e.rps * e.errorRate, 0)
@@ -97,7 +112,8 @@ export function edgePath(a: GraphNode, b: GraphNode, bend = 0) {
   return `${start} Q ${cx.toFixed(1)} ${cy.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`
 }
 
-const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
+const isNum = (v: unknown): v is number =>
+  typeof v === 'number' && Number.isFinite(v)
 
 function isEdge(x: unknown): x is EdgeStat {
   if (!x || typeof x !== 'object') return false
@@ -135,8 +151,12 @@ export function parseTraffic(raw: unknown): TrafficResponse | null {
   const r = raw as Record<string, unknown>
   if (!Array.isArray(r.edges)) return null
   const edges = r.edges.filter(isEdge)
-  const down = Array.isArray(r.down) ? r.down.filter((d): d is string => typeof d === 'string') : []
+  const down = Array.isArray(r.down)
+    ? r.down.filter((d): d is string => typeof d === 'string')
+    : []
   const ts = isNum(r.ts) ? r.ts : Math.floor(Date.now() / 1000)
-  const cryptoCalls = Array.isArray(r.cryptoCalls) ? r.cryptoCalls.filter(isCall) : []
+  const cryptoCalls = Array.isArray(r.cryptoCalls)
+    ? r.cryptoCalls.filter(isCall)
+    : []
   return { ts, edges, down, cryptoCalls }
 }

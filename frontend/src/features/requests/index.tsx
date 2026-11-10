@@ -1,12 +1,12 @@
-import { AccessSection } from './access-section'
-import { LevelSection } from './level-section'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AccessSection } from './access-section'
+import { LevelSection } from './level-section'
 
 export function Requests() {
   return (
@@ -22,7 +22,8 @@ export function Requests() {
         <div>
           <h1 className='page-title tracking-tight'>Otorisasi ganda</h1>
           <p className='text-muted-foreground'>
-            Penambahan akses dan perubahan level memerlukan persetujuan dua pihak.
+            Penambahan akses dan perubahan level memerlukan persetujuan dua
+            pihak.
           </p>
         </div>
 

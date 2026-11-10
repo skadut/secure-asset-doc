@@ -12,7 +12,9 @@ export type VersionPair<T extends VersionRecord> =
   | { kind: 'pair'; current: T; previous: T }
 
 // versions: newest first (src/data/grc.ts, Document.versions contract)
-export function versionPair<T extends VersionRecord>(versions: readonly T[]): VersionPair<T> {
+export function versionPair<T extends VersionRecord>(
+  versions: readonly T[]
+): VersionPair<T> {
   const [current, previous] = versions
   if (!current) return { kind: 'none' }
   if (!previous) return { kind: 'single', current }

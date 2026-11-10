@@ -1,5 +1,11 @@
 import { useCallback } from 'react'
-import { bytesToBase64, checkUploadFile, errorMessageForStatus, resolveUploadMime, UNSUPPORTED_TYPE_MESSAGE } from './uploads-helpers'
+import {
+  bytesToBase64,
+  checkUploadFile,
+  errorMessageForStatus,
+  resolveUploadMime,
+  UNSUPPORTED_TYPE_MESSAGE,
+} from './uploads-helpers'
 
 type UploadResult = { ok: true } | { ok: false; message: string }
 
@@ -11,7 +17,8 @@ export function useUploads() {
   const upload = useCallback(async (file: File): Promise<UploadResult> => {
     const mime = resolveUploadMime(file)
     const invalid = checkUploadFile(file, mime)
-    if (invalid || mime === null) return { ok: false, message: invalid ?? UNSUPPORTED_TYPE_MESSAGE }
+    if (invalid || mime === null)
+      return { ok: false, message: invalid ?? UNSUPPORTED_TYPE_MESSAGE }
     const ctrl = new AbortController()
     let timedOut = false
     const timer = setTimeout(() => {
@@ -27,7 +34,8 @@ export function useUploads() {
         body: JSON.stringify({ name: file.name, mime, data }),
         signal: ctrl.signal,
       })
-      if (!res.ok) return { ok: false, message: errorMessageForStatus(res.status) }
+      if (!res.ok)
+        return { ok: false, message: errorMessageForStatus(res.status) }
       return { ok: true }
     } catch {
       return { ok: false, message: timedOut ? TIMEOUT_ERROR : NETWORK_ERROR }

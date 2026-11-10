@@ -103,10 +103,16 @@ export function DataTableFacetedFilter<TData, TValue>({
                       )
                     }}
                   >
-                    <span className='ui-facet-check' data-checked={isSelected} aria-hidden='true'>
+                    <span
+                      className='ui-facet-check'
+                      data-checked={isSelected}
+                      aria-hidden='true'
+                    >
                       <CheckIcon className='h-3.5 w-3.5' />
                     </span>
-                    <span className='sr-only'>{isSelected ? 'Selected' : 'Not selected'}</span>
+                    <span className='sr-only'>
+                      {isSelected ? 'Selected' : 'Not selected'}
+                    </span>
                     {option.icon && (
                       <option.icon className='size-4 text-muted-foreground' />
                     )}

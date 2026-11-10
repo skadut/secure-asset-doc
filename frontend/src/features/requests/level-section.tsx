@@ -1,7 +1,18 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ConfirmDialog } from '@/components/confirm-dialog'
+import {
+  ApiError,
+  createLevelRequest,
+  decideLevelRequest,
+  fips199For,
+  listLevelRequests,
+  listUsers,
+  type Fips199,
+  type LevelChangeInput,
+  type LevelRequest,
+} from '@/lib/access-api'
+import { getMe, type Me } from '@/lib/session'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -17,18 +28,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  ApiError,
-  createLevelRequest,
-  decideLevelRequest,
-  fips199For,
-  listLevelRequests,
-  listUsers,
-  type Fips199,
-  type LevelChangeInput,
-  type LevelRequest,
-} from '@/lib/access-api'
-import { getMe, type Me } from '@/lib/session'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 
 type Decision = 'approve' | 'deny'
 
@@ -43,9 +43,11 @@ const FIPS: Fips199[] = ['LOW', 'MODERATE', 'HIGH']
 
 const len = (s: string) => [...s.trim()].length
 const yesNo = (v: boolean) => (v ? 'Ya' : 'Tidak')
-const errMsg = (e: unknown) => (e instanceof ApiError ? e.message : 'Permintaan gagal diproses')
+const errMsg = (e: unknown) =>
+  e instanceof ApiError ? e.message : 'Permintaan gagal diproses'
 const pad = (n: number) => String(n).padStart(2, '0')
-const isoDay = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+const isoDay = (d: Date) =>
+  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 const fmtTime = (iso: string) => new Date(iso).toLocaleString('id-ID')
 
 function addDays(iso: string, n: number) {
@@ -85,9 +87,14 @@ function RequestItem({ r, me }: { r: LevelRequest; me: Me }) {
 
   const decide = useMutation({
     mutationFn: (decision: Decision) =>
-      decideLevelRequest(r.id, { decision, reason: reason.trim() || undefined }),
+      decideLevelRequest(r.id, {
+        decision,
+        reason: reason.trim() || undefined,
+      }),
     onSuccess: (res) => {
-      toast.success(res.applied ? 'Perubahan level disetujui' : 'Permintaan ditolak')
+      toast.success(
+        res.applied ? 'Perubahan level disetujui' : 'Permintaan ditolak'
+      )
       setDec(null)
       setReason('')
       void qc.invalidateQueries({ queryKey: ['level-requests'] })
@@ -112,10 +119,16 @@ function RequestItem({ r, me }: { r: LevelRequest; me: Me }) {
       <dl className='grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm'>
         <Field label='Perubahan level'>{`${r.currentLevel} → ${r.newLevel}`}</Field>
         <Field label='Justifikasi'>{r.justification}</Field>
-        <Field label='Screening diverifikasi (PS-3)'>{yesNo(r.screeningVerified)}</Field>
+        <Field label='Screening diverifikasi (PS-3)'>
+          {yesNo(r.screeningVerified)}
+        </Field>
         <Field label='Referensi screening'>{r.screeningRef ?? '—'}</Field>
-        <Field label='Perjanjian akses ditandatangani (PS-6)'>{yesNo(r.accessAgreementSigned)}</Field>
-        <Field label='Tanggal perjanjian akses'>{r.accessAgreementDate ?? '—'}</Field>
+        <Field label='Perjanjian akses ditandatangani (PS-6)'>
+          {yesNo(r.accessAgreementSigned)}
+        </Field>
+        <Field label='Tanggal perjanjian akses'>
+          {r.accessAgreementDate ?? '—'}
+        </Field>
         <Field label='Tinjau ulang sebelum (AC-2)'>{r.reviewDue ?? '—'}</Field>
         <Field label='Basis FIPS 199'>{r.fips199Basis ?? '—'}</Field>
         <Field label='Diajukan oleh'>{r.requestedBy}</Field>
@@ -123,7 +136,9 @@ function RequestItem({ r, me }: { r: LevelRequest; me: Me }) {
         {!pending && (
           <>
             <Field label='Diputuskan oleh'>{r.decidedBy ?? '—'}</Field>
-            <Field label='Waktu keputusan'>{r.decidedAt ? fmtTime(r.decidedAt) : '—'}</Field>
+            <Field label='Waktu keputusan'>
+              {r.decidedAt ? fmtTime(r.decidedAt) : '—'}
+            </Field>
             <Field label='Alasan keputusan'>{r.decisionReason ?? '—'}</Field>
           </>
         )}
@@ -171,7 +186,11 @@ function RequestItem({ r, me }: { r: LevelRequest; me: Me }) {
             onOpenChange={(o) => {
               if (!o) setDec(null)
             }}
-            title={dec === 'approve' ? 'Setujui perubahan level?' : 'Tolak permintaan ini?'}
+            title={
+              dec === 'approve'
+                ? 'Setujui perubahan level?'
+                : 'Tolak permintaan ini?'
+            }
             desc={
               dec === 'approve'
                 ? `Level ${r.targetUser} akan diubah menjadi ${r.newLevel}.`
@@ -193,7 +212,11 @@ function RequestItem({ r, me }: { r: LevelRequest; me: Me }) {
 
 function CreateForm({ me }: { me: Me }) {
   const qc = useQueryClient()
-  const users = useQuery({ queryKey: ['access-users'], queryFn: listUsers, retry: false })
+  const users = useQuery({
+    queryKey: ['access-users'],
+    queryFn: listUsers,
+    retry: false,
+  })
 
   const [target, setTarget] = useState('')
   const [newLevel, setNewLevel] = useState('')
@@ -257,21 +280,29 @@ function CreateForm({ me }: { me: Me }) {
     if (newLevel === '') e.newLevel = 'Pilih level baru'
     else if (isSame) e.newLevel = 'Level baru harus berbeda dari level sekarang'
     const j = len(justification)
-    if (j < 1 || j > 500) e.justification = 'Justifikasi wajib diisi, maksimal 500 karakter'
+    if (j < 1 || j > 500)
+      e.justification = 'Justifikasi wajib diisi, maksimal 500 karakter'
     if (isRaise) {
-      if (!screeningVerified) e.screeningVerified = 'Centang jika screening sudah diverifikasi (PS-3)'
+      if (!screeningVerified)
+        e.screeningVerified = 'Centang jika screening sudah diverifikasi (PS-3)'
       const refLen = len(screeningRef)
       if (refLen < 1 || refLen > 120) {
-        e.screeningRef = 'Referensi screening wajib diisi, maksimal 120 karakter (PS-3)'
+        e.screeningRef =
+          'Referensi screening wajib diisi, maksimal 120 karakter (PS-3)'
       }
-      if (!agreementSigned) e.agreementSigned = 'Centang jika perjanjian akses sudah ditandatangani (PS-6)'
+      if (!agreementSigned)
+        e.agreementSigned =
+          'Centang jika perjanjian akses sudah ditandatangani (PS-6)'
       if (!agreementDate || agreementDate > t) {
-        e.agreementDate = 'Tanggal perjanjian akses wajib diisi dan tidak boleh setelah hari ini (PS-6)'
+        e.agreementDate =
+          'Tanggal perjanjian akses wajib diisi dan tidak boleh setelah hari ini (PS-6)'
       }
       if (!reviewDue) e.reviewDue = 'Isi tanggal tinjau ulang (AC-2)'
-      else if (reviewDue < minReview) e.reviewDue = 'Tanggal tinjau ulang harus setelah hari ini (AC-2)'
+      else if (reviewDue < minReview)
+        e.reviewDue = 'Tanggal tinjau ulang harus setelah hari ini (AC-2)'
       else if (reviewDue > maxReview) {
-        e.reviewDue = 'Tanggal tinjau ulang maksimal 12 bulan dari hari ini (AC-2)'
+        e.reviewDue =
+          'Tanggal tinjau ulang maksimal 12 bulan dari hari ini (AC-2)'
       }
       if (!fips) e.fips = 'Pilih basis FIPS 199'
     }
@@ -344,7 +375,10 @@ function CreateForm({ me }: { me: Me }) {
           </div>
 
           <p className='text-sm text-muted-foreground'>
-            Level sekarang: <span className='font-medium text-foreground'>{current ?? '—'}</span>
+            Level sekarang:{' '}
+            <span className='font-medium text-foreground'>
+              {current ?? '—'}
+            </span>
           </p>
 
           <div className='flex flex-col gap-2'>
@@ -372,7 +406,9 @@ function CreateForm({ me }: { me: Me }) {
                 ))}
               </SelectContent>
             </Select>
-            <p className='text-sm text-muted-foreground'>Berikan level minimum yang dibutuhkan (AC-6).</p>
+            <p className='text-sm text-muted-foreground'>
+              Berikan level minimum yang dibutuhkan (AC-6).
+            </p>
             {err('newLevel')}
           </div>
 
@@ -385,7 +421,9 @@ function CreateForm({ me }: { me: Me }) {
           <div className='flex flex-col gap-2'>
             <div className='flex items-center justify-between gap-2'>
               <Label htmlFor='lvl-justification'>Justifikasi</Label>
-              <span className='text-xs text-muted-foreground'>{len(justification)}/500</span>
+              <span className='text-xs text-muted-foreground'>
+                {len(justification)}/500
+              </span>
             </div>
             <Textarea
               id='lvl-justification'
@@ -399,7 +437,9 @@ function CreateForm({ me }: { me: Me }) {
 
           {isRaise && (
             <fieldset className='flex flex-col gap-4 rounded-md border p-4'>
-              <legend className='px-1 text-sm font-medium'>Syarat kenaikan level</legend>
+              <legend className='px-1 text-sm font-medium'>
+                Syarat kenaikan level
+              </legend>
 
               <div className='flex flex-col gap-2'>
                 <div className='flex items-center gap-3'>
@@ -410,13 +450,17 @@ function CreateForm({ me }: { me: Me }) {
                     aria-invalid={invalid('screeningVerified')}
                     aria-describedby={describe('screeningVerified')}
                   />
-                  <Label htmlFor='lvl-screening'>Screening sudah diverifikasi (PS-3)</Label>
+                  <Label htmlFor='lvl-screening'>
+                    Screening sudah diverifikasi (PS-3)
+                  </Label>
                 </div>
                 {err('screeningVerified')}
               </div>
 
               <div className='flex flex-col gap-2'>
-                <Label htmlFor='lvl-screening-ref'>Referensi screening (PS-3)</Label>
+                <Label htmlFor='lvl-screening-ref'>
+                  Referensi screening (PS-3)
+                </Label>
                 <Input
                   id='lvl-screening-ref'
                   className='h-11'
@@ -437,13 +481,17 @@ function CreateForm({ me }: { me: Me }) {
                     aria-invalid={invalid('agreementSigned')}
                     aria-describedby={describe('agreementSigned')}
                   />
-                  <Label htmlFor='lvl-agreement'>Perjanjian akses sudah ditandatangani (PS-6)</Label>
+                  <Label htmlFor='lvl-agreement'>
+                    Perjanjian akses sudah ditandatangani (PS-6)
+                  </Label>
                 </div>
                 {err('agreementSigned')}
               </div>
 
               <div className='flex flex-col gap-2'>
-                <Label htmlFor='lvl-agreement-date'>Tanggal perjanjian akses (PS-6)</Label>
+                <Label htmlFor='lvl-agreement-date'>
+                  Tanggal perjanjian akses (PS-6)
+                </Label>
                 <Input
                   id='lvl-agreement-date'
                   type='date'
@@ -458,7 +506,9 @@ function CreateForm({ me }: { me: Me }) {
               </div>
 
               <div className='flex flex-col gap-2'>
-                <Label htmlFor='lvl-review-due'>Tinjau ulang sebelum (AC-2)</Label>
+                <Label htmlFor='lvl-review-due'>
+                  Tinjau ulang sebelum (AC-2)
+                </Label>
                 <Input
                   id='lvl-review-due'
                   type='date'
@@ -478,7 +528,10 @@ function CreateForm({ me }: { me: Me }) {
 
               <div className='flex flex-col gap-2'>
                 <Label htmlFor='lvl-fips'>Basis FIPS 199</Label>
-                <Select value={fips} onValueChange={(v) => setFips(v as Fips199)}>
+                <Select
+                  value={fips}
+                  onValueChange={(v) => setFips(v as Fips199)}
+                >
                   <SelectTrigger
                     id='lvl-fips'
                     className='h-11 w-full'
@@ -515,7 +568,12 @@ function CreateForm({ me }: { me: Me }) {
             cancelBtnText='Batal'
             destructive
             isLoading={submit.isPending}
-            handleConfirm={() => submit.mutate({ newLevel: level, justification: justification.trim() })}
+            handleConfirm={() =>
+              submit.mutate({
+                newLevel: level,
+                justification: justification.trim(),
+              })
+            }
           />
         </form>
       </CardContent>

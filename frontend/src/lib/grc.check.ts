@@ -30,12 +30,16 @@ for (const link of assetDocLinks) {
 }
 for (const link of evidenceLinks) {
   assert.ok(subIds.has(link.subcategoryId), `subcategory ${link.subcategoryId}`)
-  if (link.assetId) assert.ok(assetIds.has(link.assetId), `evidence asset ${link.assetId}`)
-  if (link.documentId) assert.ok(docIds.has(link.documentId), `evidence doc ${link.documentId}`)
+  if (link.assetId)
+    assert.ok(assetIds.has(link.assetId), `evidence asset ${link.assetId}`)
+  if (link.documentId)
+    assert.ok(docIds.has(link.documentId), `evidence doc ${link.documentId}`)
 }
 for (const event of auditEvents) {
-  if (event.objectType === 'asset') assert.ok(getAsset(event.objectId), `audit asset ${event.objectId}`)
-  if (event.objectType === 'document') assert.ok(getDocument(event.objectId), `audit doc ${event.objectId}`)
+  if (event.objectType === 'asset')
+    assert.ok(getAsset(event.objectId), `audit asset ${event.objectId}`)
+  if (event.objectType === 'document')
+    assert.ok(getDocument(event.objectId), `audit doc ${event.objectId}`)
   if (event.objectType === 'evidence') {
     assert.ok(subIds.has(event.objectId), `audit evidence ${event.objectId}`)
   }
@@ -46,7 +50,10 @@ for (const doc of documents) {
 
 const seen = new Set(csfSubcategories.map((s) => coverage(s.id)))
 for (const value of ['covered', 'partial', 'gap']) {
-  assert.ok(seen.has(value as 'covered' | 'partial' | 'gap'), `coverage never returns ${value}`)
+  assert.ok(
+    seen.has(value as 'covered' | 'partial' | 'gap'),
+    `coverage never returns ${value}`
+  )
 }
 
 process.stdout.write(

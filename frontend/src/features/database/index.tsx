@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { TriangleAlert } from 'lucide-react'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
@@ -18,15 +18,28 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { ConfigDrawer } from '@/components/config-drawer'
+import { Header } from '@/components/layout/header'
+import { Main } from '@/components/layout/main'
+import { ProfileDropdown } from '@/components/profile-dropdown'
+import { Search } from '@/components/search'
+import { ThemeSwitch } from '@/components/theme-switch'
 import { DbError, useDbTable, useDbTables } from './use-database'
 
 const LIMIT = 50
 const touchClass = 'min-h-11 min-w-11'
 
 // Non-null values as text. Objects go through JSON.stringify.
-const cellText = (v: unknown) => (typeof v === 'object' ? JSON.stringify(v) : String(v))
+const cellText = (v: unknown) =>
+  typeof v === 'object' ? JSON.stringify(v) : String(v)
 
-function ErrorAlert({ error, onRetry }: { error: unknown; onRetry: () => void }) {
+function ErrorAlert({
+  error,
+  onRetry,
+}: {
+  error: unknown
+  onRetry: () => void
+}) {
   if (error instanceof DbError && error.status === 403) {
     return (
       <Alert variant='destructive' role='alert'>
@@ -84,7 +97,10 @@ export function DatabaseView() {
 
         {tables.isPending && <Skeleton className='h-[400px] w-full' />}
         {tables.isError && (
-          <ErrorAlert error={tables.error} onRetry={() => void tables.refetch()} />
+          <ErrorAlert
+            error={tables.error}
+            onRetry={() => void tables.refetch()}
+          />
         )}
 
         {tables.data && list.length === 0 && (
@@ -96,7 +112,10 @@ export function DatabaseView() {
             <div className='flex flex-col gap-2'>
               <span className='text-sm font-medium'>Tabel</span>
               <Select value={name} onValueChange={choose}>
-                <SelectTrigger className='h-11 w-full sm:w-80' aria-label='Pilih tabel'>
+                <SelectTrigger
+                  className='h-11 w-full sm:w-80'
+                  aria-label='Pilih tabel'
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -110,11 +129,18 @@ export function DatabaseView() {
             </div>
 
             {detail.isError && (
-              <ErrorAlert error={detail.error} onRetry={() => void detail.refetch()} />
+              <ErrorAlert
+                error={detail.error}
+                onRetry={() => void detail.refetch()}
+              />
             )}
-            {detail.isPending && !detail.isError && <Skeleton className='h-64 w-full' />}
+            {detail.isPending && !detail.isError && (
+              <Skeleton className='h-64 w-full' />
+            )}
 
-            {data && total === 0 && <p className='text-muted-foreground'>Tidak ada baris</p>}
+            {data && total === 0 && (
+              <p className='text-muted-foreground'>Tidak ada baris</p>
+            )}
 
             {data && total > 0 && (
               <>
@@ -147,7 +173,10 @@ export function DatabaseView() {
                     <TableHeader>
                       <TableRow>
                         {data.columns.map((c) => (
-                          <TableHead key={c.name} className='px-1.5 whitespace-nowrap'>
+                          <TableHead
+                            key={c.name}
+                            className='px-1.5 whitespace-nowrap'
+                          >
                             <span className='font-mono'>{c.name}</span>
                             <span className='block text-xs font-normal text-muted-foreground'>
                               {c.type}
@@ -162,9 +191,14 @@ export function DatabaseView() {
                           {data.columns.map((c, j) => {
                             const v = row[j]
                             return (
-                              <TableCell key={c.name} className='px-1.5 font-mono'>
+                              <TableCell
+                                key={c.name}
+                                className='px-1.5 font-mono'
+                              >
                                 {v === null || v === undefined ? (
-                                  <span className='text-muted-foreground'>NULL</span>
+                                  <span className='text-muted-foreground'>
+                                    NULL
+                                  </span>
                                 ) : (
                                   cellText(v)
                                 )}

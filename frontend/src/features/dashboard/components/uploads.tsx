@@ -5,7 +5,8 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useUploads } from './use-uploads'
 
-const emptyClass = 'rounded-md border border-dashed p-4 text-sm text-muted-foreground'
+const emptyClass =
+  'rounded-md border border-dashed p-4 text-sm text-muted-foreground'
 
 export function UploadsSection() {
   const { upload } = useUploads()
@@ -40,7 +41,10 @@ export function UploadsSection() {
           }}
         >
           {uploading ? (
-            <LoaderCircle aria-hidden='true' className='size-4 animate-spin motion-reduce:animate-none' />
+            <LoaderCircle
+              aria-hidden='true'
+              className='size-4 animate-spin motion-reduce:animate-none'
+            />
           ) : (
             <Upload aria-hidden='true' className='size-4' />
           )}
@@ -49,7 +53,8 @@ export function UploadsSection() {
       </div>
 
       <p className='text-sm text-muted-foreground'>
-        Files are sent as base64, sealed by the crypto service (/sealfile), and stored only as ciphertext. Opening a file unseals it (/unsealfile).
+        Files are sent as base64, sealed by the crypto service (/sealfile), and
+        stored only as ciphertext. Opening a file unseals it (/unsealfile).
       </p>
 
       <input
@@ -78,7 +83,10 @@ export function UploadsSection() {
         Drop a file here or use Upload
       </div>
 
-      <p aria-live='polite' className={cn('min-h-5 text-sm', status && 'text-destructive')}>
+      <p
+        aria-live='polite'
+        className={cn('min-h-5 text-sm', status && 'text-destructive')}
+      >
         {uploading ? 'Encrypting and uploading…' : status}
       </p>
     </section>

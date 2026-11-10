@@ -4,8 +4,8 @@ import { type Table } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DataTableFacetedFilter } from './faceted-filter'
-import { DataTableViewOptions } from './view-options'
 import './search-field.css'
+import { DataTableViewOptions } from './view-options'
 
 type DataTableToolbarProps<TData> = {
   table: Table<TData>

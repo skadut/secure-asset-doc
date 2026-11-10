@@ -13,13 +13,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
+import { assets } from '@/data/grc'
+import { cn } from '@/lib/utils'
 import {
   Table,
   TableBody,
@@ -28,8 +23,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { cn } from '@/lib/utils'
-import { assets } from '@/data/grc'
+import { ConfigDrawer } from '@/components/config-drawer'
+import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
+import { Header } from '@/components/layout/header'
+import { Main } from '@/components/layout/main'
+import { ProfileDropdown } from '@/components/profile-dropdown'
+import { Search } from '@/components/search'
+import { ThemeSwitch } from '@/components/theme-switch'
 import { assetColumns, assetFilterOptions } from './columns'
 
 const SEARCH_LABEL = 'Search assets by name'
@@ -54,7 +54,13 @@ export function Assets() {
   const table = useReactTable({
     data: assets,
     columns: assetColumns,
-    state: { sorting, columnFilters, columnVisibility, globalFilter, pagination },
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      globalFilter,
+      pagination,
+    },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
@@ -85,7 +91,8 @@ export function Assets() {
         <div>
           <h1 className='page-title tracking-tight'>Assets</h1>
           <p className='text-muted-foreground'>
-            Asset inventory with sector, Purdue level, IEC 62443 zone, criticality and last review. Sample data.
+            Asset inventory with sector, Purdue level, IEC 62443 zone,
+            criticality and last review. Sample data.
           </p>
         </div>
 
@@ -101,11 +108,31 @@ export function Assets() {
               searchPlaceholder={SEARCH_PLACEHOLDER}
               searchLabel={SEARCH_LABEL}
               filters={[
-                { columnId: 'sector', title: 'Sector', options: assetFilterOptions.sector },
-                { columnId: 'type', title: 'Type', options: assetFilterOptions.type },
-                { columnId: 'criticality', title: 'Criticality', options: assetFilterOptions.criticality },
-                { columnId: 'purdueLevel', title: 'Purdue level', options: assetFilterOptions.purdueLevel },
-                { columnId: 'status', title: 'Status', options: assetFilterOptions.status },
+                {
+                  columnId: 'sector',
+                  title: 'Sector',
+                  options: assetFilterOptions.sector,
+                },
+                {
+                  columnId: 'type',
+                  title: 'Type',
+                  options: assetFilterOptions.type,
+                },
+                {
+                  columnId: 'criticality',
+                  title: 'Criticality',
+                  options: assetFilterOptions.criticality,
+                },
+                {
+                  columnId: 'purdueLevel',
+                  title: 'Purdue level',
+                  options: assetFilterOptions.purdueLevel,
+                },
+                {
+                  columnId: 'status',
+                  title: 'Status',
+                  options: assetFilterOptions.status,
+                },
               ]}
             />
           </div>
@@ -119,7 +146,10 @@ export function Assets() {
                       <TableHead key={header.id}>
                         {header.isPlaceholder
                           ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                       </TableHead>
                     ))}
                   </TableRow>
@@ -131,14 +161,20 @@ export function Assets() {
                     <TableRow key={row.id} className='h-14'>
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
                         </TableCell>
                       ))}
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={table.getVisibleLeafColumns().length} className='h-24 text-center'>
+                    <TableCell
+                      colSpan={table.getVisibleLeafColumns().length}
+                      className='h-24 text-center'
+                    >
                       No assets match the current filters.
                     </TableCell>
                   </TableRow>

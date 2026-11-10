@@ -1,10 +1,16 @@
 // FICTIONAL DEMO DATA. NOT A REAL DOCUMENT. Fictional org "Demo Defense Command", fictional bases and vendors.
 // Sample rows live in src/test-utils/grc-fixture.ts (test and seed only). App data hydrates from /api/grc.
 
-const _now = new Date();
-export const TODAY: string = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
+const _now = new Date()
+export const TODAY: string = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`
 
-export type Tlp = 'CLEAR' | 'GREEN' | 'AMBER' | 'AMBER+STRICT' | 'RED' | 'RED+STRICT' // FIRST TLP 2.0 (RED+STRICT is app-local, not in FIRST spec)
+export type Tlp =
+  | 'CLEAR'
+  | 'GREEN'
+  | 'AMBER'
+  | 'AMBER+STRICT'
+  | 'RED'
+  | 'RED+STRICT' // FIRST TLP 2.0 (RED+STRICT is app-local, not in FIRST spec)
 export type Criticality = 'high' | 'medium' | 'low'
 export type Sector = 'Energy' | 'Water' | 'Telecom'
 export type PurdueLevel = 'L0' | 'L1' | 'L2' | 'L3' | 'L3.5' | 'L4'
@@ -36,7 +42,13 @@ export type Asset = {
   status: 'active' | 'maintenance' | 'retired'
 }
 
-export type DocFile = { name: string; mime: 'application/pdf' | 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'; url: string } // url like '/api/files/DOC-0001/3.0'
+export type DocFile = {
+  name: string
+  mime:
+    | 'application/pdf'
+    | 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  url: string
+} // url like '/api/files/DOC-0001/3.0'
 
 export type DocVersion = {
   version: string
@@ -99,7 +111,17 @@ export type AuditEvent = {
   id: string
   at: string // ISO datetime
   actor: string
-  action: 'create' | 'update' | 'approve' | 'link' | 'unlink' | 'export' | 'delete' | 'access.denied' | 'purge' | 'derive'
+  action:
+    | 'create'
+    | 'update'
+    | 'approve'
+    | 'link'
+    | 'unlink'
+    | 'export'
+    | 'delete'
+    | 'access.denied'
+    | 'purge'
+    | 'derive'
   objectType: 'asset' | 'document' | 'evidence' | 'upload' | 'user' | 'audit'
   objectId: string
   summary: string

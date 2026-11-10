@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useSearch } from '@tanstack/react-router'
+import { documents, type Tlp } from '@/data/grc'
+import { getDocument } from '@/lib/grc'
+import { getMe } from '@/lib/session'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -8,11 +11,8 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { TlpBadge } from '@/components/tlp-badge'
-import { documents, type Tlp } from '@/data/grc'
 import { FilePreview } from '@/features/documents/components/file-preview'
 import { DocumentUnavailable } from '@/features/errors/document-unavailable'
-import { getDocument } from '@/lib/grc'
-import { getMe } from '@/lib/session'
 import './viewer.css'
 
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -75,8 +75,12 @@ function Picker() {
                   search={{ doc: d.id }}
                   className='flex min-h-11 min-w-0 flex-wrap items-center gap-3 px-4 py-3 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none'
                 >
-                  <span className='w-24 shrink-0 break-all font-mono text-sm text-muted-foreground'>{d.id}</span>
-                  <span className='min-w-0 flex-1 break-words font-medium'>{d.title}</span>
+                  <span className='w-24 shrink-0 font-mono text-sm break-all text-muted-foreground'>
+                    {d.id}
+                  </span>
+                  <span className='min-w-0 flex-1 font-medium break-words'>
+                    {d.title}
+                  </span>
                   <span className='shrink-0'>
                     <TlpBadge tlp={d.tlp} />
                   </span>
@@ -86,7 +90,9 @@ function Picker() {
           </ul>
         </div>
       ) : (
-        <p className='text-muted-foreground'>Belum ada dokumen yang tersedia untuk dibuka.</p>
+        <p className='text-muted-foreground'>
+          Belum ada dokumen yang tersedia untuk dibuka.
+        </p>
       )}
     </div>
   )
@@ -133,12 +139,16 @@ function ViewerBody({ docId }: { docId: string }) {
       const t = e.target
       if (
         t instanceof HTMLElement &&
-        (t.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName))
+        (t.isContentEditable ||
+          ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName))
       ) {
         return
       }
       if (!(t instanceof Node) || !rootRef.current?.contains(t)) return
-      if ((e.ctrlKey || e.metaKey) && ['p', 's', 'c'].includes(e.key.toLowerCase())) {
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        ['p', 's', 'c'].includes(e.key.toLowerCase())
+      ) {
         e.preventDefault()
       }
     }
@@ -146,12 +156,16 @@ function ViewerBody({ docId }: { docId: string }) {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [])
 
-  if (!doc || probe.data === 403 || probe.data === 404) return <DocumentUnavailable />
+  if (!doc || probe.data === 403 || probe.data === 404)
+    return <DocumentUnavailable />
 
   return (
     <>
       <div ref={rootRef} className='viewer-content flex min-w-0 flex-col gap-4'>
-        <nav aria-label='Navigasi dokumen' className='flex flex-wrap items-center gap-x-4 gap-y-2 text-sm'>
+        <nav
+          aria-label='Navigasi dokumen'
+          className='flex flex-wrap items-center gap-x-4 gap-y-2 text-sm'
+        >
           <Link
             to='/documents/$documentId'
             params={{ documentId: doc.id }}
@@ -159,13 +173,18 @@ function ViewerBody({ docId }: { docId: string }) {
           >
             Kembali ke detail dokumen
           </Link>
-          <Link to='/documents' className='inline-flex min-h-11 items-center text-muted-foreground underline underline-offset-4'>
+          <Link
+            to='/documents'
+            className='inline-flex min-h-11 items-center text-muted-foreground underline underline-offset-4'
+          >
             Registri dokumen
           </Link>
         </nav>
         <header className='flex min-w-0 flex-wrap items-center justify-between gap-3 border-b pb-3'>
           <div className='flex min-w-0 flex-col gap-1'>
-            <h1 className='text-xl font-bold tracking-tight break-words'>{doc.title}</h1>
+            <h1 className='text-xl font-bold tracking-tight break-words'>
+              {doc.title}
+            </h1>
             <div className='flex flex-wrap items-center gap-2 text-sm'>
               <span className='font-mono break-all'>{doc.id}</span>
               <TlpBadge tlp={doc.tlp} />
@@ -175,7 +194,10 @@ function ViewerBody({ docId }: { docId: string }) {
         </header>
 
         <div className='grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[14rem_minmax(0,1fr)_16rem]'>
-          <aside aria-labelledby='viewer-versions' className='flex min-w-0 flex-col gap-3'>
+          <aside
+            aria-labelledby='viewer-versions'
+            className='flex min-w-0 flex-col gap-3'
+          >
             <h2 id='viewer-versions' className='text-sm font-semibold'>
               Riwayat versi
             </h2>
@@ -192,7 +214,10 @@ function ViewerBody({ docId }: { docId: string }) {
                       {v.version}
                       {i === 0 && ' (saat ini)'}
                     </span>
-                    <time dateTime={v.date} className='font-mono tabular-nums text-muted-foreground'>
+                    <time
+                      dateTime={v.date}
+                      className='font-mono text-muted-foreground tabular-nums'
+                    >
                       {v.date}
                     </time>
                   </button>
@@ -212,7 +237,8 @@ function ViewerBody({ docId }: { docId: string }) {
             </h2>
             {expired ? (
               <p role='alert'>
-                Sesi berakhir. Buka kembali dokumen dari registri untuk memulai sesi baru.
+                Sesi berakhir. Buka kembali dokumen dari registri untuk memulai
+                sesi baru.
               </p>
             ) : (
               <FilePreview file={current?.file} />
@@ -241,8 +267,9 @@ function ViewerBody({ docId }: { docId: string }) {
                 <kbd className='font-mono text-xs'>Ctrl/Cmd + S</kbd>
               </li>
             </ul>
-            <p className='text-sm text-muted-foreground break-words'>
-              Pemblokiran ini hanya penangkal, bukan kontrol keamanan. Keputusan akses dibuat di server.
+            <p className='text-sm break-words text-muted-foreground'>
+              Pemblokiran ini hanya penangkal, bukan kontrol keamanan. Keputusan
+              akses dibuat di server.
             </p>
           </aside>
         </div>
@@ -261,7 +288,11 @@ function SessionTimer({
   elapsed: number
 }) {
   const expired = remaining === 0
-  const label = expired ? 'Sesi berakhir' : remaining === null ? 'Sesi berjalan' : 'Sisa sesi'
+  const label = expired
+    ? 'Sesi berakhir'
+    : remaining === null
+      ? 'Sesi berjalan'
+      : 'Sisa sesi'
   const value = expired ? 0 : (remaining ?? elapsed)
 
   return (

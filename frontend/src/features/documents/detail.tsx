@@ -1,14 +1,15 @@
 import { type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { CriticalityBadge, DocStatusBadge, ReviewStatusBadge } from '@/components/status-badge'
-import { TlpBadge } from '@/components/tlp-badge'
+import { type AuditEvent, type Document, CSF_FUNCTIONS } from '@/data/grc'
+import {
+  assetsForDocument,
+  auditFor,
+  getDocument,
+  isDocCurrent,
+  subcategoriesForDocument,
+} from '@/lib/grc'
+import { getMe } from '@/lib/session'
 import { Badge } from '@/components/ui/badge'
 import {
   Table,
@@ -18,23 +19,22 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { ConfigDrawer } from '@/components/config-drawer'
+import { Header } from '@/components/layout/header'
+import { Main } from '@/components/layout/main'
+import { ProfileDropdown } from '@/components/profile-dropdown'
+import { Search } from '@/components/search'
 import {
-  type AuditEvent,
-  type Document,
-  CSF_FUNCTIONS,
-} from '@/data/grc'
-import {
-  assetsForDocument,
-  auditFor,
-  getDocument,
-  isDocCurrent,
-  subcategoriesForDocument,
-} from '@/lib/grc'
-import { getMe } from '@/lib/session'
-import { TLP_NOTES, daysUntil, reviewLabel } from './helpers'
+  CriticalityBadge,
+  DocStatusBadge,
+  ReviewStatusBadge,
+} from '@/components/status-badge'
+import { ThemeSwitch } from '@/components/theme-switch'
+import { TlpBadge } from '@/components/tlp-badge'
+import { DocumentUnavailable } from '@/features/errors/document-unavailable'
 import { AccessGrants } from './components/access-grants'
 import { DeriveBriefing } from './components/derive-briefing'
-import { DocumentUnavailable } from '@/features/errors/document-unavailable'
+import { TLP_NOTES, daysUntil, reviewLabel } from './helpers'
 
 export function DocumentDetail({ documentId }: { documentId: string }) {
   const doc = getDocument(documentId)
@@ -49,7 +49,10 @@ export function DocumentDetail({ documentId }: { documentId: string }) {
       </Header>
 
       <Main className='flex flex-1 flex-col gap-6'>
-        <Link to='/documents' className='w-fit text-sm underline underline-offset-4'>
+        <Link
+          to='/documents'
+          className='w-fit text-sm underline underline-offset-4'
+        >
           Semua dokumen
         </Link>
 
@@ -92,12 +95,17 @@ function DocumentBody({ doc }: { doc: Document }) {
           {doc.granted && <Badge variant='outline'>Diberikan</Badge>}
         </h1>
         <p className='break-words text-muted-foreground'>
-          Ringkasan tinjauan, riwayat versi, aset terkait, bukti CSF 2.0, dan aktivitas dokumen ini. Isi dokumen hanya dapat dibuka di penampil aman. Data contoh.
+          Ringkasan tinjauan, riwayat versi, aset terkait, bukti CSF 2.0, dan
+          aktivitas dokumen ini. Isi dokumen hanya dapat dibuka di penampil
+          aman. Data contoh.
         </p>
         <div className='flex flex-wrap items-center gap-2 text-sm'>
           <span className='font-mono break-all'>{doc.id}</span>
           <span>
-            Versi <span className='font-mono tabular-nums'>{current?.version ?? 'tidak ada'}</span>
+            Versi{' '}
+            <span className='font-mono tabular-nums'>
+              {current?.version ?? 'tidak ada'}
+            </span>
           </span>
         </div>
       </header>
@@ -128,7 +136,10 @@ function DocumentBody({ doc }: { doc: Document }) {
           <Field label='Tinjauan berikutnya'>
             <span className='flex flex-wrap items-center gap-2'>
               <span className='font-mono tabular-nums'>{doc.nextReview}</span>
-              <ReviewStatusBadge days={daysUntil(doc.nextReview)} date={reviewLabel(doc.nextReview)} />
+              <ReviewStatusBadge
+                days={daysUntil(doc.nextReview)}
+                date={reviewLabel(doc.nextReview)}
+              />
             </span>
           </Field>
           <Field label='Disetujui oleh (versi saat ini)'>
@@ -149,20 +160,29 @@ function DocumentBody({ doc }: { doc: Document }) {
                 >
                   <span
                     aria-hidden='true'
-                    className='absolute -left-1.5 top-1.5 size-3 rounded-full border bg-background'
+                    className='absolute top-1.5 -left-1.5 size-3 rounded-full border bg-background'
                   />
                   <div className='flex min-w-0 flex-col gap-1 p-3'>
                     <span className='flex flex-wrap items-center gap-2'>
-                      <span className='font-mono break-all'>{version.version}</span>
+                      <span className='font-mono break-all'>
+                        {version.version}
+                      </span>
                       {index === 0 && <Badge variant='outline'>Saat ini</Badge>}
-                      <time dateTime={version.date} className='font-mono tabular-nums text-muted-foreground'>
+                      <time
+                        dateTime={version.date}
+                        className='font-mono text-muted-foreground tabular-nums'
+                      >
                         {version.date}
                       </time>
                     </span>
-                    <span className='text-sm text-muted-foreground break-words'>{version.author}</span>
+                    <span className='text-sm break-words text-muted-foreground'>
+                      {version.author}
+                    </span>
                     <span className='break-words'>{version.summary}</span>
                     <span className='text-sm break-words'>
-                      {version.approvedBy ? `Disetujui oleh ${version.approvedBy}` : 'Belum disetujui'}
+                      {version.approvedBy
+                        ? `Disetujui oleh ${version.approvedBy}`
+                        : 'Belum disetujui'}
                     </span>
                   </div>
                 </li>
@@ -170,7 +190,9 @@ function DocumentBody({ doc }: { doc: Document }) {
             </ol>
           </>
         ) : (
-          <p className='text-muted-foreground'>Belum ada versi untuk dokumen ini.</p>
+          <p className='text-muted-foreground'>
+            Belum ada versi untuk dokumen ini.
+          </p>
         )}
       </section>
 
@@ -215,7 +237,9 @@ function DocumentBody({ doc }: { doc: Document }) {
               </Table>
             </div>
           ) : (
-            <p className='text-muted-foreground'>Tidak ada aset yang terkait dengan dokumen ini.</p>
+            <p className='text-muted-foreground'>
+              Tidak ada aset yang terkait dengan dokumen ini.
+            </p>
           )}
         </div>
 
@@ -223,7 +247,8 @@ function DocumentBody({ doc }: { doc: Document }) {
           <h3 className='font-semibold'>Bukti CSF 2.0</h3>
           {!docIsCurrent && (
             <p className='text-sm break-words'>
-              Dihitung sebagai bukti parsial sampai disetujui dan dalam tanggal tinjauan.
+              Dihitung sebagai bukti parsial sampai disetujui dan dalam tanggal
+              tinjauan.
             </p>
           )}
           {subcategories.length ? (
@@ -244,7 +269,9 @@ function DocumentBody({ doc }: { doc: Document }) {
                     <TableRow key={sub.id}>
                       <TableCell className='font-mono'>{sub.id}</TableCell>
                       <TableCell>{CSF_FUNCTIONS[sub.fn]}</TableCell>
-                      <TableCell className='whitespace-normal'>{sub.outcome}</TableCell>
+                      <TableCell className='whitespace-normal'>
+                        {sub.outcome}
+                      </TableCell>
                       <TableCell>
                         <Link
                           to='/evidence'
@@ -260,7 +287,9 @@ function DocumentBody({ doc }: { doc: Document }) {
               </Table>
             </div>
           ) : (
-            <p className='text-muted-foreground'>Tidak ada subkategori CSF 2.0 yang merujuk dokumen ini.</p>
+            <p className='text-muted-foreground'>
+              Tidak ada subkategori CSF 2.0 yang merujuk dokumen ini.
+            </p>
           )}
         </div>
       </section>
@@ -274,7 +303,9 @@ function DocumentBody({ doc }: { doc: Document }) {
             ))}
           </ol>
         ) : (
-          <p className='text-muted-foreground'>Belum ada aktivitas tercatat untuk dokumen ini.</p>
+          <p className='text-muted-foreground'>
+            Belum ada aktivitas tercatat untuk dokumen ini.
+          </p>
         )}
       </section>
 

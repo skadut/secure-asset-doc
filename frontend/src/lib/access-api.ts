@@ -137,14 +137,17 @@ export function listAccessRequests(): Promise<AccessRequest[]> {
 
 export function createAccessRequest(
   docId: string,
-  body: { grantee: string; reason: string; expiresAt?: string },
+  body: { grantee: string; reason: string; expiresAt?: string }
 ): Promise<{ id: string; status: 'pending' }> {
-  return post(`/api/documents/${encodeURIComponent(docId)}/access-requests`, body)
+  return post(
+    `/api/documents/${encodeURIComponent(docId)}/access-requests`,
+    body
+  )
 }
 
 export function decideAccessRequest(
   id: string,
-  body: { decision: 'approve' | 'deny'; reason?: string },
+  body: { decision: 'approve' | 'deny'; reason?: string }
 ): Promise<{ id: string; status: string; granted: boolean }> {
   return post(`/api/access-requests/${encodeURIComponent(id)}/decision`, body)
 }
@@ -153,10 +156,13 @@ export function listGrants(docId: string): Promise<Grant[]> {
   return call(`/api/documents/${encodeURIComponent(docId)}/grants`)
 }
 
-export async function revokeGrant(docId: string, username: string): Promise<void> {
+export async function revokeGrant(
+  docId: string,
+  username: string
+): Promise<void> {
   await request(
     `/api/documents/${encodeURIComponent(docId)}/grants/${encodeURIComponent(username)}`,
-    { method: 'DELETE' },
+    { method: 'DELETE' }
   )
 }
 
@@ -173,7 +179,7 @@ export function listLevelRequests(): Promise<LevelRequest[]> {
 
 export function createLevelRequest(
   username: string,
-  body: LevelChangeInput,
+  body: LevelChangeInput
 ): Promise<
   | { id: string; status: 'pending' }
   | { username: string; fromLevel: number; toLevel: number; applied: true }
@@ -183,25 +189,38 @@ export function createLevelRequest(
 
 export function decideLevelRequest(
   id: string,
-  body: { decision: 'approve' | 'deny'; reason?: string },
+  body: { decision: 'approve' | 'deny'; reason?: string }
 ): Promise<{ id: string; status: string; applied: boolean }> {
   return post(`/api/level-requests/${encodeURIComponent(id)}/decision`, body)
 }
 
-const TLP_ORDER: Tlp[] = ['CLEAR', 'GREEN', 'AMBER', 'AMBER+STRICT', 'RED', 'RED+STRICT']
+const TLP_ORDER: Tlp[] = [
+  'CLEAR',
+  'GREEN',
+  'AMBER',
+  'AMBER+STRICT',
+  'RED',
+  'RED+STRICT',
+]
 
 export function explainAccess(
   me: Me,
   tlp: Tlp,
-  hasActiveGrant: boolean,
+  hasActiveGrant: boolean
 ): { permit: boolean; reasons: string[] } {
   const i = TLP_ORDER.indexOf(tlp)
   const L = me.accessLevel
-  const levelOk = Number.isInteger(L) && L >= 1 && L <= 5 && i !== -1 && i <= Math.min(L, 4)
-  if (hasActiveGrant) return { permit: true, reasons: ['Grant aktif untuk dokumen ini'] }
-  if (levelOk) return { permit: true, reasons: [`Level akses ${L} mencakup TLP:${tlp}`] }
+  const levelOk =
+    Number.isInteger(L) && L >= 1 && L <= 5 && i !== -1 && i <= Math.min(L, 4)
+  if (hasActiveGrant)
+    return { permit: true, reasons: ['Grant aktif untuk dokumen ini'] }
+  if (levelOk)
+    return { permit: true, reasons: [`Level akses ${L} mencakup TLP:${tlp}`] }
   const reasons: string[] = []
-  if (i === 5) reasons.push('TLP:RED+STRICT hanya dapat dibuka dengan grant aktif, termasuk untuk level 5')
+  if (i === 5)
+    reasons.push(
+      'TLP:RED+STRICT hanya dapat dibuka dengan grant aktif, termasuk untuk level 5'
+    )
   else if (i === -1) reasons.push('TLP tidak dikenal')
   else reasons.push(`Level akses ${L} tidak mencakup TLP:${tlp}`)
   reasons.push('Tidak ada grant aktif untuk dokumen ini')

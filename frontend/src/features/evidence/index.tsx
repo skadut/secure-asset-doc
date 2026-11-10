@@ -1,17 +1,15 @@
 // ponytail: local filter state; move to URL search params for shareable filters
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from '@tanstack/react-router'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { CoverageBadge, DocStatusBadge } from '@/components/status-badge'
-import { TlpBadge } from '@/components/tlp-badge'
+import { CSF_FUNCTIONS, csfSubcategories, type CsfFunction } from '@/data/grc'
+import {
+  coverage,
+  evidenceForSubcategory,
+  getAsset,
+  getDocument,
+} from '@/lib/grc'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { CoverageSegment } from './components/coverage-segment'
 import {
   Table,
   TableBody,
@@ -20,8 +18,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { CSF_FUNCTIONS, csfSubcategories, type CsfFunction } from '@/data/grc'
-import { coverage, evidenceForSubcategory, getAsset, getDocument } from '@/lib/grc'
+import { ConfigDrawer } from '@/components/config-drawer'
+import { Header } from '@/components/layout/header'
+import { Main } from '@/components/layout/main'
+import { ProfileDropdown } from '@/components/profile-dropdown'
+import { Search } from '@/components/search'
+import { CoverageBadge, DocStatusBadge } from '@/components/status-badge'
+import { ThemeSwitch } from '@/components/theme-switch'
+import { TlpBadge } from '@/components/tlp-badge'
+import { CoverageSegment } from './components/coverage-segment'
 
 type CoverageState = ReturnType<typeof coverage>
 type FnFilter = CsfFunction | 'all'
@@ -90,8 +95,10 @@ function EvidenceDetail({ item }: { item: Item }) {
           <span className='font-medium'>{item.doc.title}</span>
           <TlpBadge tlp={item.doc.tlp} />
           <DocStatusBadge status={item.doc.status} />
-          <span className='font-mono tabular-nums text-muted-foreground'>
-            {item.doc.versions[0] ? `v${item.doc.versions[0].version}` : 'No version recorded'}
+          <span className='font-mono text-muted-foreground tabular-nums'>
+            {item.doc.versions[0]
+              ? `v${item.doc.versions[0].version}`
+              : 'No version recorded'}
           </span>
         </>
       ) : (
@@ -123,7 +130,9 @@ function EvidenceRow({ row, hash }: { row: Row; hash: string }) {
           <CoverageBadge coverage={row.coverage} />
           {hasEvidence ? (
             <>
-              <span className='tabular-nums text-muted-foreground'>{row.items.length} linked</span>
+              <span className='text-muted-foreground tabular-nums'>
+                {row.items.length} linked
+              </span>
               {row.items.map((item, i) => (
                 <ItemLink key={i} item={item} />
               ))}
@@ -135,7 +144,9 @@ function EvidenceRow({ row, hash }: { row: Row; hash: string }) {
       </div>
       {hasEvidence && (
         <details ref={notes} className='text-sm'>
-          <summary className={`${touchClass} cursor-pointer underline underline-offset-4`}>
+          <summary
+            className={`${touchClass} cursor-pointer underline underline-offset-4`}
+          >
             Evidence notes
           </summary>
           <ul className='mt-2 flex flex-col gap-3 border-t pt-3'>
@@ -168,7 +179,8 @@ export function Evidence() {
       const nextCov = cov !== 'all' && cov !== target.coverage ? 'all' : cov
       const list = rows.filter(
         (r) =>
-          (nextFn === 'all' || r.fn === nextFn) && (nextCov === 'all' || r.coverage === nextCov)
+          (nextFn === 'all' || r.fn === nextFn) &&
+          (nextCov === 'all' || r.coverage === nextCov)
       )
       setFn(nextFn)
       setCov(nextCov)
@@ -177,7 +189,8 @@ export function Evidence() {
   }
 
   const visible = rows.filter(
-    (r) => (fn === 'all' || r.fn === fn) && (cov === 'all' || r.coverage === cov)
+    (r) =>
+      (fn === 'all' || r.fn === fn) && (cov === 'all' || r.coverage === cov)
   )
   const totalPages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE))
   const current = Math.min(page, totalPages)
@@ -196,17 +209,20 @@ export function Evidence() {
 
       <Main className='focus-strong flex flex-1 flex-col gap-6'>
         <div>
-          <h1 className='text-2xl font-bold tracking-tight'>CSF 2.0 evidence</h1>
+          <h1 className='text-2xl font-bold tracking-tight'>
+            CSF 2.0 evidence
+          </h1>
           <p className='text-muted-foreground'>
-            Evidence linked to a {rows.length}-subcategory subset of NIST CSF 2.0. Coverage
-            reflects linked evidence only, not an assessment. Sample data.
+            Evidence linked to a {rows.length}-subcategory subset of NIST CSF
+            2.0. Coverage reflects linked evidence only, not an assessment.
+            Sample data.
           </p>
         </div>
 
         <p className='text-sm'>
           Covered = at least one approved document within its review date.
-          Partial = evidence linked but no current approved document.
-          Gap = no evidence linked.
+          Partial = evidence linked but no current approved document. Gap = no
+          evidence linked.
         </p>
 
         <div className='overflow-x-auto rounded-md border'>
@@ -234,21 +250,38 @@ export function Evidence() {
                         setPage(1)
                       }}
                     >
-                      <span className='font-mono'>{s.fn}</span> {CSF_FUNCTIONS[s.fn]}
+                      <span className='font-mono'>{s.fn}</span>{' '}
+                      {CSF_FUNCTIONS[s.fn]}
                     </Button>
                   </TableCell>
-                  <TableCell className='text-right tabular-nums'>{s.covered}</TableCell>
-                  <TableCell className='text-right tabular-nums'>{s.partial}</TableCell>
-                  <TableCell className='text-right tabular-nums'>{s.gap}</TableCell>
-                  <TableCell className='text-right tabular-nums'>{s.total}</TableCell>
+                  <TableCell className='text-right tabular-nums'>
+                    {s.covered}
+                  </TableCell>
+                  <TableCell className='text-right tabular-nums'>
+                    {s.partial}
+                  </TableCell>
+                  <TableCell className='text-right tabular-nums'>
+                    {s.gap}
+                  </TableCell>
+                  <TableCell className='text-right tabular-nums'>
+                    {s.total}
+                  </TableCell>
                 </TableRow>
               ))}
               <TableRow>
                 <TableCell className='font-medium'>All functions</TableCell>
-                <TableCell className='text-right tabular-nums'>{total.covered}</TableCell>
-                <TableCell className='text-right tabular-nums'>{total.partial}</TableCell>
-                <TableCell className='text-right tabular-nums'>{total.gap}</TableCell>
-                <TableCell className='text-right tabular-nums'>{total.total}</TableCell>
+                <TableCell className='text-right tabular-nums'>
+                  {total.covered}
+                </TableCell>
+                <TableCell className='text-right tabular-nums'>
+                  {total.partial}
+                </TableCell>
+                <TableCell className='text-right tabular-nums'>
+                  {total.gap}
+                </TableCell>
+                <TableCell className='text-right tabular-nums'>
+                  {total.total}
+                </TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -290,31 +323,36 @@ export function Evidence() {
         </div>
 
         {visible.length === 0 ? (
-          <p className='text-muted-foreground'>No results match these filters.</p>
+          <p className='text-muted-foreground'>
+            No results match these filters.
+          </p>
         ) : (
           <>
-            {FUNCTIONS.filter((f) => pageRows.some((r) => r.fn === f)).map((f) => {
-              const c = counts(rows.filter((r) => r.fn === f))
-              return (
-                <section key={f} className='flex flex-col gap-2'>
-                  <div>
-                    <h2 className='text-xl font-semibold'>
-                      <span className='font-mono'>{f}</span> {CSF_FUNCTIONS[f]}
-                    </h2>
-                    <p className='text-sm'>
-                      {c.covered} covered · {c.partial} partial · {c.gap} gap
-                    </p>
-                  </div>
-                  <ul className='divide-y rounded-md border'>
-                    {pageRows
-                      .filter((r) => r.fn === f)
-                      .map((row) => (
-                        <EvidenceRow key={row.id} row={row} hash={hash} />
-                      ))}
-                  </ul>
-                </section>
-              )
-            })}
+            {FUNCTIONS.filter((f) => pageRows.some((r) => r.fn === f)).map(
+              (f) => {
+                const c = counts(rows.filter((r) => r.fn === f))
+                return (
+                  <section key={f} className='flex flex-col gap-2'>
+                    <div>
+                      <h2 className='text-xl font-semibold'>
+                        <span className='font-mono'>{f}</span>{' '}
+                        {CSF_FUNCTIONS[f]}
+                      </h2>
+                      <p className='text-sm'>
+                        {c.covered} covered · {c.partial} partial · {c.gap} gap
+                      </p>
+                    </div>
+                    <ul className='divide-y rounded-md border'>
+                      {pageRows
+                        .filter((r) => r.fn === f)
+                        .map((row) => (
+                          <EvidenceRow key={row.id} row={row} hash={hash} />
+                        ))}
+                    </ul>
+                  </section>
+                )
+              }
+            )}
             <nav
               aria-label='Evidence pages'
               className='flex flex-wrap items-center justify-between gap-3'

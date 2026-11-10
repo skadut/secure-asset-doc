@@ -10,19 +10,26 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
+import { auditEvents, type AuditEvent } from '@/data/grc'
+import { getMe } from '@/lib/session'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { ConfigDrawer } from '@/components/config-drawer'
+import { DataTableColumnHeader } from '@/components/data-table'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { auditEvents, type AuditEvent } from '@/data/grc'
-import { DataTableColumnHeader } from '@/components/data-table'
-import { getMe } from '@/lib/session'
 import { PurgeDialog } from './purge-dialog'
 
 const selectClass =
@@ -32,19 +39,28 @@ function ObjectLink({ event }: { event: AuditEvent }) {
   const className = 'font-mono text-sm underline underline-offset-4'
   if (event.objectType === 'asset') {
     return (
-      <Link to='/assets/$assetId' params={{ assetId: event.objectId }} className={className}>
+      <Link
+        to='/assets/$assetId'
+        params={{ assetId: event.objectId }}
+        className={className}
+      >
         {event.objectId}
       </Link>
     )
   }
   if (event.objectType === 'document') {
     return (
-      <Link to='/documents/$documentId' params={{ documentId: event.objectId }} className={className}>
+      <Link
+        to='/documents/$documentId'
+        params={{ documentId: event.objectId }}
+        className={className}
+      >
         {event.objectId}
       </Link>
     )
   }
-  if (event.objectType !== 'evidence') return <span className='font-mono text-sm'>{event.objectId}</span>
+  if (event.objectType !== 'evidence')
+    return <span className='font-mono text-sm'>{event.objectId}</span>
   return (
     <Link
       to='/evidence'
@@ -70,7 +86,9 @@ export function AuditLog() {
   const { actions, objectTypes, actors } = useMemo(
     () => ({
       actions: [...new Set(auditEvents.map((event) => event.action))].sort(),
-      objectTypes: [...new Set(auditEvents.map((event) => event.objectType))].sort(),
+      objectTypes: [
+        ...new Set(auditEvents.map((event) => event.objectType)),
+      ].sort(),
       actors: [...new Set(auditEvents.map((event) => event.actor))].sort(),
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -110,9 +128,14 @@ export function AuditLog() {
   const columns: ColumnDef<AuditEvent>[] = [
     {
       accessorKey: 'at',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Time' />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title='Time' />
+      ),
       cell: ({ row }) => (
-        <time className='whitespace-nowrap font-mono text-sm tabular-nums' dateTime={row.original.at}>
+        <time
+          className='font-mono text-sm whitespace-nowrap tabular-nums'
+          dateTime={row.original.at}
+        >
           {row.original.at}
         </time>
       ),
@@ -124,7 +147,9 @@ export function AuditLog() {
       cell: ({ row }) => (
         <div className='flex gap-1'>
           <Badge variant='outline'>{row.original.action}</Badge>
-          {row.original.action === 'purge' && <Badge variant='destructive'>permanent</Badge>}
+          {row.original.action === 'purge' && (
+            <Badge variant='destructive'>permanent</Badge>
+          )}
         </div>
       ),
     },
@@ -137,7 +162,9 @@ export function AuditLog() {
     {
       accessorKey: 'summary',
       header: 'Summary',
-      cell: ({ row }) => <span className='min-w-56'>{row.original.summary}</span>,
+      cell: ({ row }) => (
+        <span className='min-w-56'>{row.original.summary}</span>
+      ),
     },
     {
       id: 'changes',
@@ -164,11 +191,16 @@ export function AuditLog() {
               {changes.length} {changes.length === 1 ? 'field' : 'fields'}
             </Button>
             {isExpanded && (
-              <ul id={`changes-${row.original.id}`} className='mt-2 flex flex-col gap-1 text-sm'>
+              <ul
+                id={`changes-${row.original.id}`}
+                className='mt-2 flex flex-col gap-1 text-sm'
+              >
                 {changes.map((change, index) => (
                   <li key={`${change.field}-${index}`}>
                     <span className='font-medium'>{change.field}:</span>{' '}
-                    <span>{change.from} → {change.to}</span>
+                    <span>
+                      {change.from} → {change.to}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -206,7 +238,8 @@ export function AuditLog() {
           <div>
             <h1 className='page-title tracking-tight'>Audit log</h1>
             <p className='text-muted-foreground'>
-              Recorded changes to assets, documents and evidence links. Sample data.
+              Recorded changes to assets, documents and evidence links. Sample
+              data.
             </p>
           </div>
           {canPurge && (
@@ -220,7 +253,11 @@ export function AuditLog() {
           )}
         </div>
         {canPurge && (
-          <PurgeDialog open={purgeOpen} onOpenChange={setPurgeOpen} onPurged={() => void reloadAudit()} />
+          <PurgeDialog
+            open={purgeOpen}
+            onOpenChange={setPurgeOpen}
+            onPurged={() => void reloadAudit()}
+          />
         )}
 
         <div className='flex flex-wrap items-end gap-4'>
@@ -237,23 +274,50 @@ export function AuditLog() {
           </div>
           <div className='flex flex-col gap-1.5'>
             <Label htmlFor='audit-action'>Action</Label>
-            <select id='audit-action' className={selectClass} value={action} onChange={(e) => setAction(e.target.value)}>
+            <select
+              id='audit-action'
+              className={selectClass}
+              value={action}
+              onChange={(e) => setAction(e.target.value)}
+            >
               <option value='all'>All actions</option>
-              {actions.map((value) => <option key={value} value={value}>{value}</option>)}
+              {actions.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
             </select>
           </div>
           <div className='flex flex-col gap-1.5'>
             <Label htmlFor='audit-object-type'>Object type</Label>
-            <select id='audit-object-type' className={selectClass} value={objectType} onChange={(e) => setObjectType(e.target.value)}>
+            <select
+              id='audit-object-type'
+              className={selectClass}
+              value={objectType}
+              onChange={(e) => setObjectType(e.target.value)}
+            >
               <option value='all'>All object types</option>
-              {objectTypes.map((value) => <option key={value} value={value}>{value}</option>)}
+              {objectTypes.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
             </select>
           </div>
           <div className='flex flex-col gap-1.5'>
             <Label htmlFor='audit-actor'>Actor</Label>
-            <select id='audit-actor' className={selectClass} value={actor} onChange={(e) => setActor(e.target.value)}>
+            <select
+              id='audit-actor'
+              className={selectClass}
+              value={actor}
+              onChange={(e) => setActor(e.target.value)}
+            >
               <option value='all'>All actors</option>
-              {actors.map((value) => <option key={value} value={value}>{value}</option>)}
+              {actors.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -265,24 +329,37 @@ export function AuditLog() {
                 <TableRow key={group.id}>
                   {group.headers.map((header) => (
                     <TableHead key={header.id}>
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                     </TableHead>
                   ))}
                 </TableRow>
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows.length ? table.getRowModel().rows.map((row) => (
-                <TableRow key={row.original.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className='align-top'>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              )) : (
+              {table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.original.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className='align-top'>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className='h-24 text-center text-muted-foreground'>
+                  <TableCell
+                    colSpan={columns.length}
+                    className='h-24 text-center text-muted-foreground'
+                  >
                     No results match these filters.
                   </TableCell>
                 </TableRow>
@@ -296,13 +373,24 @@ export function AuditLog() {
             {filteredEvents.length} events, 20 per page
           </p>
           <div className='flex items-center gap-2'>
-            <Button variant='outline' size='sm' onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
               Previous
             </Button>
             <span className='text-sm tabular-nums'>
-              Page {pageCount ? table.getState().pagination.pageIndex + 1 : 0} of {pageCount}
+              Page {pageCount ? table.getState().pagination.pageIndex + 1 : 0}{' '}
+              of {pageCount}
             </span>
-            <Button variant='outline' size='sm' onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
               Next
             </Button>
           </div>

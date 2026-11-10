@@ -40,11 +40,7 @@ export function FontProvider({ children }: { children: React.ReactNode }) {
 
   const setFont = (font: Font) => {
     try {
-      setCookie(
-        FONT_COOKIE_NAME,
-        encodeURIComponent(font),
-        FONT_COOKIE_MAX_AGE
-      )
+      setCookie(FONT_COOKIE_NAME, encodeURIComponent(font), FONT_COOKIE_MAX_AGE)
     } catch {
       // persistence unavailable; keep in-memory choice
     }

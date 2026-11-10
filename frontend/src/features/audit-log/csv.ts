@@ -1,6 +1,14 @@
 import type { AuditEvent } from '@/data/grc'
 
-const COLUMNS = ['id', 'at', 'actor', 'action', 'objectType', 'objectId', 'summary'] as const
+const COLUMNS = [
+  'id',
+  'at',
+  'actor',
+  'action',
+  'objectType',
+  'objectId',
+  'summary',
+] as const
 
 // Neutralize spreadsheet formula injection: a leading = + - @ TAB or CR becomes a literal text cell.
 function cell(value: string): string {
@@ -11,6 +19,8 @@ function cell(value: string): string {
 export function toCsv(events: AuditEvent[]): string {
   return [
     COLUMNS.join(','),
-    ...events.map((e) => COLUMNS.map((c) => cell(String(e[c] ?? ''))).join(',')),
+    ...events.map((e) =>
+      COLUMNS.map((c) => cell(String(e[c] ?? ''))).join(',')
+    ),
   ].join('\r\n')
 }

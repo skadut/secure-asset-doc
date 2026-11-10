@@ -27,7 +27,10 @@ assert.equal(particleMapping(11).count, 2)
 assert.equal(particleMapping(1000).count, 6)
 assert.equal(particleMapping(0).dur, 3)
 assert.ok(particleMapping(1e9).dur >= 0.8)
-assert.ok(particleMapping(100).dur < particleMapping(1).dur, 'more traffic is faster')
+assert.ok(
+  particleMapping(100).dur < particleMapping(1).dur,
+  'more traffic is faster'
+)
 
 // ring buffer keeps the newest items
 assert.deepEqual(pushHistory([1, 2], 3, 2), [2, 3])
@@ -41,14 +44,21 @@ const history: HistoryPoint[] = [
   {
     ts: 1,
     edges: [
-      { source: 'client', target: 'backend', rps: 10, errorRate: 0.1, avgMs: 5 },
+      {
+        source: 'client',
+        target: 'backend',
+        rps: 10,
+        errorRate: 0.1,
+        avgMs: 5,
+      },
       { source: 'backend', target: 'db', rps: 30, errorRate: 0, avgMs: 2 },
     ],
   },
 ]
-assert.deepEqual(seriesFor(history, { kind: 'edge', source: 'client', target: 'backend' }), [
-  { ts: 1, rps: 10, errorRate: 0.1 },
-])
+assert.deepEqual(
+  seriesFor(history, { kind: 'edge', source: 'client', target: 'backend' }),
+  [{ ts: 1, rps: 10, errorRate: 0.1 }]
+)
 assert.deepEqual(seriesFor(history, { kind: 'node', id: 'db' }), [
   { ts: 1, rps: 30, errorRate: 0 },
 ])

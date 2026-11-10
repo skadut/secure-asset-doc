@@ -9,6 +9,12 @@ import {
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
+import { handleServerError } from '@/lib/handle-server-error'
+import { setMe, type Me } from '@/lib/session'
+import { SessionLogin } from '@/features/auth/session-login'
+import { DirectionProvider } from './context/direction-provider'
+import { FontProvider } from './context/font-provider'
+import { ThemeProvider } from './context/theme-provider'
 import {
   assets,
   assetDocLinks,
@@ -25,12 +31,6 @@ import {
   type EvidenceLink,
   type LockedDocument,
 } from './data/grc'
-import { handleServerError } from '@/lib/handle-server-error'
-import { setMe, type Me } from '@/lib/session'
-import { SessionLogin } from '@/features/auth/session-login'
-import { DirectionProvider } from './context/direction-provider'
-import { FontProvider } from './context/font-provider'
-import { ThemeProvider } from './context/theme-provider'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
 // Styles
@@ -128,17 +128,20 @@ async function loadApp() {
     }
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     const data: unknown = await response.json()
-    if (!data || typeof data !== 'object') throw new Error('Invalid API response')
+    if (!data || typeof data !== 'object')
+      throw new Error('Invalid API response')
     const payload = data as Record<string, unknown>
     const hydrate = <T,>(key: string, target: T[]) => {
       const items = payload[key]
-      if (!Array.isArray(items)) throw new Error(`Invalid API response: ${key} must be an array`)
+      if (!Array.isArray(items))
+        throw new Error(`Invalid API response: ${key} must be an array`)
       target.length = 0
       for (const item of items) target.push(item as T)
     }
     hydrate<Asset>('assets', assets)
     const rawDocs = payload.documents
-    if (!Array.isArray(rawDocs)) throw new Error('Invalid API response: documents must be an array')
+    if (!Array.isArray(rawDocs))
+      throw new Error('Invalid API response: documents must be an array')
     documents.length = 0
     lockedDocuments.length = 0
     for (const item of rawDocs as (Document | LockedDocument)[]) {

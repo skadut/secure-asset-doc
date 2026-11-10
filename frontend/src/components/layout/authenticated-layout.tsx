@@ -34,7 +34,10 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
               'peer-data-[variant=inset]:has-data-[layout=fixed]:h-[calc(100svh-(var(--spacing)*4))]'
             )}
           >
-            <div key={location.pathname} className='screen-enter flex flex-1 flex-col'>
+            <div
+              key={location.pathname}
+              className='screen-enter flex flex-1 flex-col'
+            >
               {children ?? <Outlet />}
             </div>
           </SidebarInset>

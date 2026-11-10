@@ -33,9 +33,7 @@ export const sidebarData: SidebarData = {
     },
     {
       title: 'Inventory',
-      items: [
-        { title: 'Assets', url: '/assets', icon: Shield },
-      ],
+      items: [{ title: 'Assets', url: '/assets', icon: Shield }],
     },
     {
       title: 'Akses dokumen',

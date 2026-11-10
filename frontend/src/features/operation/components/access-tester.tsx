@@ -1,13 +1,25 @@
-import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { ApiError, listGrants, type DirectoryUser } from '@/lib/access-api'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ApiError, listGrants, type DirectoryUser } from '@/lib/access-api'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { explainOperationAccess } from '../access'
 import { grantsKey, type OperationDocument } from '../api'
 
-export function AccessTester({ users, docs }: { users: DirectoryUser[]; docs: OperationDocument[] }) {
+export function AccessTester({
+  users,
+  docs,
+}: {
+  users: DirectoryUser[]
+  docs: OperationDocument[]
+}) {
   const [username, setUsername] = useState('')
   const [docId, setDocId] = useState('')
   const user = users.find((u) => u.username === username)
@@ -23,9 +35,13 @@ export function AccessTester({ users, docs }: { users: DirectoryUser[]; docs: Op
   let result: { permit: boolean; reasons: string[] } | null = null
   let message = 'Pilih pengguna dan dokumen untuk menguji akses.'
   if (user && doc) {
-    if (grants.isError) message = grants.error instanceof ApiError ? grants.error.message : 'Gagal memuat'
+    if (grants.isError)
+      message =
+        grants.error instanceof ApiError ? grants.error.message : 'Gagal memuat'
     else if (grants.data) {
-      const hasActive = grants.data.some((g) => g.username === user.username && g.active)
+      const hasActive = grants.data.some(
+        (g) => g.username === user.username && g.active
+      )
       result = explainOperationAccess(user.accessLevel, doc.tlp, hasActive)
     } else message = 'Memuat hak akses dokumen...'
   }
@@ -34,7 +50,9 @@ export function AccessTester({ users, docs }: { users: DirectoryUser[]; docs: Op
     <section className='flex min-w-0 flex-col gap-4'>
       <div>
         <h2 className='text-base font-semibold'>Uji keputusan akses</h2>
-        <p className='text-sm text-muted-foreground'>Simulasi aturan di sisi klien, tanpa membuka dokumen.</p>
+        <p className='text-sm text-muted-foreground'>
+          Simulasi aturan di sisi klien, tanpa membuka dokumen.
+        </p>
       </div>
 
       <div className='grid min-w-0 gap-3 sm:grid-cols-2'>
@@ -70,7 +88,11 @@ export function AccessTester({ users, docs }: { users: DirectoryUser[]; docs: Op
         </div>
       </div>
 
-      <div role='status' aria-live='polite' className='flex min-w-0 flex-col gap-3 rounded-md border bg-card p-4'>
+      <div
+        role='status'
+        aria-live='polite'
+        className='flex min-w-0 flex-col gap-3 rounded-md border bg-card p-4'
+      >
         {result ? (
           <>
             <Badge variant='outline' className='w-fit text-sm font-semibold'>
@@ -85,7 +107,9 @@ export function AccessTester({ users, docs }: { users: DirectoryUser[]; docs: Op
         ) : (
           <p className='text-sm text-muted-foreground'>{message}</p>
         )}
-        <p className='text-xs text-muted-foreground'>Keputusan final dibuat oleh server.</p>
+        <p className='text-xs text-muted-foreground'>
+          Keputusan final dibuat oleh server.
+        </p>
       </div>
     </section>
   )

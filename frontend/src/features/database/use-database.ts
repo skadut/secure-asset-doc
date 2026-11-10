@@ -1,7 +1,11 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
 export type DbColumn = { name: string; type: string }
-export type DbTableInfo = { name: string; rowCount: number; columns: DbColumn[] }
+export type DbTableInfo = {
+  name: string
+  rowCount: number
+  columns: DbColumn[]
+}
 export type DbTablesResponse = { tables: DbTableInfo[] }
 export type DbTableResponse = {
   table: string

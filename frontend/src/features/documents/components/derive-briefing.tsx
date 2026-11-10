@@ -1,19 +1,36 @@
 import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { Link } from '@tanstack/react-router'
 import type { Tlp } from '@/data/grc'
-import { TlpBadge } from '@/components/tlp-badge'
+import { toast } from 'sonner'
+import { getMe } from '@/lib/session'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { getMe } from '@/lib/session'
+import { TlpBadge } from '@/components/tlp-badge'
 import { TLP_LEVELS } from '../helpers'
 
-type Provenance = { derivedFrom: string | null; children: { id: string; title: string; tlp: Tlp }[] }
+type Provenance = {
+  derivedFrom: string | null
+  children: { id: string; title: string; tlp: Tlp }[]
+}
 type DeriveResponse = { documentId: string; auditId: string }
 
 async function request(url: string, init: RequestInit = {}): Promise<Response> {
@@ -24,15 +41,25 @@ async function request(url: string, init: RequestInit = {}): Promise<Response> {
   })
   if (!res.ok) {
     const json: { error?: string } = await res.json().catch(() => ({}))
-    throw new Error(res.status === 403 ? 'Not allowed' : (json.error ?? `HTTP ${res.status}`))
+    throw new Error(
+      res.status === 403 ? 'Not allowed' : (json.error ?? `HTTP ${res.status}`)
+    )
   }
   return res
 }
 
-const errorMessage = (error: unknown) => (error instanceof Error ? error.message : 'Request failed')
-const getJson = async <T,>(url: string): Promise<T> => (await request(url)).json() as Promise<T>
+const errorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : 'Request failed'
+const getJson = async <T,>(url: string): Promise<T> =>
+  (await request(url)).json() as Promise<T>
 
-export function DeriveBriefing({ documentId, parentTlp }: { documentId: string; parentTlp: Tlp }) {
+export function DeriveBriefing({
+  documentId,
+  parentTlp,
+}: {
+  documentId: string
+  parentTlp: Tlp
+}) {
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState('')
@@ -44,24 +71,37 @@ export function DeriveBriefing({ documentId, parentTlp }: { documentId: string; 
 
   const provenance = useQuery({
     queryKey: ['document-derived', documentId],
-    queryFn: () => getJson<Provenance>(`/api/documents/${encodeURIComponent(documentId)}/derived`),
+    queryFn: () =>
+      getJson<Provenance>(
+        `/api/documents/${encodeURIComponent(documentId)}/derived`
+      ),
     retry: false,
   })
   const derive = useMutation({
     mutationFn: async () => {
       if (!title.trim()) throw new Error('Title is required')
       if (!summary.trim()) throw new Error('Summary is required')
-      if (!tlp || !allowedTlps.includes(tlp)) throw new Error('Select a lower TLP level')
-      const response = await request(`/api/documents/${encodeURIComponent(documentId)}/derive`, {
-        method: 'POST',
-        body: JSON.stringify({ title: title.trim(), tlp, summary: summary.trim() }),
-      })
+      if (!tlp || !allowedTlps.includes(tlp))
+        throw new Error('Select a lower TLP level')
+      const response = await request(
+        `/api/documents/${encodeURIComponent(documentId)}/derive`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            title: title.trim(),
+            tlp,
+            summary: summary.trim(),
+          }),
+        }
+      )
       return response.json() as Promise<DeriveResponse>
     },
     onSuccess: () => {
       toast.success('Derived briefing created')
       setOpen(false)
-      void queryClient.invalidateQueries({ queryKey: ['document-derived', documentId] })
+      void queryClient.invalidateQueries({
+        queryKey: ['document-derived', documentId],
+      })
     },
     onError: (error) => toast.error(errorMessage(error)),
   })
@@ -76,7 +116,10 @@ export function DeriveBriefing({ documentId, parentTlp }: { documentId: string; 
           <DialogContent className='max-h-[90dvh] overflow-y-auto'>
             <DialogHeader>
               <DialogTitle>Create derived briefing</DialogTitle>
-              <DialogDescription>Create a summary with a TLP classification lower than the parent document.</DialogDescription>
+              <DialogDescription>
+                Create a summary with a TLP classification lower than the parent
+                document.
+              </DialogDescription>
             </DialogHeader>
             <form
               noValidate
@@ -84,7 +127,9 @@ export function DeriveBriefing({ documentId, parentTlp }: { documentId: string; 
               onSubmit={(event) => {
                 event.preventDefault()
                 const nextTitleError = title.trim() ? '' : 'Title is required.'
-                const nextSummaryError = summary.trim() ? '' : 'Summary is required.'
+                const nextSummaryError = summary.trim()
+                  ? ''
+                  : 'Summary is required.'
                 setTitleError(nextTitleError)
                 setSummaryError(nextSummaryError)
                 if (!nextTitleError && !nextSummaryError) derive.mutate()
@@ -92,43 +137,125 @@ export function DeriveBriefing({ documentId, parentTlp }: { documentId: string; 
             >
               <div className='flex min-w-0 flex-col gap-1.5'>
                 <Label htmlFor='derive-title'>Title</Label>
-                <Input id='derive-title' className='h-11 sm:h-9' maxLength={120} required value={title} aria-invalid={!!titleError} aria-describedby={titleError ? 'derive-title-error' : undefined} onChange={(event) => { setTitle(event.target.value); setTitleError('') }} />
-                {titleError && <p id='derive-title-error' className='text-sm text-destructive' role='alert'>{titleError}</p>}
+                <Input
+                  id='derive-title'
+                  className='h-11 sm:h-9'
+                  maxLength={120}
+                  required
+                  value={title}
+                  aria-invalid={!!titleError}
+                  aria-describedby={
+                    titleError ? 'derive-title-error' : undefined
+                  }
+                  onChange={(event) => {
+                    setTitle(event.target.value)
+                    setTitleError('')
+                  }}
+                />
+                {titleError && (
+                  <p
+                    id='derive-title-error'
+                    className='text-sm text-destructive'
+                    role='alert'
+                  >
+                    {titleError}
+                  </p>
+                )}
               </div>
               <div className='flex min-w-0 flex-col gap-1.5'>
                 <Label htmlFor='derive-tlp'>TLP</Label>
-                <Select value={tlp} onValueChange={(value) => setTlp(value as Tlp)}>
+                <Select
+                  value={tlp}
+                  onValueChange={(value) => setTlp(value as Tlp)}
+                >
                   <SelectTrigger id='derive-tlp' className='min-h-11 w-full'>
                     <SelectValue placeholder='Select a lower TLP level' />
                   </SelectTrigger>
                   <SelectContent>
-                    {allowedTlps.map((value) => <SelectItem key={value} value={value}>{value}</SelectItem>)}
+                    {allowedTlps.map((value) => (
+                      <SelectItem key={value} value={value}>
+                        {value}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className='flex min-w-0 flex-col gap-1.5'>
                 <Label htmlFor='derive-summary'>Briefing summary</Label>
-                <Textarea id='derive-summary' maxLength={4000} required rows={6} value={summary} aria-invalid={!!summaryError} aria-describedby={summaryError ? 'derive-summary-error' : undefined} onChange={(event) => { setSummary(event.target.value); setSummaryError('') }} />
-                {summaryError && <p id='derive-summary-error' className='text-sm text-destructive' role='alert'>{summaryError}</p>}
+                <Textarea
+                  id='derive-summary'
+                  maxLength={4000}
+                  required
+                  rows={6}
+                  value={summary}
+                  aria-invalid={!!summaryError}
+                  aria-describedby={
+                    summaryError ? 'derive-summary-error' : undefined
+                  }
+                  onChange={(event) => {
+                    setSummary(event.target.value)
+                    setSummaryError('')
+                  }}
+                />
+                {summaryError && (
+                  <p
+                    id='derive-summary-error'
+                    className='text-sm text-destructive'
+                    role='alert'
+                  >
+                    {summaryError}
+                  </p>
+                )}
               </div>
               <DialogFooter className='flex-col-reverse gap-2 sm:flex-row'>
-                <Button type='button' variant='outline' className='min-h-11' onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type='submit' className='min-h-11' disabled={derive.isPending}>{derive.isPending ? 'Saving…' : 'Create briefing'}</Button>
+                <Button
+                  type='button'
+                  variant='outline'
+                  className='min-h-11'
+                  onClick={() => setOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type='submit'
+                  className='min-h-11'
+                  disabled={derive.isPending}
+                >
+                  {derive.isPending ? 'Saving…' : 'Create briefing'}
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
       )}
       {provenance.data?.derivedFrom && (
-        <p className='break-words text-sm'>Derived from <Link className='underline underline-offset-4' to='/documents/$documentId' params={{ documentId: provenance.data.derivedFrom }}>{provenance.data.derivedFrom}</Link></p>
+        <p className='text-sm break-words'>
+          Derived from{' '}
+          <Link
+            className='underline underline-offset-4'
+            to='/documents/$documentId'
+            params={{ documentId: provenance.data.derivedFrom }}
+          >
+            {provenance.data.derivedFrom}
+          </Link>
+        </p>
       )}
       {!!provenance.data?.children.length && (
         <div className='flex min-w-0 flex-col gap-2'>
           <h2 className='text-lg font-semibold'>Derived briefings</h2>
           <ul className='flex min-w-0 flex-col gap-2'>
             {provenance.data.children.map((child) => (
-              <li key={child.id} className='flex min-w-0 flex-wrap items-center gap-2 break-words text-sm'>
-                <Link className='break-all underline underline-offset-4' to='/documents/$documentId' params={{ documentId: child.id }}>{child.id}</Link>
+              <li
+                key={child.id}
+                className='flex min-w-0 flex-wrap items-center gap-2 text-sm break-words'
+              >
+                <Link
+                  className='break-all underline underline-offset-4'
+                  to='/documents/$documentId'
+                  params={{ documentId: child.id }}
+                >
+                  {child.id}
+                </Link>
                 <span className='min-w-0 break-words'>{child.title}</span>
                 <TlpBadge tlp={child.tlp} />
               </li>

@@ -1,7 +1,7 @@
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
-import { ConfirmDialog } from '@/components/confirm-dialog'
 import { goHome, setMe } from '@/lib/session'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 
 interface SignOutDialogProps {
   open: boolean
@@ -14,7 +14,10 @@ export function SignOutDialog({ open, onOpenChange }: SignOutDialogProps) {
   const handleSignOut = async () => {
     let res: Response
     try {
-      res = await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' })
+      res = await fetch('/api/logout', {
+        method: 'POST',
+        credentials: 'same-origin',
+      })
     } catch {
       toast.error('Sign out failed. Please try again.')
       return

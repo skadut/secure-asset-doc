@@ -40,8 +40,7 @@ export const evidenceForSubcategory = (id: string) =>
 export const subcategoriesForDocument = (id: string) =>
   csfSubcategories.filter((subcategory) =>
     evidenceLinks.some(
-      (link) =>
-        link.subcategoryId === subcategory.id && link.documentId === id
+      (link) => link.subcategoryId === subcategory.id && link.documentId === id
     )
   )
 
@@ -60,13 +59,17 @@ export const coverage = (
   subcategoryId: string,
   evidence: EvidenceLink[] = evidenceLinks,
   docs: Document[] = documents,
-  today: string = TODAY,
+  today: string = TODAY
 ): 'covered' | 'partial' | 'gap' => {
   const links = evidence.filter((link) => link.subcategoryId === subcategoryId)
   if (
     links.some((link) => {
-      const document = link.documentId ? docs.find((doc) => doc.id === link.documentId) : undefined
-      return document ? document.status === 'approved' && document.nextReview >= today : false
+      const document = link.documentId
+        ? docs.find((doc) => doc.id === link.documentId)
+        : undefined
+      return document
+        ? document.status === 'approved' && document.nextReview >= today
+        : false
     })
   ) {
     return 'covered'
@@ -79,5 +82,7 @@ export const auditFor = (
   objectId: string
 ): AuditEvent[] =>
   auditEvents
-    .filter((event) => event.objectType === objectType && event.objectId === objectId)
+    .filter(
+      (event) => event.objectType === objectType && event.objectId === objectId
+    )
     .sort((a, b) => b.at.localeCompare(a.at))

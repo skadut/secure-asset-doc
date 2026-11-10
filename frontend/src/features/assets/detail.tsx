@@ -1,13 +1,12 @@
-import { Link } from '@tanstack/react-router'
 import { ArrowLeftIcon } from '@radix-ui/react-icons'
-import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { AssetStatusBadge, CriticalityBadge, DocStatusBadge, ReviewStatusBadge } from '@/components/status-badge'
-import { TlpBadge } from '@/components/tlp-badge'
+import { Link } from '@tanstack/react-router'
+import { CSF_FUNCTIONS, type Asset } from '@/data/grc'
+import {
+  auditFor,
+  documentsForAsset,
+  getAsset,
+  subcategoriesForAsset,
+} from '@/lib/grc'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import {
@@ -18,23 +17,39 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { CSF_FUNCTIONS, type Asset } from '@/data/grc'
+import { ConfigDrawer } from '@/components/config-drawer'
+import { Header } from '@/components/layout/header'
+import { Main } from '@/components/layout/main'
+import { ProfileDropdown } from '@/components/profile-dropdown'
+import { Search } from '@/components/search'
 import {
-  auditFor,
-  documentsForAsset,
-  getAsset,
-  subcategoriesForAsset,
-} from '@/lib/grc'
+  AssetStatusBadge,
+  CriticalityBadge,
+  DocStatusBadge,
+  ReviewStatusBadge,
+} from '@/components/status-badge'
+import { ThemeSwitch } from '@/components/theme-switch'
+import { TlpBadge } from '@/components/tlp-badge'
 import { isReviewOverdue } from './columns'
 
 const dateTime = (iso: string) =>
   new Date(iso).toISOString().replace('T', ' ').slice(0, 16) + ' UTC'
 
-function Field({ label, children, mono }: { label: string; children: React.ReactNode; mono?: boolean }) {
+function Field({
+  label,
+  children,
+  mono,
+}: {
+  label: string
+  children: React.ReactNode
+  mono?: boolean
+}) {
   return (
     <div className='flex flex-col gap-1'>
       <dt className='text-sm text-muted-foreground'>{label}</dt>
-      <dd className={mono ? 'font-mono tabular-nums' : undefined}>{children}</dd>
+      <dd className={mono ? 'font-mono tabular-nums' : undefined}>
+        {children}
+      </dd>
     </div>
   )
 }
@@ -42,22 +57,34 @@ function Field({ label, children, mono }: { label: string; children: React.React
 function Details({ asset }: { asset: Asset }) {
   return (
     <section aria-labelledby='asset-details' className='flex flex-col gap-3'>
-      <h2 id='asset-details' className='text-lg font-semibold tracking-tight'>Asset details</h2>
+      <h2 id='asset-details' className='text-lg font-semibold tracking-tight'>
+        Asset details
+      </h2>
       <dl className='grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3'>
         <Field label='Type'>{asset.type}</Field>
         <Field label='Site'>{asset.site}</Field>
         <Field label='Sector'>{asset.sector}</Field>
-        <Field label='Purdue level' mono>{asset.purdueLevel}</Field>
+        <Field label='Purdue level' mono>
+          {asset.purdueLevel}
+        </Field>
         <Field label='IEC 62443 zone'>{asset.zone}</Field>
         <Field label='Vendor'>{asset.vendor}</Field>
-        <Field label='Model' mono>{asset.model}</Field>
-        <Field label='Firmware' mono>{asset.firmware}</Field>
-        <Field label='IP address' mono>{asset.ipAddress}</Field>
+        <Field label='Model' mono>
+          {asset.model}
+        </Field>
+        <Field label='Firmware' mono>
+          {asset.firmware}
+        </Field>
+        <Field label='IP address' mono>
+          {asset.ipAddress}
+        </Field>
         <Field label='Owner'>{asset.owner}</Field>
         <Field label='Last reviewed'>
           <span className='flex flex-wrap items-center gap-x-2'>
             <span className='font-mono tabular-nums'>{asset.lastReviewed}</span>
-            {isReviewOverdue(asset.lastReviewed) && <ReviewStatusBadge days={-1} />}
+            {isReviewOverdue(asset.lastReviewed) && (
+              <ReviewStatusBadge days={-1} />
+            )}
           </span>
         </Field>
       </dl>
@@ -69,7 +96,12 @@ function LinkedDocuments({ assetId }: { assetId: string }) {
   const docs = documentsForAsset(assetId)
   return (
     <section aria-labelledby='linked-documents' className='flex flex-col gap-3'>
-      <h2 id='linked-documents' className='text-lg font-semibold tracking-tight'>Linked documents</h2>
+      <h2
+        id='linked-documents'
+        className='text-lg font-semibold tracking-tight'
+      >
+        Linked documents
+      </h2>
       {docs.length === 0 ? (
         <p className='text-muted-foreground'>No linked documents.</p>
       ) : (
@@ -97,11 +129,19 @@ function LinkedDocuments({ assetId }: { assetId: string }) {
                       {doc.id}
                     </Link>
                   </TableCell>
-                  <TableCell className='whitespace-normal'>{doc.title}</TableCell>
+                  <TableCell className='whitespace-normal'>
+                    {doc.title}
+                  </TableCell>
                   <TableCell>{doc.type}</TableCell>
-                  <TableCell><TlpBadge tlp={doc.tlp} /></TableCell>
-                  <TableCell><DocStatusBadge status={doc.status} /></TableCell>
-                  <TableCell className='font-mono tabular-nums'>{doc.versions[0]?.version ?? 'No version recorded'}</TableCell>
+                  <TableCell>
+                    <TlpBadge tlp={doc.tlp} />
+                  </TableCell>
+                  <TableCell>
+                    <DocStatusBadge status={doc.status} />
+                  </TableCell>
+                  <TableCell className='font-mono tabular-nums'>
+                    {doc.versions[0]?.version ?? 'No version recorded'}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -116,16 +156,25 @@ function CsfEvidence({ assetId }: { assetId: string }) {
   const subcategories = subcategoriesForAsset(assetId)
   return (
     <section aria-labelledby='csf-evidence' className='flex flex-col gap-3'>
-      <h2 id='csf-evidence' className='text-lg font-semibold tracking-tight'>CSF 2.0 evidence</h2>
+      <h2 id='csf-evidence' className='text-lg font-semibold tracking-tight'>
+        CSF 2.0 evidence
+      </h2>
       {subcategories.length === 0 ? (
-        <p className='text-muted-foreground'>No CSF 2.0 subcategories linked to this asset.</p>
+        <p className='text-muted-foreground'>
+          No CSF 2.0 subcategories linked to this asset.
+        </p>
       ) : (
         <ul className='flex flex-col divide-y rounded-md border'>
           {subcategories.map((sub) => (
-            <li key={sub.id} className='flex flex-col gap-1 p-3 sm:flex-row sm:items-start sm:gap-4'>
+            <li
+              key={sub.id}
+              className='flex flex-col gap-1 p-3 sm:flex-row sm:items-start sm:gap-4'
+            >
               <div className='flex shrink-0 flex-col gap-1 sm:w-40'>
                 <span className='font-mono font-medium'>{sub.id}</span>
-                <Badge variant='outline' className='w-fit'>{CSF_FUNCTIONS[sub.fn]}</Badge>
+                <Badge variant='outline' className='w-fit'>
+                  {CSF_FUNCTIONS[sub.fn]}
+                </Badge>
               </div>
               <p className='min-w-0 flex-1 text-sm'>{sub.outcome}</p>
               <Link
@@ -147,7 +196,9 @@ function ChangeHistory({ assetId }: { assetId: string }) {
   const events = auditFor('asset', assetId)
   return (
     <section aria-labelledby='change-history' className='flex flex-col gap-3'>
-      <h2 id='change-history' className='text-lg font-semibold tracking-tight'>Change history</h2>
+      <h2 id='change-history' className='text-lg font-semibold tracking-tight'>
+        Change history
+      </h2>
       {events.length === 0 ? (
         <p className='text-muted-foreground'>No recorded changes.</p>
       ) : (
@@ -155,7 +206,9 @@ function ChangeHistory({ assetId }: { assetId: string }) {
           {events.map((event) => (
             <li key={event.id} className='flex flex-col gap-1 border-l pl-4'>
               <div className='flex flex-wrap items-center gap-x-3 text-sm'>
-                <time dateTime={event.at} className='font-mono tabular-nums'>{dateTime(event.at)}</time>
+                <time dateTime={event.at} className='font-mono tabular-nums'>
+                  {dateTime(event.at)}
+                </time>
                 <span className='text-muted-foreground'>{event.actor}</span>
                 <Badge variant='outline'>{event.action}</Badge>
               </div>
@@ -190,7 +243,10 @@ export function AssetDetail({ assetId }: { assetId: string }) {
       </Header>
 
       <Main className='flex flex-1 flex-col gap-6'>
-        <Link to='/assets' className='inline-flex w-fit items-center gap-1 text-sm underline underline-offset-4'>
+        <Link
+          to='/assets'
+          className='inline-flex w-fit items-center gap-1 text-sm underline underline-offset-4'
+        >
           <ArrowLeftIcon className='size-4' aria-hidden />
           All assets
         </Link>
@@ -198,7 +254,9 @@ export function AssetDetail({ assetId }: { assetId: string }) {
         {asset ? (
           <>
             <div className='flex flex-col gap-2'>
-              <h1 className='text-2xl font-bold tracking-tight'>{asset.name}</h1>
+              <h1 className='text-2xl font-bold tracking-tight'>
+                {asset.name}
+              </h1>
               <div className='flex flex-wrap items-center gap-2'>
                 <span className='font-mono'>{asset.id}</span>
                 <Separator orientation='vertical' className='h-4' />
@@ -206,7 +264,8 @@ export function AssetDetail({ assetId }: { assetId: string }) {
                 <AssetStatusBadge status={asset.status} />
               </div>
               <p className='text-muted-foreground'>
-                Asset record with linked documents, CSF 2.0 evidence and change history. Sample data.
+                Asset record with linked documents, CSF 2.0 evidence and change
+                history. Sample data.
               </p>
             </div>
 
@@ -220,12 +279,17 @@ export function AssetDetail({ assetId }: { assetId: string }) {
           </>
         ) : (
           <>
-            <h1 className='text-2xl font-bold tracking-tight'>Asset not found</h1>
+            <h1 className='text-2xl font-bold tracking-tight'>
+              Asset not found
+            </h1>
             <p className='text-muted-foreground'>
-              No asset with ID <span className='font-mono'>{assetId}</span>. Sample data.
+              No asset with ID <span className='font-mono'>{assetId}</span>.
+              Sample data.
             </p>
             <p>
-              <Link to='/assets' className='underline underline-offset-4'>Back to assets</Link>
+              <Link to='/assets' className='underline underline-offset-4'>
+                Back to assets
+              </Link>
             </p>
           </>
         )}

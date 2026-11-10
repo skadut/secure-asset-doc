@@ -19,11 +19,13 @@ export function LevelBadge({ level }: { level: number }) {
     <Badge
       variant='outline'
       title={label}
-      className='border-transparent rounded-[4px] px-1.5 py-1 font-mono text-[11px] font-semibold tracking-[.04em]'
+      className='rounded-[4px] border-transparent px-1.5 py-1 font-mono text-[11px] font-semibold tracking-[.04em]'
       style={{
         backgroundColor: neutral ? 'var(--muted)' : `var(--viz-tlp-${k})`,
         color: neutral ? 'var(--foreground)' : `var(--viz-tlp-ink-${k})`,
-        boxShadow: strict ? `inset 0 0 0 2px var(--viz-tlp-ring-${k})` : undefined,
+        boxShadow: strict
+          ? `inset 0 0 0 2px var(--viz-tlp-ring-${k})`
+          : undefined,
       }}
     >
       <span aria-hidden='true'>Level {n}</span>

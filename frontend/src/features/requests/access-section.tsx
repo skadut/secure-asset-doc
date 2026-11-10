@@ -1,8 +1,17 @@
 import { useId, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ConfirmDialog } from '@/components/confirm-dialog'
-import { TlpBadge } from '@/components/tlp-badge'
+import {
+  ApiError,
+  createAccessRequest,
+  decideAccessRequest,
+  listAccessRequests,
+  listUsers,
+  revokeGrant,
+  type AccessRequest,
+  type Approval,
+} from '@/lib/access-api'
+import { getMe, type Me } from '@/lib/session'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -18,17 +27,8 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  ApiError,
-  createAccessRequest,
-  decideAccessRequest,
-  listAccessRequests,
-  listUsers,
-  revokeGrant,
-  type AccessRequest,
-  type Approval,
-} from '@/lib/access-api'
-import { getMe, type Me } from '@/lib/session'
+import { ConfirmDialog } from '@/components/confirm-dialog'
+import { TlpBadge } from '@/components/tlp-badge'
 import { grantsKey } from '@/features/operation/api'
 
 const DOC_RE = /^DOC-\d{4}$/
@@ -69,8 +69,12 @@ const STEP_TONE: Record<StepState, string> = {
 }
 
 const fmt = (iso: string) =>
-  new Date(iso).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })
-const errMsg = (e: unknown) => (e instanceof ApiError ? e.message : 'Terjadi kesalahan')
+  new Date(iso).toLocaleString('id-ID', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  })
+const errMsg = (e: unknown) =>
+  e instanceof ApiError ? e.message : 'Terjadi kesalahan'
 const isConflict = (e: unknown) => e instanceof ApiError && e.status === 409
 
 const viewerRoleOf = (me: Me, r: AccessRequest): ViewerRole => {
@@ -80,11 +84,19 @@ const viewerRoleOf = (me: Me, r: AccessRequest): ViewerRole => {
       ? 'security_officer'
       : 'commander'
   }
-  return me.accessLevel === 5 ? 'commander' : me.securityOfficer ? 'security_officer' : null
+  return me.accessLevel === 5
+    ? 'commander'
+    : me.securityOfficer
+      ? 'security_officer'
+      : null
 }
 
-function stepsOf(r: AccessRequest, now: number): { label: string; state: StepState }[] {
-  const denied = r.status === 'denied' || r.approvals.some((a) => a.decision === 'deny')
+function stepsOf(
+  r: AccessRequest,
+  now: number
+): { label: string; state: StepState }[] {
+  const denied =
+    r.status === 'denied' || r.approvals.some((a) => a.decision === 'deny')
   const approval = (role: Role): StepState => {
     const a = r.approvals.find((x) => x.role === role)
     if (a) return a.decision === 'approve' ? 'done' : 'bad'
@@ -92,13 +104,20 @@ function stepsOf(r: AccessRequest, now: number): { label: string; state: StepSta
   }
   const approved = r.status === 'approved'
   const halted = denied || r.status === 'cancelled'
-  const active = approved && (r.expiresAt === null || Date.parse(r.expiresAt) > now)
+  const active =
+    approved && (r.expiresAt === null || Date.parse(r.expiresAt) > now)
   return [
     { label: 'Diajukan', state: 'done' },
     { label: 'Persetujuan Komandan', state: approval('commander') },
-    { label: 'Persetujuan Perwira Keamanan', state: approval('security_officer') },
+    {
+      label: 'Persetujuan Perwira Keamanan',
+      state: approval('security_officer'),
+    },
     { label: 'Diberikan', state: approved ? 'done' : halted ? 'skip' : 'wait' },
-    { label: 'Aktif', state: halted ? 'skip' : !approved ? 'wait' : active ? 'done' : 'expired' },
+    {
+      label: 'Aktif',
+      state: halted ? 'skip' : !approved ? 'wait' : active ? 'done' : 'expired',
+    },
   ]
 }
 
@@ -108,16 +127,23 @@ function queueLabel(r: AccessRequest, me: Me, viewerRole: ViewerRole): string {
   if (r.status === 'cancelled') return 'Dibatalkan'
   if (r.requestedBy === me.username) return 'Permintaan Anda'
   if (r.grantee === me.username) return 'Menunggu persetujuan'
-  if (viewerRole && !r.approvals.some((a) => a.role === viewerRole)) return 'Perlu keputusan Anda'
+  if (viewerRole && !r.approvals.some((a) => a.role === viewerRole))
+    return 'Perlu keputusan Anda'
   return 'Menunggu persetujuan'
 }
 
-function validateCreate(f: { docId: string; grantee: string; reason: string; expires: string }): Errs {
+function validateCreate(f: {
+  docId: string
+  grantee: string
+  reason: string
+  expires: string
+}): Errs {
   const e: Errs = {}
   if (!DOC_RE.test(f.docId.trim())) e.docId = 'Format ID dokumen harus DOC-0000'
   if (!f.grantee) e.grantee = 'Pilih penerima akses'
   const len = [...f.reason.trim()].length
-  if (len < 1 || len > REASON_MAX) e.reason = `Alasan wajib diisi, maksimal ${REASON_MAX} karakter`
+  if (len < 1 || len > REASON_MAX)
+    e.reason = `Alasan wajib diisi, maksimal ${REASON_MAX} karakter`
   if (f.expires && !(new Date(f.expires).getTime() > Date.now()))
     e.expires = 'Waktu kedaluwarsa harus di masa depan'
   return e
@@ -126,7 +152,8 @@ function validateCreate(f: { docId: string; grantee: string; reason: string; exp
 function validateRevoke(docId: string, username: string): Errs {
   const e: Errs = {}
   if (!DOC_RE.test(docId.trim())) e.docId = 'Format ID dokumen harus DOC-0000'
-  if (!USERNAME_RE.test(username.trim())) e.username = 'Gunakan 3–40 huruf kecil, angka, titik, atau tanda hubung'
+  if (!USERNAME_RE.test(username.trim()))
+    e.username = 'Gunakan 3–40 huruf kecil, angka, titik, atau tanda hubung'
   return e
 }
 
@@ -143,7 +170,11 @@ type ItemProps = {
   me: Me
   viewerRole: ViewerRole
   deciding: boolean
-  onDecide: (r: AccessRequest, decision: 'approve' | 'deny', reason: string) => void
+  onDecide: (
+    r: AccessRequest,
+    decision: 'approve' | 'deny',
+    reason: string
+  ) => void
 }
 
 function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
@@ -152,7 +183,8 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
   const [now] = useState(() => Date.now())
   const isRequester = r.requestedBy === me.username
   const isGrantee = r.grantee === me.username
-  const decided = viewerRole !== null && r.approvals.some((a) => a.role === viewerRole)
+  const decided =
+    viewerRole !== null && r.approvals.some((a) => a.role === viewerRole)
   const locked = isRequester || isGrantee || decided || viewerRole === null
   const showDecision =
     r.status === 'pending' &&
@@ -167,7 +199,11 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
         <div className='flex flex-wrap items-center gap-2'>
           <TlpBadge tlp={r.tlp} />
           <span className='font-mono text-sm break-all'>{r.documentId}</span>
-          <Badge variant={queue === 'Perlu keputusan Anda' ? 'default' : 'outline'}>{queue}</Badge>
+          <Badge
+            variant={queue === 'Perlu keputusan Anda' ? 'default' : 'outline'}
+          >
+            {queue}
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className='flex flex-col gap-4'>
@@ -236,7 +272,10 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
               />
             </div>
             {isRequester && (
-              <p id={`${reasonId}-disabled`} className='text-sm text-muted-foreground'>
+              <p
+                id={`${reasonId}-disabled`}
+                className='text-sm text-muted-foreground'
+              >
                 Pemohon tidak dapat menyetujui permintaannya sendiri
               </p>
             )}
@@ -258,7 +297,9 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
             <div className='grid gap-2 sm:grid-cols-2'>
               <Button
                 disabled={locked || deciding}
-                aria-describedby={isRequester ? `${reasonId}-disabled` : undefined}
+                aria-describedby={
+                  isRequester ? `${reasonId}-disabled` : undefined
+                }
                 onClick={() => onDecide(r, 'approve', reason)}
               >
                 Setujui
@@ -266,7 +307,9 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
               <Button
                 variant='outline'
                 disabled={locked || deciding}
-                aria-describedby={isRequester ? `${reasonId}-disabled` : undefined}
+                aria-describedby={
+                  isRequester ? `${reasonId}-disabled` : undefined
+                }
                 onClick={() => onDecide(r, 'deny', reason)}
               >
                 Tolak
@@ -298,16 +341,23 @@ export function AccessSection() {
     enabled: canRequest,
   })
 
-  const refreshRequests = () => queryClient.invalidateQueries({ queryKey: ['access-requests'] })
+  const refreshRequests = () =>
+    queryClient.invalidateQueries({ queryKey: ['access-requests'] })
 
   const decide = useMutation({
-    mutationFn: (v: { id: string; documentId: string; decision: 'approve' | 'deny'; reason?: string }) =>
-      decideAccessRequest(v.id, { decision: v.decision, reason: v.reason }),
+    mutationFn: (v: {
+      id: string
+      documentId: string
+      decision: 'approve' | 'deny'
+      reason?: string
+    }) => decideAccessRequest(v.id, { decision: v.decision, reason: v.reason }),
     onSuccess: (res, v) => {
       toast.success(res.granted ? 'Akses diberikan' : 'Keputusan disimpan')
       void refreshRequests()
       if (res.granted)
-        void queryClient.invalidateQueries({ queryKey: ['document-grants', v.documentId] })
+        void queryClient.invalidateQueries({
+          queryKey: ['document-grants', v.documentId],
+        })
     },
     onError: (e) => {
       toast.error(errMsg(e))
@@ -316,7 +366,7 @@ export function AccessSection() {
   })
 
   const [docId, setDocId] = useState(
-    () => new URLSearchParams(window.location.search).get('doc') ?? '',
+    () => new URLSearchParams(window.location.search).get('doc') ?? ''
   )
   const [grantee, setGrantee] = useState('')
   const [reason, setReason] = useState('')
@@ -350,31 +400,51 @@ export function AccessSection() {
   const [revokeOpen, setRevokeOpen] = useState(false)
 
   const revoke = useMutation({
-    mutationFn: (v: { docId: string; username: string }) => revokeGrant(v.docId, v.username),
+    mutationFn: (v: { docId: string; username: string }) =>
+      revokeGrant(v.docId, v.username),
     onSuccess: (_, v) => {
       toast.success('Akses dicabut')
       setRevokeOpen(false)
       void refreshRequests()
-      void queryClient.invalidateQueries({ queryKey: ['document-grants', v.docId] })
+      void queryClient.invalidateQueries({
+        queryKey: ['document-grants', v.docId],
+      })
       void queryClient.invalidateQueries({ queryKey: grantsKey(v.docId) })
     },
     onError: (e, v) => {
       toast.error(errMsg(e))
       if (isConflict(e)) {
         void refreshRequests()
-        void queryClient.invalidateQueries({ queryKey: ['document-grants', v.docId] })
+        void queryClient.invalidateQueries({
+          queryKey: ['document-grants', v.docId],
+        })
       }
     },
   })
 
-  if (!me) return <p className='text-muted-foreground'>Sesi tidak tersedia. Muat ulang halaman.</p>
+  if (!me)
+    return (
+      <p className='text-muted-foreground'>
+        Sesi tidak tersedia. Muat ulang halaman.
+      </p>
+    )
 
   const list = requests.data ?? []
-  const createErrs = createAttempted ? validateCreate({ docId, grantee, reason, expires }) : {}
-  const revokeErrs = revokeAttempted ? validateRevoke(revokeDoc, revokeUser) : {}
-  const granteeOptions = (users.data ?? []).filter((u) => u.username !== me.username)
+  const createErrs = createAttempted
+    ? validateCreate({ docId, grantee, reason, expires })
+    : {}
+  const revokeErrs = revokeAttempted
+    ? validateRevoke(revokeDoc, revokeUser)
+    : {}
+  const granteeOptions = (users.data ?? []).filter(
+    (u) => u.username !== me.username
+  )
 
-  const onDecide = (r: AccessRequest, decision: 'approve' | 'deny', reasonText: string) =>
+  const onDecide = (
+    r: AccessRequest,
+    decision: 'approve' | 'deny',
+    reasonText: string
+  ) =>
     decide.mutate({
       id: r.id,
       documentId: r.documentId,
@@ -385,19 +455,26 @@ export function AccessSection() {
   const submitCreate = (e: FormEvent) => {
     e.preventDefault()
     setCreateAttempted(true)
-    if (Object.keys(validateCreate({ docId, grantee, reason, expires })).length === 0)
+    if (
+      Object.keys(validateCreate({ docId, grantee, reason, expires }))
+        .length === 0
+    )
       create.mutate()
   }
 
   const submitRevoke = (e: FormEvent) => {
     e.preventDefault()
     setRevokeAttempted(true)
-    if (Object.keys(validateRevoke(revokeDoc, revokeUser)).length === 0) setRevokeOpen(true)
+    if (Object.keys(validateRevoke(revokeDoc, revokeUser)).length === 0)
+      setRevokeOpen(true)
   }
 
   return (
     <section className='flex min-w-0 flex-col gap-6'>
-      <section aria-labelledby={`${uid}-queue`} className='flex min-w-0 flex-col gap-4'>
+      <section
+        aria-labelledby={`${uid}-queue`}
+        className='flex min-w-0 flex-col gap-4'
+      >
         <h2 id={`${uid}-queue`} className='text-lg font-semibold'>
           Permintaan akses
         </h2>
@@ -437,7 +514,11 @@ export function AccessSection() {
             <CardTitle>Ajukan akses</CardTitle>
           </CardHeader>
           <CardContent>
-            <form className='flex flex-col gap-4' noValidate onSubmit={submitCreate}>
+            <form
+              className='flex flex-col gap-4'
+              noValidate
+              onSubmit={submitCreate}
+            >
               <div className='flex flex-col gap-1.5'>
                 <Label htmlFor={`${uid}-doc`}>ID dokumen</Label>
                 <Input
@@ -446,7 +527,9 @@ export function AccessSection() {
                   placeholder='DOC-0001'
                   autoComplete='off'
                   aria-invalid={Boolean(createErrs.docId)}
-                  aria-describedby={createErrs.docId ? `${uid}-doc-err` : undefined}
+                  aria-describedby={
+                    createErrs.docId ? `${uid}-doc-err` : undefined
+                  }
                   onChange={(e) => setDocId(e.target.value)}
                 />
                 <FieldError id={`${uid}-doc-err`} msg={createErrs.docId} />
@@ -463,24 +546,34 @@ export function AccessSection() {
                     id={`${uid}-grantee`}
                     className='w-full'
                     aria-invalid={Boolean(createErrs.grantee)}
-                    aria-describedby={createErrs.grantee ? `${uid}-grantee-err` : undefined}
+                    aria-describedby={
+                      createErrs.grantee ? `${uid}-grantee-err` : undefined
+                    }
                   >
                     <SelectValue
-                      placeholder={users.isPending ? 'Memuat pengguna…' : 'Pilih penerima'}
+                      placeholder={
+                        users.isPending ? 'Memuat pengguna…' : 'Pilih penerima'
+                      }
                     />
                   </SelectTrigger>
                   <SelectContent>
                     {granteeOptions.map((u) => (
                       <SelectItem key={u.username} value={u.username}>
-                        {u.username} · {u.rankName ?? '—'} · Level {u.accessLevel}
+                        {u.username} · {u.rankName ?? '—'} · Level{' '}
+                        {u.accessLevel}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 {users.isError && (
-                  <p className='text-sm text-muted-foreground'>Daftar pengguna gagal dimuat.</p>
+                  <p className='text-sm text-muted-foreground'>
+                    Daftar pengguna gagal dimuat.
+                  </p>
                 )}
-                <FieldError id={`${uid}-grantee-err`} msg={createErrs.grantee} />
+                <FieldError
+                  id={`${uid}-grantee-err`}
+                  msg={createErrs.grantee}
+                />
               </div>
 
               <div className='flex flex-col gap-1.5'>
@@ -493,8 +586,14 @@ export function AccessSection() {
                   onChange={(e) => setReason(e.target.value)}
                 />
                 <div className='flex items-start justify-between gap-2 text-sm'>
-                  <FieldError id={`${uid}-reason-err`} msg={createErrs.reason} />
-                  <span id={`${uid}-reason-count`} className='ms-auto tabular-nums text-muted-foreground'>
+                  <FieldError
+                    id={`${uid}-reason-err`}
+                    msg={createErrs.reason}
+                  />
+                  <span
+                    id={`${uid}-reason-count`}
+                    className='ms-auto text-muted-foreground tabular-nums'
+                  >
                     {[...reason.trim()].length}/{REASON_MAX}
                   </span>
                 </div>
@@ -507,13 +606,22 @@ export function AccessSection() {
                   type='datetime-local'
                   value={expires}
                   aria-invalid={Boolean(createErrs.expires)}
-                  aria-describedby={createErrs.expires ? `${uid}-expires-err` : undefined}
+                  aria-describedby={
+                    createErrs.expires ? `${uid}-expires-err` : undefined
+                  }
                   onChange={(e) => setExpires(e.target.value)}
                 />
-                <FieldError id={`${uid}-expires-err`} msg={createErrs.expires} />
+                <FieldError
+                  id={`${uid}-expires-err`}
+                  msg={createErrs.expires}
+                />
               </div>
 
-              <Button type='submit' className='w-full sm:w-auto' disabled={create.isPending}>
+              <Button
+                type='submit'
+                className='w-full sm:w-auto'
+                disabled={create.isPending}
+              >
                 Ajukan akses
               </Button>
             </form>
@@ -527,7 +635,11 @@ export function AccessSection() {
             <CardTitle>Cabut akses</CardTitle>
           </CardHeader>
           <CardContent>
-            <form className='flex flex-col gap-4' noValidate onSubmit={submitRevoke}>
+            <form
+              className='flex flex-col gap-4'
+              noValidate
+              onSubmit={submitRevoke}
+            >
               <div className='flex flex-col gap-1.5'>
                 <Label htmlFor={`${uid}-rev-doc`}>ID dokumen</Label>
                 <Input
@@ -536,7 +648,9 @@ export function AccessSection() {
                   placeholder='DOC-0001'
                   autoComplete='off'
                   aria-invalid={Boolean(revokeErrs.docId)}
-                  aria-describedby={revokeErrs.docId ? `${uid}-rev-doc-err` : undefined}
+                  aria-describedby={
+                    revokeErrs.docId ? `${uid}-rev-doc-err` : undefined
+                  }
                   onChange={(e) => setRevokeDoc(e.target.value)}
                 />
                 <FieldError id={`${uid}-rev-doc-err`} msg={revokeErrs.docId} />
@@ -549,13 +663,22 @@ export function AccessSection() {
                   value={revokeUser}
                   autoComplete='off'
                   aria-invalid={Boolean(revokeErrs.username)}
-                  aria-describedby={revokeErrs.username ? `${uid}-rev-user-err` : undefined}
+                  aria-describedby={
+                    revokeErrs.username ? `${uid}-rev-user-err` : undefined
+                  }
                   onChange={(e) => setRevokeUser(e.target.value)}
                 />
-                <FieldError id={`${uid}-rev-user-err`} msg={revokeErrs.username} />
+                <FieldError
+                  id={`${uid}-rev-user-err`}
+                  msg={revokeErrs.username}
+                />
               </div>
 
-              <Button type='submit' variant='destructive' className='w-full sm:w-auto'>
+              <Button
+                type='submit'
+                variant='destructive'
+                className='w-full sm:w-auto'
+              >
                 Cabut akses
               </Button>
             </form>
@@ -573,7 +696,10 @@ export function AccessSection() {
         destructive
         isLoading={revoke.isPending}
         handleConfirm={() =>
-          revoke.mutate({ docId: revokeDoc.trim(), username: revokeUser.trim() })
+          revoke.mutate({
+            docId: revokeDoc.trim(),
+            username: revokeUser.trim(),
+          })
         }
       />
     </section>
