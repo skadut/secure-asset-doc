@@ -1,15 +1,16 @@
-import { useState } from 'react'
+import { useId, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { type Tlp } from '@/data/grc'
 import { toast } from 'sonner'
 import {
-  addGrant,
   ApiError,
+  createAccessRequest,
   listGrants,
   revokeGrant,
   type DirectoryUser,
 } from '@/lib/access-api'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -18,6 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { TlpBadge } from '@/components/tlp-badge'
 import {
@@ -30,7 +32,7 @@ import {
 import { grantsKey, usersKey, type OperationDocument } from '../api'
 import { LevelBadge } from './level-badge'
 
-type Target = { username: string; docId: string; action: 'grant' | 'revoke' }
+type Target = { username: string; docId: string }
 
 export function switchFor(state: CellState): {
   checked: boolean
@@ -62,7 +64,8 @@ export function AccessPanel({
   const [query, setQuery] = useState('')
   const [dim, setDim] = useState<UserDimension>('all')
   const [dimValue, setDimValue] = useState('all')
-  const [target, setTarget] = useState<Target | null>(null)
+  const [revokeTarget, setRevokeTarget] = useState<Target | null>(null)
+  const [requestTarget, setRequestTarget] = useState<Target | null>(null)
   const queryClient = useQueryClient()
   const tlpDocs =
     tlpFilter === 'ALL' ? docs : docs.filter((item) => item.tlp === tlpFilter)
@@ -101,34 +104,22 @@ export function AccessPanel({
   const grantCount = users.filter((user) => stateFor(user) === 'grant').length
   const levelCount = users.filter((user) => stateFor(user) === 'level').length
 
-  const changeGrant = useMutation({
+  const revokeAccess = useMutation({
     mutationFn: (pending: Target) =>
-      pending.action === 'grant'
-        ? addGrant(pending.docId, pending.username)
-        : revokeGrant(pending.docId, pending.username),
+      revokeGrant(pending.docId, pending.username),
     onSuccess: async (_data, pending) => {
-      toast.success(
-        pending.action === 'grant'
-          ? `Akses ${pending.username} ke ${pending.docId} diberikan`
-          : `Akses ${pending.username} ke ${pending.docId} dicabut`
-      )
-      setTarget(null)
+      toast.success(`Akses ${pending.username} ke ${pending.docId} dicabut`)
+      setRevokeTarget(null)
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: grantsKey(pending.docId) }),
         queryClient.invalidateQueries({ queryKey: usersKey }),
       ])
     },
-    onError: (error, pending) =>
+    onError: (error) =>
       toast.error(
-        error instanceof ApiError
-          ? error.message
-          : pending.action === 'grant'
-            ? 'Gagal memberi akses'
-            : 'Gagal mencabut akses'
+        error instanceof ApiError ? error.message : 'Gagal mencabut akses'
       ),
   })
-
-  const pendingGrant = target?.action === 'grant'
 
   return (
     <section className='flex min-w-0 flex-col gap-4'>
@@ -322,15 +313,16 @@ export function AccessPanel({
                       </div>
                       <Switch
                         checked={control.checked}
-                        disabled={control.disabled || changeGrant.isPending}
+                        disabled={control.disabled || revokeAccess.isPending}
                         aria-label={label}
-                        onCheckedChange={(checked) =>
-                          setTarget({
+                        onCheckedChange={(checked) => {
+                          const next = {
                             username: user.username,
                             docId: doc.id,
-                            action: checked ? 'grant' : 'revoke',
-                          })
-                        }
+                          }
+                          if (checked) setRequestTarget(next)
+                          else setRevokeTarget(next)
+                        }}
                       />
                     </li>
                   )
@@ -342,31 +334,131 @@ export function AccessPanel({
       )}
 
       <p className='text-xs text-muted-foreground'>
-        Server memutuskan akses. Switch menambah grant tanpa tanggal kedaluwarsa
-        atau mencabut grant aktif.
+        Switch ON mengajukan permintaan akses yang harus disetujui dua pihak.
+        Switch OFF mencabut grant aktif.
       </p>
 
       <ConfirmDialog
-        open={target !== null}
+        open={revokeTarget !== null}
         onOpenChange={(open) => {
-          if (!open && !changeGrant.isPending) setTarget(null)
+          if (!open && !revokeAccess.isPending) setRevokeTarget(null)
         }}
-        title={pendingGrant ? 'Beri akses?' : 'Cabut akses?'}
+        title='Cabut akses?'
         desc={
-          target
-            ? pendingGrant
-              ? `Tambahkan grant tanpa tanggal kedaluwarsa untuk ${target.username} ke dokumen ${target.docId}?`
-              : `Cabut grant aktif ${target.username} ke dokumen ${target.docId}?`
+          revokeTarget
+            ? `Cabut grant aktif ${revokeTarget.username} ke dokumen ${revokeTarget.docId}?`
             : ''
         }
-        destructive={!pendingGrant}
+        destructive
         cancelBtnText='Batal'
-        confirmText={pendingGrant ? 'Beri akses' : 'Cabut akses'}
-        isLoading={changeGrant.isPending}
+        confirmText='Cabut akses'
+        isLoading={revokeAccess.isPending}
         handleConfirm={() => {
-          if (target) changeGrant.mutate(target)
+          if (revokeTarget) revokeAccess.mutate(revokeTarget)
         }}
       />
+
+      {requestTarget && (
+        <AccessRequestDialog
+          target={requestTarget}
+          onClose={() => setRequestTarget(null)}
+        />
+      )}
     </section>
+  )
+}
+
+function AccessRequestDialog({
+  target,
+  onClose,
+}: {
+  target: Target
+  onClose: () => void
+}) {
+  const formId = useId()
+  const reasonId = useId()
+  const expiryId = useId()
+  const queryClient = useQueryClient()
+  const [reason, setReason] = useState('')
+  const [expiry, setExpiry] = useState('')
+  const trimmed = reason.trim()
+  const valid = trimmed.length >= 1 && trimmed.length <= 500
+
+  const submit = useMutation({
+    mutationFn: () =>
+      createAccessRequest(target.docId, {
+        grantee: target.username,
+        reason: trimmed,
+        ...(expiry
+          ? {
+              expiresAt: new Date(`${expiry}T23:59:59.999`).toISOString(),
+            }
+          : {}),
+      }),
+    onSuccess: async () => {
+      toast.success(
+        `Permintaan akses ${target.username} ke ${target.docId} diajukan`
+      )
+      onClose()
+      await queryClient.invalidateQueries({ queryKey: ['access-requests'] })
+    },
+    onError: (error) =>
+      toast.error(
+        error instanceof ApiError
+          ? error.message
+          : 'Gagal mengajukan permintaan akses'
+      ),
+  })
+
+  return (
+    <ConfirmDialog
+      open
+      onOpenChange={(open) => {
+        if (!open && !submit.isPending) onClose()
+      }}
+      title='Ajukan permintaan akses'
+      desc={
+        <>
+          Pengguna <span className='font-mono'>{target.username}</span>, dokumen{' '}
+          <span className='font-mono'>{target.docId}</span>. Permintaan ini
+          membutuhkan persetujuan ganda di Otorisasi ganda sebelum akses aktif.
+        </>
+      }
+      cancelBtnText='Batal'
+      confirmText='Ajukan permintaan'
+      form={formId}
+      disabled={!valid}
+      isLoading={submit.isPending}
+    >
+      <form
+        id={formId}
+        className='grid gap-4'
+        onSubmit={(event: FormEvent) => {
+          event.preventDefault()
+          if (valid && !submit.isPending) submit.mutate()
+        }}
+      >
+        <div className='grid gap-2'>
+          <Label htmlFor={reasonId}>Alasan permintaan</Label>
+          <Textarea
+            id={reasonId}
+            required
+            maxLength={500}
+            value={reason}
+            onChange={(event) => setReason(event.target.value)}
+          />
+        </div>
+        <div className='grid gap-2'>
+          <Label htmlFor={expiryId}>Berlaku sampai (opsional)</Label>
+          <Input
+            id={expiryId}
+            type='date'
+            value={expiry}
+            onChange={(event) => setExpiry(event.target.value)}
+            className='min-h-11'
+          />
+        </div>
+      </form>
+    </ConfirmDialog>
   )
 }

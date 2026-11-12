@@ -166,13 +166,6 @@ export async function revokeGrant(
   )
 }
 
-export async function addGrant(docId: string, username: string): Promise<void> {
-  await request(`/api/documents/${encodeURIComponent(docId)}/grants`, {
-    method: 'POST',
-    body: JSON.stringify({ username }),
-  })
-}
-
 export function listLevelRequests(): Promise<LevelRequest[]> {
   return call('/api/level-requests')
 }
