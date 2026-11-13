@@ -1,6 +1,6 @@
 # Run di PowerShell (copy-paste)
 
-Setiap blok bisa langsung di-paste ke **Windows PowerShell**. Setiap blok mulai dengan `Set-Location`, jadi aman di-paste di folder mana pun. Untuk perintah yang meminta PIN, pakai PowerShell, jangan Git Bash. Jangan menebak PIN, karena setiap PIN salah menaikkan lockout TPM. Penjelasan lengkap ada di [TUTORIAL.md](TUTORIAL.md).
+Setiap blok bisa langsung di-paste ke **Windows PowerShell**. Setiap blok mulai dengan `Set-Location`, jadi aman di-paste di folder mana pun. Untuk perintah yang meminta PIN, pakai PowerShell, jangan Git Bash. Jangan menebak PIN, karena setiap PIN salah menaikkan lockout TPM. Penjelasan lengkap ada di [tutorial-operator.md](tutorial-operator.md).
 
 Daftar isi:
 - [Versi 1: Boot dari 0](#versi-1-boot-dari-0)

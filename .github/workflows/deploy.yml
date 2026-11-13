@@ -26,7 +26,7 @@ jobs:
           rsync -a --delete \
             --exclude '.git/' --exclude '.env' \
             --exclude 'cryptography-service/run/' \
-            --exclude 'db/CREDENTIALS.md' \
+            --exclude 'docs/demo/akun-demo.md' \
             ./ "$APP_DIR/"
 
   build-frontend:

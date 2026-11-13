@@ -2,6 +2,8 @@
 
 Panduan ini untuk operator yang menjalankan perintah sendiri di PowerShell. Gunakan hanya data demo. Jangan masukkan data pribadi, operasional, atau rahasia nyata.
 
+Screenshot jalur TPM native (start, fingerprint, verifikasi audit) ada di [tpm-native-demo.md](tpm-native-demo.md). Versi copy-paste semua skenario PowerShell ada di [run-powershell.md](run-powershell.md).
+
 ## 0. Prasyarat
 
 - Windows dengan TPM 2.0. Buka PowerShell sebagai Administrator, jalankan:
@@ -221,7 +223,7 @@ Dari `cryptography-service\tpm-services\`, jalankan:
 & .\bin\tpm-msk.exe audit verify "$env:APPDATA\tpm-msk\audit.jsonl"
 ```
 
-Hasil yang diharapkan untuk tiap file yang ada: `OK (<jumlah> records)` dan exit code `0`. Jika file belum ada, layanan belum menghasilkan audit; ulangi setelah layanan mencatat aktivitas. Jika muncul `broken at line ...`, simpan informasi file/baris dan hentikan penggunaan log tersebut sampai penyebabnya diselidiki. `audit verify` memverifikasi rantai hash, bukan tanda tangan audit.
+Hasil yang diharapkan untuk tiap file yang ada: `OK (<jumlah> records)` dan exit code `0`. Jika file belum ada, layanan belum menghasilkan audit; ulangi setelah layanan mencatat aktivitas. Jika muncul `broken at line ...`, simpan informasi file/baris dan hentikan penggunaan log tersebut sampai penyebabnya diselidiki. `audit verify` memverifikasi rantai hash, bukan tanda tangan audit. Contoh hasil nyata ada di [tpm-native-demo.md](tpm-native-demo.md#verifikasi-audit).
 
 ## 7. Troubleshooting
 

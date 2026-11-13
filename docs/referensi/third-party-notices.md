@@ -1,4 +1,6 @@
-# Third-party notices
+# Pemberitahuan pihak ketiga
+
+Dokumen ini mencantumkan referensi tampilan dan lisensi pihak ketiga yang dipakai proyek. Teks lisensi di bawah dipertahankan apa adanya dalam bahasa Inggris.
 
 The following appearance references were adapted from the Uiverse.io Galaxy repository. Only CSS and markup structure were borrowed, adapted to project tokens, and scoped under `.ui-…` class names. No code is loaded from Uiverse at runtime.
 

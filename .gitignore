@@ -49,7 +49,6 @@ docs/versi-lama/crypt-module-vault/crypt-module.exe
 cryptography-service/tpm-services/bin/
 
 # Secrets and local key material (never commit)
-db/CREDENTIALS.md
 .env.*
 !.env.example
 *.key

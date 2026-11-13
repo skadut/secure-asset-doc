@@ -1,23 +1,25 @@
-# Service Traffic Visualization Guide
+# Panduan visualisasi lalu lintas layanan
 
-A general guide for building a live, animated service-to-service traffic map without adding any new infrastructure. Existing services record their own traffic in memory, one service exposes the aggregated data, and the frontend fetches and renders it as an interactive node graph.
+Panduan umum untuk membangun peta lalu lintas antar layanan yang hidup dan beranimasi tanpa menambah infrastruktur baru. Layanan yang ada mencatat lalu lintasnya sendiri di memori, satu layanan mengekspos data agregat, dan frontend mengambil lalu merendernya sebagai graph node interaktif.
+
+Untuk penerapan di proyek ini, lihat [desain keamanan](../keamanan/desain-keamanan.md#lalu-lintas-layanan) dan [run.md](../operasi/run.md).
 
 ---
 
-## 1. Overview
+## 1. Ringkasan
 
-### Goal
+### Tujuan
 
-Display each service as a node and each communication path as an animated edge. Each edge shows live metrics such as request rate, error rate, and latency.
+Tampilkan setiap layanan sebagai node dan setiap jalur komunikasi sebagai edge beranimasi. Setiap edge menunjukkan metrik live seperti request rate, error rate, dan latensi.
 
-### Principles
+### Prinsip
 
-- **No new services.** No Prometheus, no collector, no separate aggregator. Only libraries and endpoints inside existing services.
-- **The sender counts.** Each edge is recorded by the service that initiates the request.
-- **One public entry point.** The frontend only talks to one service (usually the backend API). Internal services stay unexposed.
-- **Metadata only.** Record counts, durations, and status codes. Never record payloads, tokens, or key material.
+- **Tanpa layanan baru.** Tanpa Prometheus, tanpa collector, tanpa agregator terpisah. Hanya library dan endpoint di dalam layanan yang ada.
+- **Pengirim yang menghitung.** Setiap edge dicatat oleh layanan yang memulai request.
+- **Satu titik masuk publik.** Frontend hanya berbicara ke satu layanan (biasanya API backend). Layanan internal tetap tidak diekspos.
+- **Hanya metadata.** Catat jumlah, durasi, dan status code. Jangan pernah mencatat payload, token, atau material kunci.
 
-### Architecture
+### Arsitektur
 
 ```
 Frontend ──(normal requests)──► Backend API ──► Service A
@@ -29,34 +31,34 @@ Frontend ──(normal requests)──► Backend API ──► Service A
 
 ---
 
-## 2. Define the Graph Model
+## 2. Definisikan model graph
 
-Before writing code, list every edge you expect and decide which service records it.
+Sebelum menulis kode, daftar setiap edge yang diharapkan dan putuskan layanan mana yang mencatatnya.
 
-| Source | Target | Protocol | Recorded by |
+| Sumber | Target | Protokol | Dicatat oleh |
 |---|---|---|---|
-| frontend | backend | HTTPS | backend (inbound middleware) |
-| backend | service-a | HTTP / SQL / gRPC | backend (outbound wrapper) |
-| backend | service-b | HTTP / gRPC | backend (outbound wrapper) |
-| service-b | service-c | HTTP | service-b (outbound wrapper) |
+| frontend | backend | HTTPS | backend (middleware inbound) |
+| backend | service-a | HTTP / SQL / gRPC | backend (wrapper outbound) |
+| backend | service-b | HTTP / gRPC | backend (wrapper outbound) |
+| service-b | service-c | HTTP | service-b (wrapper outbound) |
 
-Use stable, lowercase service IDs. The same IDs must be used in the backend recorder and in the frontend node list.
+Pakai ID layanan huruf kecil yang stabil. ID yang sama harus dipakai di recorder backend dan di daftar node frontend.
 
-### Metrics per edge
+### Metrik per edge
 
-| Metric | Description | Visual mapping |
+| Metrik | Deskripsi | Pemetaan visual |
 |---|---|---|
-| `rps` | Requests per second over a sliding window | Number or speed of moving particles |
-| `errorRate` | Failed requests / total requests | Edge color |
-| `avgMs` (or p95) | Average or percentile latency | Label or stroke width |
+| `rps` | Request per detik pada jendela geser | Jumlah atau kecepatan partikel bergerak |
+| `errorRate` | Request gagal / total request | Warna edge |
+| `avgMs` (atau p95) | Latensi rata-rata atau persentil | Label atau lebar stroke |
 
 ---
 
-## 3. Record Traffic In Memory
+## 3. Catat lalu lintas di memori
 
-Create a small shared library (not a service) that every participating service imports. It keeps per-second buckets for each edge and computes stats over a sliding window.
+Buat library bersama kecil (bukan service) yang diimpor setiap layanan peserta. Library menyimpan bucket per detik untuk setiap edge dan menghitung statistik pada jendela geser.
 
-### Example (Go)
+### Contoh (Go)
 
 ```go
 package traffic
@@ -138,17 +140,17 @@ func (r *Recorder) Snapshot() []EdgeStats {
 }
 ```
 
-A 10-second window (`NewRecorder(10 * time.Second)`) gives a responsive, live-feeling graph. Use a longer window for smoother numbers.
+Jendela 10 detik (`NewRecorder(10 * time.Second)`) memberi graph yang responsif dan terasa live. Pakai jendela lebih panjang untuk angka yang lebih halus.
 
-### Other languages
+### Bahasa lain
 
-The same design works anywhere: a mutex-protected map of `edge -> second -> {count, errors, totalMs}`, a `record()` function, and a `snapshot()` function that prunes old buckets.
+Desain yang sama bekerja di mana saja: map yang dilindungi mutex dengan bentuk `edge -> second -> {count, errors, totalMs}`, fungsi `record()`, dan fungsi `snapshot()` yang memangkas bucket lama.
 
 ---
 
-## 4. Hook Into Existing Calls
+## 4. Hubungkan ke panggilan yang ada
 
-### Inbound (the public service counts frontend traffic)
+### Inbound (layanan publik menghitung lalu lintas frontend)
 
 ```go
 func TrafficMiddleware(rec *traffic.Recorder, next http.Handler) http.Handler {
@@ -172,7 +174,7 @@ type statusWriter struct {
 func (s *statusWriter) WriteHeader(c int) { s.code = c; s.ResponseWriter.WriteHeader(c) }
 ```
 
-### Outbound HTTP (any service calling another)
+### HTTP outbound (layanan mana pun yang memanggil layanan lain)
 
 ```go
 type MeteredTransport struct {
@@ -195,9 +197,9 @@ client := &http.Client{Transport: &MeteredTransport{
 }}
 ```
 
-### Outbound non-HTTP (SQL drivers, gRPC, message queues)
+### Outbound non-HTTP (driver SQL, gRPC, message queue)
 
-Wrap the call site directly:
+Bungkus langsung di call site:
 
 ```go
 start := time.Now()
@@ -205,15 +207,15 @@ err := repo.Query(ctx, ...)
 rec.Record("backend", "service-a", time.Since(start), err != nil)
 ```
 
-For gRPC, use a unary client interceptor with the same logic.
+Untuk gRPC, pakai unary client interceptor dengan logika yang sama.
 
 ---
 
-## 5. Expose and Merge the Stats
+## 5. Ekspos dan gabungkan statistik
 
-### Internal services
+### Layanan internal
 
-Each internal service that records edges exposes its snapshot on an internal-only endpoint.
+Setiap layanan internal yang mencatat edge mengekspos snapshot-nya di endpoint khusus internal.
 
 ```go
 mux.HandleFunc("/internal/traffic", func(w http.ResponseWriter, r *http.Request) {
@@ -222,11 +224,11 @@ mux.HandleFunc("/internal/traffic", func(w http.ResponseWriter, r *http.Request)
 })
 ```
 
-Restrict this endpoint to the internal network or require mTLS from the backend.
+Batasi endpoint ini ke jaringan internal atau wajibkan mTLS dari backend.
 
-### Public service (aggregation point)
+### Layanan publik (titik agregasi)
 
-The backend merges its own snapshot with each internal service's snapshot and returns a single response.
+Backend menggabungkan snapshot-nya sendiri dengan snapshot setiap layanan internal dan mengembalikan satu respons.
 
 ```go
 mux.HandleFunc("/api/traffic", func(w http.ResponseWriter, r *http.Request) {
@@ -246,7 +248,7 @@ mux.HandleFunc("/api/traffic", func(w http.ResponseWriter, r *http.Request) {
 })
 ```
 
-### Response shape
+### Bentuk respons
 
 ```json
 {
@@ -258,17 +260,17 @@ mux.HandleFunc("/api/traffic", func(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-### Node health (optional)
+### Kesehatan node (opsional)
 
-If an internal `/internal/traffic` call fails, include that service in a `down` list in the response so the frontend can mark the node red.
+Jika panggilan `/internal/traffic` gagal, sertakan layanan itu dalam daftar `down` pada respons agar frontend dapat menandai node merah.
 
 ---
 
-## 6. Render in the Frontend
+## 6. Render di frontend
 
-This example uses React Flow (`npm i @xyflow/react`). The same concept applies to D3, Cytoscape.js, or plain SVG.
+Contoh ini memakai React Flow (`npm i @xyflow/react`). Konsep yang sama berlaku untuk D3, Cytoscape.js, atau SVG biasa.
 
-### Fetch the data
+### Ambil data
 
 ```tsx
 type EdgeStats = { source: string; target: string; rps: number; errorRate: number; avgMs: number };
@@ -291,7 +293,7 @@ function useTraffic(intervalMs = 2000) {
 }
 ```
 
-### Animated edge
+### Edge beranimasi
 
 ```tsx
 import { BaseEdge, getBezierPath, EdgeProps } from "@xyflow/react";
@@ -329,7 +331,7 @@ export function TrafficEdge(props: EdgeProps) {
 }
 ```
 
-### Graph component
+### Komponen graph
 
 ```tsx
 import { ReactFlow, Background, Controls } from "@xyflow/react";
@@ -365,45 +367,45 @@ export function TrafficMap() {
 }
 ```
 
-### Visual enhancements
+### Peningkatan visual
 
-- **Custom nodes:** icon, name, status dot, and a badge with the total inbound rps.
-- **Idle state:** dim nodes and edges with no traffic in the current window.
-- **Detail panel:** on node or edge click, show a small history chart. Keep the last N snapshots in frontend state to build it without any backend storage.
-- **Highlighting:** on node hover, emphasize its connected edges and fade the rest.
-
----
-
-## 7. Security Checklist
-
-- Protect `/api/traffic` with the same authentication and authorization as the rest of the admin UI. A topology map is useful reconnaissance for an attacker.
-- Keep `/internal/traffic` endpoints off the public network. Require mTLS or network policy restrictions.
-- Record metadata only. Do not put payloads, user IDs, tokens, secrets, or key identifiers into edge labels or stats.
-- Keep the label set small and fixed (service IDs only) to avoid unbounded memory growth.
-- Exclude the dashboard's own polling from the counts.
-- Rate-limit `/api/traffic` so the dashboard cannot be used to load the backend or fan out to internal services.
+- **Node khusus:** ikon, nama, titik status, dan badge berisi total rps masuk.
+- **Keadaan idle:** redupkan node dan edge tanpa lalu lintas pada jendela saat ini.
+- **Panel detail:** saat node atau edge diklik, tampilkan grafik riwayat kecil. Simpan N snapshot terakhir di state frontend untuk membangunnya tanpa penyimpanan backend.
+- **Penyorotan:** saat node di-hover, tegaskan edge yang terhubung dan redupkan sisanya.
 
 ---
 
-## 8. Limitations and Upgrade Paths
+## 7. Checklist keamanan
 
-| Limitation | Impact | Upgrade path |
+- Lindungi `/api/traffic` dengan autentikasi dan otorisasi yang sama dengan sisa UI admin. Peta topologi berguna untuk reconnaissance penyerang.
+- Jauhkan endpoint `/internal/traffic` dari jaringan publik. Wajibkan mTLS atau pembatasan network policy.
+- Catat metadata saja. Jangan menaruh payload, user ID, token, secret, atau identifier kunci ke label edge atau statistik.
+- Jaga set label tetap kecil dan tetap (hanya ID layanan) untuk menghindari pertumbuhan memori tanpa batas.
+- Kecualikan polling dashboard sendiri dari hitungan.
+- Rate-limit `/api/traffic` agar dashboard tidak dapat dipakai untuk membebani backend atau membanjiri layanan internal.
+
+---
+
+## 8. Batasan dan jalur peningkatan
+
+| Batasan | Dampak | Jalur peningkatan |
 |---|---|---|
-| In-memory stats | Reset on restart | Acceptable for a live view; add persistence only if history is required |
-| Multiple replicas | Each replica only knows its own traffic | Have the backend query every replica, or move to a shared metrics store later |
-| Polling | Slight delay and extra requests | Switch `/api/traffic` to Server-Sent Events (SSE) |
-| Third-party services you cannot modify | No self-reporting | Count them from the caller side, or read their built-in metrics endpoint if one exists |
+| Statistik di memori | Reset saat restart | Dapat diterima untuk tampilan live; tambahkan persistensi hanya jika riwayat dibutuhkan |
+| Beberapa replika | Setiap replika hanya tahu lalu lintasnya sendiri | Buat backend menanyakan setiap replika, atau pindah ke metrics store bersama nanti |
+| Polling | Sedikit jeda dan request tambahan | Ganti `/api/traffic` ke Server-Sent Events (SSE) |
+| Layanan pihak ketiga yang tidak dapat diubah | Tidak ada self-reporting | Hitung dari sisi pemanggil, atau baca endpoint metrik bawaan jika ada |
 
 ---
 
-## 9. Implementation Order
+## 9. Urutan implementasi
 
-1. Write the edge table (Section 2) and agree on service IDs.
-2. Add the shared recorder library.
-3. Add the inbound middleware to the public service.
-4. Wrap every outbound client in every service.
-5. Add `/internal/traffic` to internal services and `/api/traffic` to the backend.
-6. Verify with `curl /api/traffic` while generating some load.
-7. Build the frontend graph with static node positions.
-8. Add the animated edge and color mapping.
-9. Add custom nodes, the detail panel, and the security hardening.
+1. Tulis tabel edge (bagian 2) dan sepakati ID layanan.
+2. Tambah library recorder bersama.
+3. Tambah middleware inbound ke layanan publik.
+4. Bungkus setiap client outbound di setiap layanan.
+5. Tambah `/internal/traffic` ke layanan internal dan `/api/traffic` ke backend.
+6. Verifikasi dengan `curl /api/traffic` sambil menghasilkan beban.
+7. Bangun graph frontend dengan posisi node statis.
+8. Tambah edge beranimasi dan pemetaan warna.
+9. Tambah node khusus, panel detail, dan pengerasan keamanan.
