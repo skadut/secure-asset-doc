@@ -192,7 +192,8 @@ async function grc() {
     dbq("SELECT id, fn, category, category_name, outcome FROM csf_subcategories ORDER BY array_position(ARRAY['GV','ID','PR','DE','RS','RC']::text[], fn), id"),
     dbq('SELECT subcategory_id, document_id, asset_id, note FROM evidence_links ORDER BY id'),
     dbq('SELECT asset_id, document_id FROM asset_document_links ORDER BY asset_id, document_id'),
-    dbq('SELECT id, at, actor, action, object_type, object_id, summary, changes FROM audit_events ORDER BY id'),
+    // ponytail: audit view capped at 5000 newest events; add pagination when older history is needed.
+    dbq('SELECT * FROM (SELECT id, at, actor, action, object_type, object_id, summary, changes FROM audit_events ORDER BY id DESC LIMIT 5000) t ORDER BY id'),
   ]);
 
   const versionsByDoc = new Map();

@@ -11,12 +11,12 @@ function main() {
   assert.equal(isCredentialColumn('password_hash'), true);
   assert.equal(isCredentialColumn('totp_secret'), true);
   assert.equal(isCredentialColumn('Password'), true);
-  assert.equal(isCredentialColumn('token_hash'), false);
+  assert.equal(isCredentialColumn('token_hash'), true);
   assert.equal(isCredentialColumn('username'), false);
   assert.equal(maskCell('password_hash', '$2b$hash'), '[DISEMBUNYIKAN]');
   assert.equal(maskCell('totp_secret', 'JBSWY3DP'), '[DISEMBUNYIKAN]');
   assert.equal(maskCell('password_hash', null), null);
-  assert.equal(maskCell('token_hash', 'abc'), 'abc');
+  assert.equal(maskCell('token_hash', 'abc'), '[DISEMBUNYIKAN]');
   assert.equal(maskCell('username', 'alice'), 'alice');
   assert.equal(maskCell('id', 42), 42);
 

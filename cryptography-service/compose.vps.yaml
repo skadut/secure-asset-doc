@@ -21,9 +21,22 @@ services:
     secrets: [tpm_pin]
     volumes:
       - tpm-msk-data:/data
+      # only the three files tpm-msk loads are mounted; CA private keys stay out of the container
       - type: bind
-        source: ./cryptography-service/run/pki
-        target: /run/pki
+        source: ./cryptography-service/run/pki/keyzone/ca.pem
+        target: /run/pki/keyzone/ca.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./cryptography-service/run/pki/keyzone/tpm-service.pem
+        target: /run/pki/keyzone/tpm-service.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./cryptography-service/run/pki/keyzone/tpm-service-key.pem
+        target: /run/pki/keyzone/tpm-service-key.pem
         read_only: true
         bind:
           create_host_path: false

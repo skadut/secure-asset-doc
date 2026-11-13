@@ -7,7 +7,7 @@ export function truncate(v) {
   return `${v.slice(0, MAX_CELL)}… (${v.length} chars)`;
 }
 
-const CREDENTIAL_COL = /password|totp|secret/i;
+const CREDENTIAL_COL = /password|totp|secret|token_hash/i;
 export const isCredentialColumn = (name) => CREDENTIAL_COL.test(String(name));
 export function maskCell(colName, value) {
   if (value === null) return null;

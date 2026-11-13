@@ -1,5 +1,6 @@
 // Route handlers: login (step 1), otp (step 2), device-check, logout, me, ranks. Deps injected from server.mjs.
-import { RANKS, verifyPassword, dummyVerify, createChallengeStore } from './auth.mjs';
+import net from 'node:net';
+import { RANKS, verifyPassword, dummyVerify, createChallengeStore, createLoginLimiter } from './auth.mjs';
 import { findLoginUser, lookupSession, createSession, destroySession, meFromRow, meJson, sidSetCookie, sidClearCookie, readPreferences, patchPreferences, validatePreferencesPatch, preferencesBodyTooLarge, mergePreferences, DEFAULT_PREFERENCES } from './session.mjs';
 import { post } from './crypto-client.mjs';
 
@@ -14,7 +15,12 @@ const challenges = createChallengeStore();
 const PRIVATE = /^(::ffff:)?(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)|^::1$/;
 
 export function makeAuthRoutes({ q, send, readRaw, limiter, verify = verifyPassword, dummy = dummyVerify, challengeStore = challenges, cryptoPost = cryptoPostDefault }) {
-  const ipOf = (req) => req.socket.remoteAddress ?? '';
+  const ipLimiter = createLoginLimiter({ max: 20, windowMs: 5 * 60 * 1000 });
+  const ipOf = (req) => {
+    const real = req.headers['x-real-ip'];
+    if (typeof real === 'string' && net.isIP(real) !== 0) return real;
+    return req.socket.remoteAddress ?? '';
+  };
   let cryptoCache = null;
   let cryptoInflight = null;
   const CRYPTO_FAIL = { status: 'fail', note: 'crypto-api tidak merespons' };
@@ -42,12 +48,13 @@ export function makeAuthRoutes({ q, send, readRaw, limiter, verify = verifyPassw
   // Counts one failure (password or code) on the account. Lock at MAX_FAILS: reset counter to 0, set locked_until +15 min.
   // Returns attemptsLeft after this failure. Unknown user (user === null): audit only, no DB row touched.
   async function recordFail(user, username, action, ip) {
-    const detail = JSON.stringify({ ip });
     const label = action === 'login.code.fail' ? 'code' : 'password';
     if (!user) {
-      await q('SELECT log_audit($1, $2, $3, $4, $5, $6::jsonb)', [username, action, 'user', username, `Failed ${label} authentication`, detail]);
+      const detail = JSON.stringify({ ip, username: String(username).slice(0, 64) });
+      await q('SELECT log_audit($1, $2, $3, $4, $5, $6::jsonb)', ['unknown', action, 'user', 'unknown', `Failed ${label} authentication`, detail]);
       return MAX_FAILS - 1;
     }
+    const detail = JSON.stringify({ ip });
     const { rows } = await q(
       `UPDATE users SET
          failed_attempts = CASE WHEN failed_attempts + 1 >= $2 THEN 0 ELSE failed_attempts + 1 END,
@@ -80,10 +87,9 @@ export function makeAuthRoutes({ q, send, readRaw, limiter, verify = verifyPassw
     const { username, password } = body;
     if (username.length > 64 || password.length > MAX_PASSWORD) return send(res, 400, { error: 'bad request' });
 
-    // Limiter key unchanged from the original code (x-real-ip, falling back to socket).
     const ip = ipOf(req);
-    const key = `${username}|${req.headers['x-real-ip'] ?? ip}`;
-    if (limiter.isLimited(key)) return send(res, 429, { error: 'rate_limited' });
+    const key = `${username}|${ip}`;
+    if (limiter.isLimited(key) || ipLimiter.isLimited(ip)) return send(res, 429, { error: 'rate_limited' });
 
     const user = USERNAME.test(username) ? await findLoginUser(q, username) : null;
     // Same crypto round trip on unknown user, so timing does not reveal existence.
@@ -92,6 +98,7 @@ export function makeAuthRoutes({ q, send, readRaw, limiter, verify = verifyPassw
     if (user?.active && ok && isLocked(user)) return send(res, 423, lockedBody(user));
     if (!user || !ok || !user.active) {
       limiter.recordFailure(key);
+      ipLimiter.recordFailure(ip);
       // No counting while locked: the lock already blocks sign-in, and counting would re-arm it.
       if (!(user?.active && isLocked(user))) await recordFail(user?.active ? user : null, username, 'login.password.fail', ip);
       // Fixed count keeps the response body identical for unknown and known usernames.
@@ -107,6 +114,7 @@ export function makeAuthRoutes({ q, send, readRaw, limiter, verify = verifyPassw
     let body;
     try { body = JSON.parse(raw.toString('utf8')); } catch { return send(res, 400, { error: 'bad request' }); }
     if (!body || typeof body !== 'object' || typeof body.challenge !== 'string') return send(res, 400, { error: 'bad request' });
+    if (ipLimiter.isLimited(ipOf(req))) return send(res, 429, { error: 'rate_limited' });
 
     const c = challengeStore.get(body.challenge);
     if (!c) return send(res, 401, { error: 'invalid credentials' });
@@ -129,6 +137,7 @@ export function makeAuthRoutes({ q, send, readRaw, limiter, verify = verifyPassw
     if (!codeOk) {
       // Crypto down is not a wrong code: 503, no failure counted.
       // Challenge is not consumed: wrong code may be retried until expiry or lock.
+      ipLimiter.recordFailure(ipOf(req));
       const attemptsLeft = await recordFail(user, user.username, 'login.code.fail', ipOf(req));
       return send(res, 401, { error: 'invalid code', attemptsLeft });
     }
