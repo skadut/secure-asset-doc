@@ -1,1 +1,0 @@
-{"ts":1793031849,"edges":[{"source":"frontend","target":"backend","rps":0,"errorRate":0,"avgMs":0},{"source":"backend","target":"db","rps":0,"errorRate":0,"avgMs":0}],"down":["crypto-service"]}

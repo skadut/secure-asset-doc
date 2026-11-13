@@ -105,6 +105,7 @@ function ViewerBody({ docId }: { docId: string }) {
     expiresAtMs: number
     ttlSeconds: number
   }>(null)
+  const [sessionDenied, setSessionDenied] = useState(false)
   const doc = getDocument(docId)
   const limit = doc ? sessionLimitSeconds(doc.tlp) : null
   const serverRemaining = serverSession
@@ -130,7 +131,10 @@ function ViewerBody({ docId }: { docId: string }) {
       signal: controller.signal,
     })
       .then(async (response) => {
-        if (!response.ok) return null
+        if (!response.ok) {
+          if (!controller.signal.aborted) setSessionDenied(true)
+          return null
+        }
         const payload: unknown = await response.json()
         if (typeof payload !== 'object' || payload === null) return null
         const body = payload as Record<string, unknown>
@@ -144,6 +148,7 @@ function ViewerBody({ docId }: { docId: string }) {
           !Number.isFinite(body.ttlSeconds)
         )
           return null
+        if (!controller.signal.aborted) setSessionDenied(false)
         return {
           sessionId: body.sessionId,
           expiresAtMs,
@@ -188,6 +193,8 @@ function ViewerBody({ docId }: { docId: string }) {
       return res.status
     },
   })
+  const fileUnavailable =
+    sessionDenied || probe.data === 403 || probe.data === 404
 
   const rootRef = useRef<HTMLDivElement>(null)
   // Watermark per pen: username + time stamped once on open.
@@ -230,7 +237,7 @@ function ViewerBody({ docId }: { docId: string }) {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [])
 
-  if (!doc || probe.data === 403 || probe.data === 404)
+  if (!doc)
     return (
       <div className='flex min-h-0 flex-1 flex-col'>
         <header className='flex min-h-[52px] items-center gap-3 border-b border-rail-line px-4'>
@@ -241,7 +248,7 @@ function ViewerBody({ docId }: { docId: string }) {
             <ArrowLeft aria-hidden='true' className='size-3.5' /> Registri
           </Link>
           <span className='font-mono text-[11.5px] text-rail-dim'>
-            {doc?.id ?? 'Dokumen tidak tersedia'}
+            Dokumen tidak tersedia
           </span>
         </header>
         <DocumentUnavailable />
@@ -419,6 +426,10 @@ function ViewerBody({ docId }: { docId: string }) {
                     Sesi berakhir. Buka kembali dokumen dari registri untuk
                     memulai sesi baru.
                   </p>
+                ) : fileUnavailable ? (
+                  <div className='min-h-0 [&>*]:min-h-0'>
+                    <DocumentUnavailable />
+                  </div>
                 ) : (
                   <FilePreview file={previewFile} secure />
                 )}
