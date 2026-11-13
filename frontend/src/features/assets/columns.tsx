@@ -2,21 +2,18 @@ import { Link } from '@tanstack/react-router'
 import { type ColumnDef, type FilterFn } from '@tanstack/react-table'
 import { assets, TODAY, type Asset, type Criticality } from '@/data/grc'
 import { DataTableColumnHeader } from '@/components/data-table'
-import {
-  AssetStatusBadge,
-  CriticalityBadge,
-  ReviewStatusBadge,
-} from '@/components/status-badge'
+import { Chip } from '@/components/chip'
+import { StatusDot } from '@/components/status-dot'
 
 const DAY_MS = 86_400_000
 
-// ponytail: 365-day rule is fixed; move to a per-site review policy when real schedules exist
+// ponytail: fixed 365-day review threshold; replace when asset-specific schedules exist.
 export const isReviewOverdue = (lastReviewed: string) =>
   (Date.parse(TODAY) - Date.parse(lastReviewed)) / DAY_MS > 365
 
 export const statusLabel: Record<Asset['status'], string> = {
-  active: 'Active',
-  maintenance: 'Maintenance',
+  active: 'Aktif',
+  maintenance: 'Pemeliharaan',
   retired: 'Retired',
 }
 
@@ -26,124 +23,84 @@ const criticalityRank: Record<Criticality, number> = {
   low: 2,
 }
 
-const includesAny: FilterFn<Asset> = (row, columnId, value: string[]) =>
-  value.includes(String(row.getValue(columnId)))
+export const includesAny: FilterFn<Asset> = (row, columnId, value: string) =>
+  value === '' || String(row.getValue(columnId)) === value
 
 const uniqueOptions = (key: 'type' | 'sector' | 'purdueLevel') =>
-  Array.from(new Set(assets.map((asset) => asset[key])))
-    .sort()
-    .map((value) => ({ label: value, value }))
+  [...new Set(assets.map((asset) => asset[key]))].sort()
 
 export const assetFilterOptions = {
   sector: uniqueOptions('sector'),
   type: uniqueOptions('type'),
   purdueLevel: uniqueOptions('purdueLevel'),
-  criticality: [
-    { label: 'High', value: 'high' },
-    { label: 'Medium', value: 'medium' },
-    { label: 'Low', value: 'low' },
-  ],
-  status: [
-    { label: statusLabel.active, value: 'active' },
-    { label: statusLabel.maintenance, value: 'maintenance' },
-    { label: statusLabel.retired, value: 'retired' },
-  ],
+  criticality: ['high', 'medium', 'low'] as const,
+  status: ['active', 'maintenance', 'retired'] as const,
+}
+
+const criticalityTone: Record<Criticality, 'fail' | 'warn' | 'ink'> = {
+  high: 'fail',
+  medium: 'warn',
+  low: 'ink',
 }
 
 export const assetColumns: ColumnDef<Asset>[] = [
   {
     accessorKey: 'id',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='ID' />
-    ),
+    size: 112,
+    header: ({ column }) => <DataTableColumnHeader column={column} title='ID' />,
     cell: ({ row }) => (
-      <Link
-        to='/assets/$assetId'
-        params={{ assetId: row.original.id }}
-        className='font-mono underline underline-offset-4'
-      >
+      <Link to='/assets/$assetId' params={{ assetId: row.original.id }} className='font-mono text-[10px] underline underline-offset-4'>
         {row.original.id}
       </Link>
     ),
   },
   {
     accessorKey: 'name',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Name' />
-    ),
-    cell: ({ row }) => <span className='font-medium'>{row.original.name}</span>,
+    size: 486,
+    header: ({ column }) => <DataTableColumnHeader column={column} title='NAMA' />,
+    cell: ({ row }) => <span className='font-medium text-ink'>{row.original.name}</span>,
   },
   {
     accessorKey: 'type',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Type' />
-    ),
+    size: 180,
+    header: ({ column }) => <DataTableColumnHeader column={column} title='TIPE' />,
     filterFn: includesAny,
   },
   {
     accessorKey: 'site',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Site' />
-    ),
-  },
-  {
-    accessorKey: 'sector',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Sector' />
-    ),
-    filterFn: includesAny,
+    size: 160,
+    header: ({ column }) => <DataTableColumnHeader column={column} title='SITE' />,
   },
   {
     accessorKey: 'purdueLevel',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Purdue level' />
-    ),
-    enableHiding: true,
-    cell: ({ row }) => (
-      <span className='font-mono'>{row.original.purdueLevel}</span>
-    ),
+    size: 74,
+    header: ({ column }) => <DataTableColumnHeader column={column} title='PURDUE' />,
+    cell: ({ row }) => <span className='font-mono tabular-nums'>{row.original.purdueLevel}</span>,
     filterFn: includesAny,
   },
   {
-    accessorKey: 'zone',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='IEC 62443 zone' />
-    ),
-  },
-  {
     accessorKey: 'criticality',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Criticality' />
-    ),
-    cell: ({ row }) => (
-      <CriticalityBadge criticality={row.original.criticality} />
-    ),
-    sortingFn: (rowA, rowB, columnId) =>
-      criticalityRank[rowA.getValue<Criticality>(columnId)] -
-      criticalityRank[rowB.getValue<Criticality>(columnId)],
+    size: 126,
+    header: ({ column }) => <DataTableColumnHeader column={column} title='KRITIKALITAS' />,
+    cell: ({ row }) => <StatusDot tone={criticalityTone[row.original.criticality]}>{row.original.criticality}</StatusDot>,
+    sortingFn: (rowA, rowB, columnId) => criticalityRank[rowA.getValue<Criticality>(columnId)] - criticalityRank[rowB.getValue<Criticality>(columnId)],
     filterFn: includesAny,
   },
   {
     accessorKey: 'status',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Status' />
-    ),
-    cell: ({ row }) => <AssetStatusBadge status={row.original.status} />,
+    size: 112,
+    header: ({ column }) => <DataTableColumnHeader column={column} title='STATUS' />,
+    cell: ({ row }) => <StatusDot tone={row.original.status === 'active' ? 'pass' : row.original.status === 'maintenance' ? 'warn' : 'ink'}>{statusLabel[row.original.status]}</StatusDot>,
     filterFn: includesAny,
   },
   {
     accessorKey: 'lastReviewed',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Last reviewed' />
-    ),
+    size: 166,
+    header: ({ column }) => <DataTableColumnHeader column={column} title='TINJAUAN' />,
     cell: ({ row }) => (
-      <div className='flex flex-wrap items-center gap-x-2'>
-        <span className='font-mono tabular-nums'>
-          {row.original.lastReviewed}
-        </span>
-        {isReviewOverdue(row.original.lastReviewed) && (
-          <ReviewStatusBadge days={-1} />
-        )}
+      <div className='flex flex-wrap items-center gap-1.5'>
+        <time className='font-mono text-[9px] tabular-nums' dateTime={row.original.lastReviewed}>{row.original.lastReviewed}</time>
+        <Chip tone={isReviewOverdue(row.original.lastReviewed) ? 'fail' : 'pass'}>{isReviewOverdue(row.original.lastReviewed) ? 'Telat' : 'Aman'}</Chip>
       </div>
     ),
   },

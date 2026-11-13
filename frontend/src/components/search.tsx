@@ -5,7 +5,7 @@ import { Button } from './ui/button'
 
 export function Search({
   className = '',
-  placeholder = 'Search',
+  placeholder = 'Cari',
   ...props
 }: React.ComponentProps<'button'> & { placeholder?: string }) {
   const { setOpen } = useSearch()
@@ -14,20 +14,16 @@ export function Search({
       {...props}
       variant='outline'
       className={cn(
-        'group relative h-11 w-11 flex-none justify-center rounded-md bg-muted/25 text-sm font-normal text-muted-foreground shadow-none hover:bg-accent sm:h-11 sm:w-40 sm:flex-1 sm:justify-start sm:pe-12 md:flex-none lg:w-52 xl:w-64',
+        'group relative h-10 w-10 flex-none justify-center rounded-none border-line bg-surface px-0 font-mono text-[10px] font-normal tracking-wide text-ink-3 shadow-none hover:bg-surface-2 hover:text-ink sm:h-8 sm:w-auto sm:min-w-[200px] sm:justify-start sm:px-2.5 sm:pe-12',
         className
       )}
       aria-keyshortcuts='Meta+K Control+K'
       onClick={() => setOpen(true)}
     >
-      <SearchIcon
-        aria-hidden='true'
-        className='sm:absolute sm:inset-s-1.5 sm:top-1/2 sm:-translate-y-1/2'
-        size={16}
-      />
-      <span className='sr-only sm:not-sr-only sm:ms-4'>{placeholder}</span>
-      <kbd className='pointer-events-none absolute inset-e-[0.3rem] top-[0.3rem] hidden h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 select-none group-hover:bg-accent sm:flex'>
-        <span className='text-xs'>⌘</span>K
+      <SearchIcon aria-hidden='true' size={13} className='shrink-0' />
+      <span className='sr-only sm:not-sr-only sm:ms-2 sm:truncate'>{placeholder}</span>
+      <kbd className='pointer-events-none absolute inset-e-2 top-1/2 hidden h-5 -translate-y-1/2 items-center gap-0.5 rounded-none border border-line bg-surface-2 px-1 font-mono text-[9px] text-ink-3 select-none sm:flex'>
+        <span>⌘</span>K
       </kbd>
     </Button>
   )

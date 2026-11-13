@@ -21,6 +21,43 @@ export type TrafficResponse = {
   cryptoCalls: CryptoCall[]
 }
 export type HistoryPoint = { ts: number; edges: EdgeStat[] }
+export type HistoryResponse = {
+  from: string | number
+  to: string | number
+  bucketSeconds: number
+  points: HistoryPoint[]
+}
+
+export function parseHistory(raw: unknown): HistoryResponse | null {
+  if (!raw || typeof raw !== 'object') return null
+  const r = raw as Record<string, unknown>
+  if (!Array.isArray(r.points)) return null
+  const points: HistoryPoint[] = []
+  for (const point of r.points) {
+    if (!point || typeof point !== 'object') return null
+    const p = point as Record<string, unknown>
+    const ts = isNum(p.ts)
+      ? p.ts
+      : typeof p.ts === 'string'
+        ? Math.floor(Date.parse(p.ts) / 1000)
+        : NaN
+    if (!Number.isFinite(ts) || !Array.isArray(p.edges)) return null
+    points.push({ ts, edges: p.edges.filter(isEdge) })
+  }
+  return {
+    from: typeof r.from === 'string' || isNum(r.from) ? r.from : '',
+    to: typeof r.to === 'string' || isNum(r.to) ? r.to : '',
+    bucketSeconds: isNum(r.bucketSeconds) ? r.bucketSeconds : 0,
+    points,
+  }
+}
+
+export function mergeHistory(existing: HistoryPoint[], incoming: HistoryPoint[], max: number): HistoryPoint[] {
+  const byTs = new Map<number, HistoryPoint>()
+  for (const point of existing) byTs.set(point.ts, point)
+  for (const point of incoming) byTs.set(point.ts, point)
+  return [...byTs.values()].sort((a, b) => a.ts - b.ts).slice(-max)
+}
 export type Level = 'idle' | 'good' | 'warning' | 'danger'
 export type Selection =
   | { kind: 'edge'; source: string; target: string }
@@ -44,7 +81,7 @@ export const ZONES = [
 export const VIEW_W = 900
 export const VIEW_H = 400
 export const NODE_R = 30
-export const HISTORY_MAX = 30 // 30 samples at 2 s = 1 min
+export const HISTORY_MAX = 120 // 120 samples: 60 prefill + 60 live
 
 export const LEVEL_LABEL: Record<Level, string> = {
   idle: 'Idle',

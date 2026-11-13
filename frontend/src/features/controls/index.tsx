@@ -1,187 +1,113 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { cn } from '@/lib/utils'
+import { CardPanel } from '@/components/card-panel'
+import { Chip } from '@/components/chip'
+import { EmptyState } from '@/components/empty-state'
+import { PageHead } from '@/components/page-head'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { decisionFlow, controlRows } from './data'
+import { decisionFlow } from './data'
 
-const familyCodes = [
-  ...new Set(controlRows.map((control) => control.id.slice(0, 2))),
-].sort()
-const families = ['All', ...familyCodes]
+const families = ['AC', 'AU', 'IA', 'MP', 'PS', 'RA', 'SC', 'SI']
+const flowNames = ['Policy Administration', 'Policy Information', 'Policy Decision', 'Policy Enforcement']
 
 export function Controls() {
   const [family, setFamily] = useState('All')
   const [query, setQuery] = useState('')
-  const normalizedQuery = query.trim().toLocaleLowerCase()
-  const rows = useMemo(
-    () =>
-      controlRows.filter((control) => {
-        const matchesFamily =
-          family === 'All' || control.id.startsWith(`${family}-`)
-        const searchable =
-          `${control.id} ${control.name} ${control.implementation}`.toLocaleLowerCase()
-        return matchesFamily && searchable.includes(normalizedQuery)
-      }),
-    [family, normalizedQuery]
-  )
 
-  return (
-    <>
-      <Header fixed>
-        <Search className='me-auto' />
-        <ThemeSwitch />
-        <ConfigDrawer />
-        <ProfileDropdown />
-      </Header>
+  const { data, isLoading } = useQuery({
+    queryKey: ['controls'],
+    retry: false,
+    queryFn: async () => {
+      const res = await fetch('/api/controls', { credentials: 'same-origin' })
+      if (!res.ok) {
+        if (res.status === 404) return { controls: [] }
+        throw new Error('Gagal memuat kontrol')
+      }
+      const json: unknown = await res.json()
+      const raw = typeof json === 'object' && json !== null && 'controls' in json ? (json as { controls?: unknown }).controls : undefined
+      if (!Array.isArray(raw)) return { controls: [] }
+      const controls = raw.filter((item): item is { id: string; family: string; name: string; implementation: string; location: string } => {
+        if (typeof item !== 'object' || item === null) return false
+        const c = item as Record<string, unknown>
+        return ['id', 'family', 'name', 'implementation', 'location'].every((key) => typeof c[key] === 'string')
+      })
+      return { controls }
+    }
+  })
 
-      <Main className='flex flex-1 flex-col gap-6'>
-        <header className='space-y-2'>
-          <h1 className='text-2xl font-bold tracking-tight'>
-            Kontrol NIST SP 800-53
-          </h1>
-          <p className='max-w-3xl text-muted-foreground'>
-            Pemetaan kontrol berikut menjelaskan hubungan desain aplikasi dengan
-            NIST SP 800-53 Rev. 5.
-          </p>
-          <p className='font-medium'>
-            Pemetaan ini adalah desain, bukan bukti kepatuhan.
-          </p>
-        </header>
+  const allControls = data?.controls ?? []
+  const normalizedQuery = query.trim().toLowerCase()
+  const filteredControls = allControls.filter((control) => {
+    const matchesFamily = family === 'All' || control.family === family || control.id.split('-')[0].toUpperCase() === family
+    const matchesQuery = normalizedQuery === '' || [control.id, control.name, control.implementation].some((value) => value.toLowerCase().includes(normalizedQuery))
+    return matchesFamily && matchesQuery
+  })
 
-        <section aria-labelledby='decision-flow-title' className='space-y-3'>
-          <h2 id='decision-flow-title' className='text-lg font-semibold'>
-            Alur keputusan akses
-          </h2>
-          <ol className='grid gap-3 sm:grid-cols-2'>
-            {decisionFlow.map((step) => (
-              <li
-                key={step.label}
-                className='rounded-lg border border-border bg-card p-4'
-              >
-                <p className='font-medium'>{step.label}</p>
-                <p className='mt-1 text-sm text-muted-foreground'>
-                  {step.detail}
-                </p>
-              </li>
-            ))}
-          </ol>
-        </section>
+  return <>
+    <Header fixed><Search className='me-auto' /><ThemeSwitch /><ConfigDrawer /><ProfileDropdown /></Header>
+    <Main className='flex flex-1 flex-col gap-5'>
+      <PageHead title='Kontrol NIST 800-53' eyebrow='SP 800-53 Rev. 5 · 8 keluarga' note='Pemetaan desain, bukan bukti kepatuhan' />
 
-        <section aria-labelledby='mapping-title' className='space-y-3'>
-          <div className='flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between'>
-            <div>
-              <h2 id='mapping-title' className='text-lg font-semibold'>
-                Pemetaan SP 800-53 Rev. 5
-              </h2>
-              <p className='text-sm text-muted-foreground'>
-                Cari berdasarkan ID, nama, atau implementasi.
-              </p>
+      <CardPanel title='Alur keputusan akses'>
+        <ol className='grid gap-3 p-3 sm:grid-cols-2 2xl:grid-cols-[minmax(0,1fr)_32px_minmax(0,1fr)_32px_minmax(0,1fr)_32px_minmax(0,1fr)]'>
+          {decisionFlow.map((step, index) => <li key={step.label} className='contents'>
+            <div className='min-w-0 border border-line bg-surface px-3 py-2'>
+              <div className='flex items-center gap-2'><Chip tone='line'>{step.label.slice(3, 6)}</Chip><strong className='text-[11px] leading-tight text-ink'>{flowNames[index]}</strong></div>
+              <p className='mt-2 text-[10px] leading-[1.45] text-ink-2'>{step.detail}</p>
             </div>
-            <div
-              className='flex flex-wrap gap-2'
-              role='group'
-              aria-label='Saring keluarga kontrol'
-            >
-              {families.map((option) => (
-                <button
-                  key={option}
-                  type='button'
-                  aria-pressed={family === option}
-                  onClick={() => setFamily(option)}
-                  className={cn(
-                    'min-h-11 rounded-md border px-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none',
-                    family === option
-                      ? 'border-primary bg-primary text-primary-foreground hover:bg-primary/90'
-                      : 'border-border hover:bg-accent hover:text-accent-foreground'
-                  )}
-                >
-                  {option === 'All' ? 'Semua' : option}
-                </button>
-              ))}
-            </div>
-          </div>
+            {index < decisionFlow.length - 1 && <span aria-hidden='true' className='hidden items-center justify-center font-mono text-ink-3 2xl:flex'>›</span>}
+          </li>)}
+        </ol>
+      </CardPanel>
 
-          <div className='space-y-2'>
-            <label htmlFor='control-search' className='text-sm font-medium'>
-              Cari kontrol
-            </label>
-            <input
-              id='control-search'
-              type='search'
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder='Contoh: AC-2 atau audit'
-              className='flex h-11 w-full max-w-xl rounded-md border border-input bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
-            />
-          </div>
+      <div className='flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between'>
+        <label className='flex min-h-11 w-full max-w-[360px] items-center gap-2 border border-line bg-surface px-3 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ink'>
+          <span className='sr-only'>Cari kontrol NIST</span>
+          <svg aria-hidden='true' viewBox='0 0 24 24' className='size-4 shrink-0' fill='none' stroke='currentColor' strokeWidth='1.6'><circle cx='10.8' cy='10.8' r='6.4' /><path d='m16 16 4.2 4.2' /></svg>
+          <input type='search' value={query} onChange={(event) => setQuery(event.target.value)} placeholder='Cari ID, nama, implementasi' className='min-w-0 flex-1 bg-transparent text-[11px] text-ink outline-none placeholder:text-ink-3' />
+        </label>
+        <div className='flex flex-wrap gap-1' role='group' aria-label='Saring keluarga kontrol'>
+          {['All', ...families].map((option) => <button key={option} type='button' aria-pressed={family === option} onClick={() => setFamily(option)} className={cn('inline-flex min-h-11 min-w-11 items-center justify-center border px-3 font-mono text-[9px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink', family === option ? 'border-ink bg-ink text-surface' : 'border-line text-ink-2 hover:bg-surface-2')}>
+            {option === 'All' ? 'Semua' : option}
+          </button>)}
+        </div>
+      </div>
 
-          <p
-            role='status'
-            aria-live='polite'
-            className='text-sm text-muted-foreground'
-          >
-            {rows.length} kontrol
-          </p>
-
-          <div className='overflow-x-auto rounded-lg border border-border'>
-            <table className='w-full min-w-[48rem] text-left text-sm'>
-              <caption className='sr-only'>
-                Tabel pemetaan kontrol NIST SP 800-53
-              </caption>
-              <thead className='bg-muted/50 text-muted-foreground'>
-                <tr>
-                  <th scope='col' className='px-4 py-3 font-medium'>
-                    ID kontrol
-                  </th>
-                  <th scope='col' className='px-4 py-3 font-medium'>
-                    Nama
-                  </th>
-                  <th scope='col' className='px-4 py-3 font-medium'>
-                    Implementasi di aplikasi
-                  </th>
-                  <th scope='col' className='px-4 py-3 font-medium'>
-                    Lokasi (berkas/modul)
-                  </th>
-                </tr>
-              </thead>
-              <tbody className='divide-y divide-border'>
-                {rows.length > 0 ? (
-                  rows.map((control) => (
-                    <tr key={control.id} className='align-top'>
-                      <th
-                        scope='row'
-                        className='px-4 py-3 font-mono font-medium whitespace-nowrap'
-                      >
-                        {control.id}
-                      </th>
-                      <td className='px-4 py-3 font-medium'>{control.name}</td>
-                      <td className='min-w-[20rem] px-4 py-3 text-muted-foreground'>
-                        {control.implementation}
-                      </td>
-                      <td className='min-w-[16rem] px-4 py-3 font-mono text-xs text-muted-foreground'>
-                        {control.location}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={4}
-                      className='px-4 py-8 text-center text-muted-foreground'
-                    >
-                      Tidak ada kontrol yang cocok dengan filter ini.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </Main>
-    </>
-  )
+      <CardPanel title='Kontrol NIST 800-53' meta={isLoading ? 'Dataset server belum tersedia' : allControls.length > 0 ? `${filteredControls.length} dari ${allControls.length} kontrol · /api/controls` : 'Dataset server belum tersedia'} className='min-w-0'>
+        <div className='overflow-x-auto'>
+          <table className='w-full min-w-[680px] border-collapse text-left'>
+            <caption className='sr-only'>Tabel kontrol NIST 800-53, nama kontrol, implementasi, dan lokasi</caption>
+            <thead className='bg-surface-2 font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'><tr>
+              <th scope='col' className='w-[100px] px-3 py-2 font-medium'>ID</th>
+              <th scope='col' className='w-[240px] px-3 py-2 font-medium'>Nama kontrol</th>
+              <th scope='col' className='px-3 py-2 font-medium'>Implementasi</th>
+              <th scope='col' className='w-[260px] px-3 py-2 font-medium'>Lokasi</th>
+            </tr></thead>
+            <tbody>
+              {isLoading && <tr><td colSpan={4} className='border-t border-line px-3 py-5'>Memuat kontrol…</td></tr>}
+              {!isLoading && allControls.length === 0 && <tr><td colSpan={4} className='border-t border-line px-3 py-5'>
+                <EmptyState title='Dataset kontrol NIST belum tersedia dari server' desc='Pemetaan NIST belum disediakan oleh /api/controls. Tidak ada baris kontrol ditampilkan.' />
+              </td></tr>}
+              {!isLoading && allControls.length > 0 && filteredControls.length === 0 && <tr><td colSpan={4} className='border-t border-line px-3 py-5'>Tidak ada kontrol yang cocok dengan filter.</td></tr>}
+              {!isLoading && filteredControls.map((control) => <tr key={control.id} className='border-t border-line'>
+                <td className='px-3 py-2'>{control.id}</td>
+                <td className='px-3 py-2'>{control.name}</td>
+                <td className='px-3 py-2'>{control.implementation}</td>
+                <td className='px-3 py-2'>{control.location}</td>
+              </tr>)}
+            </tbody>
+          </table>
+        </div>
+        <footer className='flex flex-wrap items-center justify-between gap-2 border-t border-line px-3 py-2 font-mono text-[9px] text-ink-3'>
+          <span>Data kontrol: {isLoading || allControls.length === 0 ? 'pending' : '/api/controls'}</span><span>{family === 'All' ? 'Semua keluarga' : `Keluarga ${family}`} · Filter hanya mengatur pilihan</span>
+        </footer>
+      </CardPanel>
+    </Main>
+  </>
 }

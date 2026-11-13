@@ -36,12 +36,12 @@ type DocumentsTableProps = {
 
 type LevelFilter = { value: Tlp | 'ALL'; exact: boolean }
 
-const TILE_LEVELS: { value: Tlp | 'ALL'; label: string; color: string }[] = [
-  { value: 'ALL', label: 'Semua versi dokumen', color: 'text-foreground' },
-  { value: 'RED', label: 'TLP:RED (termasuk STRICT)', color: 'text-fail' },
-  { value: 'AMBER', label: 'TLP:AMBER (termasuk STRICT)', color: 'text-warn' },
-  { value: 'GREEN', label: 'TLP:GREEN', color: 'text-pass' },
-  { value: 'CLEAR', label: 'TLP:CLEAR', color: 'text-muted-foreground' },
+const TILES: { value: Tlp | 'ALL'; label: string; color: string }[] = [
+  { value: 'ALL', label: 'Semua dokumen', color: 'text-ink' },
+  { value: 'RED', label: 'RED termasuk STRICT', color: 'text-fail' },
+  { value: 'AMBER', label: 'AMBER termasuk STRICT', color: 'text-warn' },
+  { value: 'GREEN', label: 'GREEN', color: 'text-pass' },
+  { value: 'CLEAR', label: 'CLEAR', color: 'text-ink-2' },
 ]
 
 export function DocumentsTable({
@@ -56,12 +56,12 @@ export function DocumentsTable({
     exact: false,
   })
 
-  // Tile (exact: false) groups RED with RED+STRICT and AMBER with AMBER+STRICT. Select (exact: true) matches one level only.
-  const matchesLevel = (doc: DocRow, { value, exact }: LevelFilter) =>
-    value === 'ALL' ||
-    doc.tlp === value ||
-    (!exact && value === 'RED' && doc.tlp === 'RED+STRICT') ||
-    (!exact && value === 'AMBER' && doc.tlp === 'AMBER+STRICT')
+  const matchesLevel = (doc: DocRow, filter: LevelFilter) =>
+    filter.value === 'ALL' ||
+    doc.tlp === filter.value ||
+    (!filter.exact &&
+      ((filter.value === 'RED' && doc.tlp === 'RED+STRICT') ||
+        (filter.value === 'AMBER' && doc.tlp === 'AMBER+STRICT')))
 
   const filteredData = useMemo(() => {
     const q = query.trim().toLocaleLowerCase()
@@ -83,27 +83,22 @@ export function DocumentsTable({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   })
+
   const countFor = (value: Tlp | 'ALL') =>
-    data
-      .filter((doc) => {
-        const q = query.trim().toLocaleLowerCase()
-        const matchesSearch =
-          !q ||
-          doc.id.toLocaleLowerCase().includes(q) ||
-          doc.title.toLocaleLowerCase().includes(q)
-        return matchesLevel(doc, { value, exact: false }) && matchesSearch
-      })
-      .reduce((sum, doc) => sum + doc.versions.length, 0)
+    data.filter((doc) => {
+      const q = query.trim().toLocaleLowerCase()
+      const matchesSearch =
+        !q ||
+        doc.id.toLocaleLowerCase().includes(q) ||
+        doc.title.toLocaleLowerCase().includes(q)
+      return matchesLevel(doc, { value, exact: false }) && matchesSearch
+    }).length
 
   return (
-    <section
-      aria-label='Registri dokumen'
-      className='flex min-w-0 flex-col gap-5'
-    >
-      <div className='grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5'>
-        {TILE_LEVELS.map((tile) => {
-          const active =
-            level.value === tile.value && (!level.exact || tile.value === 'ALL')
+    <section aria-label='Registri dokumen' className='flex min-w-0 flex-col gap-3'>
+      <div className='grid grid-cols-2 gap-px border border-line bg-line sm:grid-cols-3 xl:grid-cols-5'>
+        {TILES.map((tile) => {
+          const active = level.value === tile.value && !level.exact
           return (
             <button
               key={tile.value}
@@ -111,19 +106,19 @@ export function DocumentsTable({
               aria-pressed={active}
               onClick={() => setLevel({ value: tile.value, exact: false })}
               className={cn(
-                'flex min-h-[76px] flex-col justify-center gap-1 rounded-sm border bg-card px-3 py-2 text-left transition-colors duration-150 hover:bg-accent active:scale-[.98]',
-                active ? 'border-ring bg-accent' : 'border-border'
+                'flex min-h-[58px] min-w-0 flex-col items-start justify-center gap-1 bg-surface px-3 py-2 text-left transition-colors hover:bg-surface-active focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--focus)] active:bg-surface-active',
+                active && 'bg-surface-active'
               )}
             >
               <span
                 className={cn(
-                  'font-heading text-[28px] leading-none font-semibold tabular-nums',
+                  'font-heading text-[20px] leading-none font-semibold tabular-nums',
                   tile.color
                 )}
               >
                 {countFor(tile.value)}
               </span>
-              <span className='text-xs text-muted-foreground'>
+              <span className='text-[10px] leading-tight text-ink-2'>
                 {tile.label}
               </span>
             </button>
@@ -131,28 +126,22 @@ export function DocumentsTable({
         })}
       </div>
 
-      <div className='flex flex-wrap items-end gap-3'>
-        <div className='min-w-0 flex-1 basis-60'>
-          <Label
-            htmlFor='document-search'
-            className='mb-1 block text-xs text-muted-foreground'
-          >
-            Cari nomor kontrol atau judul
+      <div className='flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end'>
+        <div className='min-w-0 flex-1'>
+          <Label htmlFor='document-search' className='mb-1 block text-[10px] text-ink-3'>
+            Cari dokumen
           </Label>
           <Input
             id='document-search'
             type='search'
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder='ID dokumen atau judul'
-            className='h-11 font-mono text-sm'
+            placeholder='ID atau judul dokumen'
+            className='h-9 rounded-none border-line-strong bg-surface text-[12px] placeholder:text-ink-3'
           />
         </div>
-        <div className='w-full sm:w-56'>
-          <Label
-            htmlFor='document-level'
-            className='mb-1 block text-xs text-muted-foreground'
-          >
+        <div className='w-full sm:w-52'>
+          <Label htmlFor='document-level' className='mb-1 block text-[10px] text-ink-3'>
             Filter TLP
           </Label>
           <Select
@@ -163,7 +152,7 @@ export function DocumentsTable({
           >
             <SelectTrigger
               id='document-level'
-              className='w-full'
+              className='h-9 w-full rounded-none border-line-strong bg-surface text-[12px]'
               aria-label='Filter tingkat TLP'
             >
               <SelectValue />
@@ -180,12 +169,11 @@ export function DocumentsTable({
         </div>
       </div>
 
-      <div className='focus-strong min-w-0 overflow-x-auto rounded-sm border bg-card'>
-        {/* ponytail: table fixed 1024px, scrolls inside wrapper on narrow screens; upgrade path = card layout below md. */}
-        <Table className='doc-table w-full min-w-[1024px] table-fixed'>
+      <div className='focus-strong min-w-0 overflow-x-auto border border-line bg-surface'>
+        <Table className='doc-table w-full min-w-[836px] table-fixed'>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className='h-8 border-line bg-surface-2 hover:bg-surface-2'>
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
@@ -195,6 +183,7 @@ export function DocumentsTable({
                         ? { width: header.getSize() }
                         : undefined
                     }
+                    className='h-8 px-2 font-mono text-[8px] uppercase tracking-[.07em] text-ink-3'
                   >
                     {header.isPlaceholder
                       ? null
@@ -215,8 +204,7 @@ export function DocumentsTable({
                   aria-selected={row.original.id === selectedId}
                   tabIndex={0}
                   onClick={(event) => {
-                    if ((event.target as HTMLElement).closest('a,button'))
-                      return
+                    if ((event.target as HTMLElement).closest('a,button')) return
                     onSelect(row.original)
                   }}
                   onKeyDown={(event) => {
@@ -227,19 +215,14 @@ export function DocumentsTable({
                     }
                   }}
                   className={cn(
-                    'h-14 cursor-pointer',
-                    row.original.id === selectedId &&
-                      'bg-accent ring-1 ring-ring ring-inset'
+                    'h-[54px] cursor-pointer border-line-subtle focus-visible:outline focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-[var(--focus)]',
+                    row.original.id === selectedId && 'bg-surface-active'
                   )}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className={
-                        cell.column.id === 'title'
-                          ? 'align-middle'
-                          : 'align-middle whitespace-nowrap'
-                      }
+                      className={`px-2 py-1 ${cell.column.id === 'title' ? 'align-middle whitespace-normal' : 'align-middle whitespace-nowrap'}`}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -253,7 +236,7 @@ export function DocumentsTable({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className='h-24 text-center text-muted-foreground'
+                  className='h-20 text-center text-[11px] text-ink-3'
                 >
                   Tidak ada dokumen yang sesuai dengan filter.
                 </TableCell>
@@ -262,8 +245,8 @@ export function DocumentsTable({
           </TableBody>
         </Table>
       </div>
-      <p className='text-xs text-muted-foreground' aria-live='polite'>
-        Menampilkan {filteredData.length} dokumen,{' '}
+      <p className='font-mono text-[9px] text-ink-3' aria-live='polite'>
+        {filteredData.length} dokumen ·{' '}
         {filteredData.reduce((sum, doc) => sum + doc.versions.length, 0)} versi
       </p>
     </section>

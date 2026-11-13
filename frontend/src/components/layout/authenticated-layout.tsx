@@ -31,12 +31,12 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
 
               // If layout is fixed and sidebar is inset,
               // set the height to 100svh - spacing (total margins) to prevent overflow
-              'peer-data-[variant=inset]:has-data-[layout=fixed]:h-[calc(100svh-(var(--spacing)*4))]'
+              'peer-data-[variant=inset]:has-data-[layout=fixed]:h-svh'
             )}
           >
             <div
               key={location.pathname}
-              className='screen-enter flex flex-1 flex-col'
+              className='screen-enter flex min-w-0 flex-1 flex-col'
             >
               {children ?? <Outlet />}
             </div>

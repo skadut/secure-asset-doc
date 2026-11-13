@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { documents } from '@/data/grc'
+import { PageHead } from '@/components/page-head'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -24,18 +25,17 @@ export function Documents() {
         <ProfileDropdown />
       </Header>
 
-      <Main className='focus-strong flex min-w-0 flex-1 flex-col gap-4 sm:gap-6'>
-        <div>
-          <h1 className='page-title tracking-tight'>Registri dokumen</h1>
-          <p className='text-muted-foreground'>
-            Telusuri dokumen, klasifikasi TLP, status, dan keputusan akses akun
-            Anda.
-          </p>
-        </div>
+      <Main className='focus-strong flex min-w-0 flex-1 flex-col gap-4'>
+        <PageHead
+          eyebrow='AKSES DOKUMEN / INVENTARIS'
+          title='Registri dokumen'
+          note={`${rows.length} dokumen · ${rows.reduce((sum, doc) => sum + doc.versions.length, 0)} versi`}
+        />
+
         {rows.length === 0 ? (
-          <p className='text-muted-foreground'>Belum ada dokumen.</p>
+          <p className='text-[11px] text-ink-2'>Belum ada dokumen.</p>
         ) : (
-          <div className='flex flex-col gap-6 min-[1200px]:flex-row min-[1200px]:items-start'>
+          <div className='flex min-w-0 flex-col gap-4 min-[1200px]:flex-row min-[1200px]:items-start'>
             <div className='min-w-0 flex-1'>
               <DocumentsTable
                 data={rows}

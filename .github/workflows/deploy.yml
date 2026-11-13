@@ -73,7 +73,7 @@ jobs:
   deploy:
     needs: [build-frontend, build-backend, build-keyd-tpm, build-crypto-api]
     runs-on: [self-hosted, linux, vps]
-    # Required secrets: POSTGRES_PASSWORD, APP_DB_PASSWORD, DEMO_USER_PASSWORD, TPM_MSK_PIN.
+    # Required secrets: POSTGRES_PASSWORD, APP_DB_PASSWORD, DEMO_USER_PASSWORD, DEMO_TOTP_SECRET, TPM_MSK_PIN.
     # Secrets and variables below live in Settings > Environments > production (like GitLab CI/CD variables).
     environment: production
     steps:
@@ -174,6 +174,10 @@ jobs:
 
       - name: Approve keyd delivery key
         working-directory: ${{ env.APP_DIR }}
+        env:
+          PGUSER: ${{ vars.POSTGRES_USER }}
+          PGDATABASE: ${{ vars.POSTGRES_DB }}
+          PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         run: |
           set -euo pipefail
           fp=""
@@ -192,6 +196,9 @@ jobs:
             sleep 1
           done
           if [ -z "$approved" ]; then echo "::error::tpm-msk did not approve the keyd delivery key"; docker compose logs --tail 50 tpm-msk keyd; exit 1; fi
+          docker compose up -d db
+          docker compose exec -T db psql -v ON_ERROR_STOP=1 -U "$PGUSER" -d "$PGDATABASE" < db/init/017_ui_additive.sql
+          docker compose exec -T db psql -v ON_ERROR_STOP=1 -U "$PGUSER" -d "$PGDATABASE" < db/seed/003_nist_controls.sql
           # Same fingerprint in the env, so this up does not recreate tpm-msk without the pin.
           # No --build: images were built in the previous step. A rebuild here could recreate keyd and change its key.
           TPM_MSK_APPROVE_FP="$fp" docker compose up -d --remove-orphans
@@ -214,6 +221,7 @@ jobs:
           PGDATABASE: ${{ vars.POSTGRES_DB }}
           PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           DEMO_USER_PASSWORD: ${{ secrets.DEMO_USER_PASSWORD }}
+          DEMO_TOTP_SECRET: ${{ secrets.DEMO_TOTP_SECRET }}
         run: |
           set -euo pipefail
           users=$(docker compose exec -T db psql -v ON_ERROR_STOP=1 -U "$PGUSER" -d "$PGDATABASE" -tAc "select count(*) from users")
@@ -224,6 +232,7 @@ jobs:
           else
             echo "users=$users, skipping seed data and users"
           fi
+          docker compose run --rm --no-deps -v "$PWD/db/scripts/seed-totp.mjs:/app/seed-totp.mjs:ro" -e PGUSER -e PGDATABASE -e PGPASSWORD -e DEMO_TOTP_SECRET backend node /app/seed-totp.mjs
           # Older versions ship without a file in 002_seed.sql. This fills each one with its own PDF (doc id, version, date, summary). Skips rows that already have content.
           docker compose run --rm --no-deps -v "$PWD/db/scripts/seed-version-files.mjs:/app/seed-version-files.mjs:ro" -e PGUSER -e PGDATABASE -e PGPASSWORD backend node /app/seed-version-files.mjs
           if ! docker compose run --rm --no-deps -v "$PWD/db/scripts/protect-documents.mjs:/app/protect-documents.mjs:ro" -v "$PWD/db/scripts/demo-users.mjs:/app/demo-users.mjs:ro" -e PGUSER -e PGDATABASE -e PGPASSWORD -e DEMO_USER_PASSWORD backend node /app/protect-documents.mjs; then

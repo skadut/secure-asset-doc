@@ -1,19 +1,19 @@
 import {
   Activity,
-  Bell,
   ClipboardCheck,
   Database,
   FileText,
   KeyRound,
   LayoutDashboard,
   ListChecks,
-  Monitor,
-  Palette,
   Radio,
   ScrollText,
+  Settings,
   Shield,
+  Bell,
+  Monitor,
+  Palette,
   UserCog,
-  Wrench,
 } from 'lucide-react'
 import { type Me } from '@/lib/session'
 import { type NavGroup, type SidebarData } from '../types'
@@ -32,8 +32,8 @@ export const sidebarData: SidebarData = {
       items: [{ title: 'Dashboard', url: '/', icon: LayoutDashboard }],
     },
     {
-      title: 'Inventory',
-      items: [{ title: 'Assets', url: '/assets', icon: Shield }],
+      title: 'Inventaris',
+      items: [{ title: 'Aset', url: '/assets', icon: Shield }],
     },
     {
       title: 'Akses dokumen',
@@ -44,7 +44,7 @@ export const sidebarData: SidebarData = {
       ],
     },
     {
-      title: 'Compliance',
+      title: 'Kepatuhan',
       items: [
         { title: 'CSF 2.0 evidence', url: '/evidence', icon: ClipboardCheck },
         { title: 'Kontrol NIST 800-53', url: '/controls', icon: ListChecks },
@@ -59,10 +59,10 @@ export const sidebarData: SidebarData = {
       ],
     },
     {
-      title: 'Settings',
+      title: 'Pengaturan',
       items: [
-        { title: 'Profile', url: '/settings', icon: UserCog },
-        { title: 'Account', url: '/settings/account', icon: Wrench },
+        { title: 'Pengaturan', url: '/settings', icon: Settings },
+        { title: 'Account', url: '/settings/account', icon: UserCog },
         { title: 'Appearance', url: '/settings/appearance', icon: Palette },
         { title: 'Notifications', url: '/settings/notifications', icon: Bell },
         { title: 'Display', url: '/settings/display', icon: Monitor },
@@ -73,7 +73,7 @@ export const sidebarData: SidebarData = {
 
 // Role gates keyed by url. Items without a gate are visible to everyone.
 const gates: Record<string, (me: Me) => boolean> = {
-  '/operation': (me) => me.accessLevel === 5,
+  '/operation': (me) => me.accessLevel === 5 || me.securityOfficer === true,
   '/controls': (me) => me.securityOfficer === true || me.superAdmin === true,
   '/audit-log': (me) => me.securityOfficer === true || me.superAdmin === true,
   '/database': (me) => me.superAdmin === true,

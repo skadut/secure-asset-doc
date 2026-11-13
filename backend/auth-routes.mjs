@@ -1,7 +1,9 @@
 // Route handlers: login (step 1), otp (step 2), device-check, logout, me, ranks. Deps injected from server.mjs.
-import { RANKS, verifyPassword, dummyVerify, isDemoOtp, createChallengeStore } from './auth.mjs';
-import { findLoginUser, lookupSession, createSession, destroySession, meFromRow, meJson, sidSetCookie, sidClearCookie } from './session.mjs';
+import { RANKS, verifyPassword, dummyVerify, createChallengeStore } from './auth.mjs';
+import { findLoginUser, lookupSession, createSession, destroySession, meFromRow, meJson, sidSetCookie, sidClearCookie, readPreferences, patchPreferences, validatePreferencesPatch, preferencesBodyTooLarge, mergePreferences, DEFAULT_PREFERENCES } from './session.mjs';
 import { post } from './crypto-client.mjs';
+
+const cryptoPostDefault = post;
 
 const USERNAME = /^[a-z0-9.-]{3,40}$/;
 const MAX_PASSWORD = 1024;
@@ -11,7 +13,7 @@ const challenges = createChallengeStore();
 // RFC 1918 + loopback. Server-observed address only; X-Forwarded-For is not trusted.
 const PRIVATE = /^(::ffff:)?(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)|^::1$/;
 
-export function makeAuthRoutes({ q, send, readRaw, limiter, verify = verifyPassword, dummy = dummyVerify, challengeStore = challenges, cryptoPost = post }) {
+export function makeAuthRoutes({ q, send, readRaw, limiter, verify = verifyPassword, dummy = dummyVerify, challengeStore = challenges, cryptoPost = cryptoPostDefault }) {
   const ipOf = (req) => req.socket.remoteAddress ?? '';
   let cryptoCache = null;
   let cryptoInflight = null;
@@ -109,15 +111,23 @@ export function makeAuthRoutes({ q, send, readRaw, limiter, verify = verifyPassw
     const c = challengeStore.get(body.challenge);
     if (!c) return send(res, 401, { error: 'invalid credentials' });
     const { rows } = await q(
-      'SELECT id, username, name, rank_code, owner_label, access_level, security_officer, super_admin, unit, unit_head, active, locked_until, last_login_at, failed_since_last FROM users WHERE id = $1',
+      'SELECT id, username, name, rank_code, owner_label, access_level, security_officer, super_admin, unit, unit_head, active, locked_until, last_login_at, failed_since_last, totp_secret FROM users WHERE id = $1',
       [c.userId],
     );
     const user = rows[0];
     if (!user || !user.active) return send(res, 401, { error: 'invalid credentials' });
     if (isLocked(user)) return send(res, 423, lockedBody(user));
 
-    const codeOk = typeof body.code === 'string' && /^\d{6}$/.test(body.code) && isDemoOtp(body.code);
+    let codeOk = typeof body.code === 'string' && /^\d{6}$/.test(body.code) && !!user.totp_secret;
+    if (codeOk) {
+      let r;
+      try { r = await cryptoPost('/totpvalidate', { SecretEncrypted: user.totp_secret, CodeOTP: body.code }); }
+      catch { return send(res, 503, { error: 'crypto unavailable' }); }
+      if (r.status === 503) return send(res, 503, { error: 'crypto unavailable' });
+      codeOk = r.status === 200 && r.json?.valid === true;
+    }
     if (!codeOk) {
+      // Crypto down is not a wrong code: 503, no failure counted.
       // Challenge is not consumed: wrong code may be retried until expiry or lock.
       const attemptsLeft = await recordFail(user, user.username, 'login.code.fail', ipOf(req));
       return send(res, 401, { error: 'invalid code', attemptsLeft });
@@ -177,9 +187,25 @@ export function makeAuthRoutes({ q, send, readRaw, limiter, verify = verifyPassw
     return send(res, 200, meJson(req.me));
   }
 
+  async function getPreferences(req, res) {
+    const saved = await readPreferences(q, req.me.id);
+    return send(res, 200, mergePreferences(saved ?? DEFAULT_PREFERENCES));
+  }
+
+  async function patchUserPreferences(req, res) {
+    const raw = await readRaw(req);
+    if (raw === null || preferencesBodyTooLarge(raw)) return send(res, 400, { error: 'bad request' }, raw === null ? { Connection: 'close' } : {});
+    let body;
+    try { body = JSON.parse(raw.toString('utf8')); } catch { return send(res, 400, { error: 'bad request' }); }
+    if (validatePreferencesPatch(body)) return send(res, 400, { error: 'bad request' });
+    const saved = await patchPreferences(q, req.me.id, body);
+    if (saved === null) return send(res, 404, { error: 'not found' });
+    return send(res, 200, mergePreferences(saved));
+  }
+
   async function ranks(req, res) {
     return send(res, 200, RANKS.map(({ code, name, golongan, tlpMax }) => ({ code, name, golongan, tlpMax })));
   }
 
-  return { login, otp, deviceCheck, logout, me, ranks };
+  return { login, otp, deviceCheck, logout, me, getPreferences, patchPreferences: patchUserPreferences, ranks };
 }

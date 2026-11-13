@@ -4,7 +4,7 @@ import {
   TLP_ORDER, tlpRank, RANKS, rankByCode, tierOf, can, canReadLevel, approverRole, authorize,
   hashPassword, verifyPassword, dummyVerify, createLoginLimiter,
   checkWriteRequest, parseAllowedOrigins, newSessionToken, hashSessionToken, SESSION_TTL_MS, IDLE_TIMEOUT_MS,
-  DEMO_OTP, isDemoOtp, createChallengeStore,
+  createChallengeStore,
 } from './auth.mjs';
 
 // TLP
@@ -180,8 +180,6 @@ assert.match(hashSessionToken('a'), /^[0-9a-f]{64}$/);
 
 // OTP and challenge semantics
 assert.equal(IDLE_TIMEOUT_MS, 5 * 60 * 1000);
-assert.equal(isDemoOtp('123456'), true);
-for (const code of ['12345', '1234567', '12345a', ' 123456']) assert.equal(isDemoOtp(code), false);
 {
   let now = 100;
   const challenges = createChallengeStore({ now: () => now, ttlMs: 2000 });

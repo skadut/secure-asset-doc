@@ -21,6 +21,7 @@ export function filterGrc(grc, { accessLevel, grantedIds = new Set(), securityOf
   };
   const out = {
     ...grc,
+    controls: grc.controls ?? [],
     documents,
     evidenceLinks: grc.evidenceLinks.filter((e) => !gone(e.documentId)),
     assetDocLinks: grc.assetDocLinks.filter((l) => !gone(l.documentId)),

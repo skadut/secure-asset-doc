@@ -198,14 +198,7 @@ export async function dummyVerify(plain) {
 
 export const SESSION_TTL_MS = 30 * 60 * 1000;
 export const IDLE_TIMEOUT_MS = 5 * 60 * 1000;
-// ponytail: static demo OTP; real TOTP (RFC 6238, ±1 step, replay reject, HSM-wrapped secret) moves to crypto-service later
-export const DEMO_OTP = '123456';
-
-// Exact 6 digits, constant-time compare against DEMO_OTP.
-export function isDemoOtp(code) {
-  if (typeof code !== 'string' || !/^\d{6}$/.test(code)) return false;
-  return crypto.timingSafeEqual(Buffer.from(code), Buffer.from(DEMO_OTP));
-}
+// ponytail: one shared TOTP secret across users is demo-only; add per-user /totpgenerate secrets and enrollment UI later.
 
 // Step-1 challenge store. Single-use via consume(); expires after ttlMs.
 // ponytail: in-memory challenge store; move to DB/Redis when multi-instance

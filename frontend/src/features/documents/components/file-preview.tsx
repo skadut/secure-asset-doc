@@ -19,20 +19,26 @@ const PDF = 'application/pdf'
 const MAX_ROWS = 200
 const WIDE = '(min-width: 640px)'
 
-export function FilePreview({ file }: { file?: DocFile }) {
+export function FilePreview({
+  file,
+  secure = false,
+}: {
+  file?: DocFile
+  secure?: boolean
+}) {
   if (!file) {
     return (
       <p className='text-muted-foreground'>Belum ada berkas pada versi ini.</p>
     )
   }
   return file.mime === PDF ? (
-    <PdfPreview file={file} />
+    <PdfPreview file={file} secure={secure} />
   ) : (
-    <XlsxPreview file={file} />
+    <XlsxPreview file={file} secure={secure} />
   )
 }
 
-function PdfPreview({ file }: { file: DocFile }) {
+function PdfPreview({ file, secure }: { file: DocFile; secure: boolean }) {
   const wide = useWideScreen()
   const head = useQuery({
     queryKey: ['doc-file-head', file.url],
@@ -53,7 +59,7 @@ function PdfPreview({ file }: { file: DocFile }) {
 
   return (
     <div className='flex flex-col gap-3'>
-      <FileHeader file={file} label='PDF' size={head.data?.size} />
+      <FileHeader file={file} label='PDF' size={head.data?.size} secure={secure} />
       {!wide ? (
         <p className='text-sm text-muted-foreground'>
           Inline preview is available on larger screens.
@@ -79,7 +85,7 @@ function PdfPreview({ file }: { file: DocFile }) {
   )
 }
 
-function XlsxPreview({ file }: { file: DocFile }) {
+function XlsxPreview({ file, secure }: { file: DocFile; secure: boolean }) {
   const sheets = useQuery({
     queryKey: ['doc-file-xlsx', file.url],
     queryFn: async () => {
@@ -93,7 +99,12 @@ function XlsxPreview({ file }: { file: DocFile }) {
 
   return (
     <div className='flex flex-col gap-3'>
-      <FileHeader file={file} label='Excel workbook' size={sheets.data?.size} />
+      <FileHeader
+        file={file}
+        label='Excel workbook'
+        size={sheets.data?.size}
+        secure={secure}
+      />
       {sheets.isPending && <LoadingStatus name={file.name} />}
       {sheets.isError && (
         <p role='alert'>
@@ -109,10 +120,12 @@ function FileHeader({
   file,
   label,
   size,
+  secure = false,
 }: {
   file: DocFile
   label: string
   size?: number
+  secure?: boolean
 }) {
   return (
     <div className='flex flex-wrap items-center gap-x-4 gap-y-2 text-sm'>
@@ -121,22 +134,26 @@ function FileHeader({
       {size !== undefined && (
         <span className='font-mono tabular-nums'>{formatSize(size)}</span>
       )}
-      <a
-        href={file.url}
-        download={file.name}
-        className='underline underline-offset-4'
-      >
-        Download
-      </a>
-      {file.mime === PDF && (
-        <a
-          href={file.url}
-          target='_blank'
-          rel='noopener'
-          className='underline underline-offset-4'
-        >
-          Open in new tab
-        </a>
+      {!secure && (
+        <>
+          <a
+            href={file.url}
+            download={file.name}
+            className='underline underline-offset-4'
+          >
+            Download
+          </a>
+          {file.mime === PDF && (
+            <a
+              href={file.url}
+              target='_blank'
+              rel='noopener'
+              className='underline underline-offset-4'
+            >
+              Open in new tab
+            </a>
+          )}
+        </>
       )}
     </div>
   )

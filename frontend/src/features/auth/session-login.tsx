@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { setMe, type Me } from '@/lib/session'
+import { TlpMark } from '@/components/tlp-mark'
 import { ThemeSwitch } from '@/components/theme-switch'
 import './session-login.css'
 
@@ -29,6 +30,14 @@ type AuthUser = {
 
 const labels = ['Pemberitahuan', 'Masuk', 'Kode', 'Perangkat', 'Konfirmasi']
 const rowNames = ['Jaringan', 'Kode autentikator', 'Modul Enkripsi', 'Jam']
+const tlpLevels = [
+  'CLEAR',
+  'GREEN',
+  'AMBER',
+  'AMBER+STRICT',
+  'RED',
+  'RED+STRICT',
+] as const
 const jsonFetch = (url: string, body?: unknown) =>
   fetch(url, {
     method: body === undefined ? 'GET' : 'POST',
@@ -392,7 +401,6 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
     <main className={`lg-root${leaving ? 'lg-leave' : ''}`}>
       <div className='lg-layout'>
         <section className='lg-about' aria-label='Tentang sistem'>
-          <div className='lg-scan' aria-hidden='true' />
           <div className='lg-brand lg-in'>
             <svg className='lg-shield' viewBox='0 0 24 24' aria-hidden='true'>
               <path d='M12 3 20 6v6c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V6z' />
@@ -414,16 +422,31 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
           </div>
           <div className='lg-facts lg-in3'>
             {[
-              ['Faktor', 'Kata sandi, kode autentikator'],
-              ['Jaminan', 'AAL2, SP 800-63B'],
-              ['Kunci', 'MSK tersegel di TPM 2.0'],
-              ['Sesi', 'Kunci idle 5 mnt, batas 30 mnt'],
+              ['FAKTOR', 'Kata sandi, kode autentikator'],
+              ['JAMINAN', 'AAL2, SP 800-63B'],
+              ['KUNCI', 'MSK tersegel di TPM 2.0'],
+              ['SESI', 'Kunci idle 5 mnt, batas 30 mnt'],
             ].map(([title, value]) => (
               <div className='lg-fact' key={title}>
-                <div className='lg-muted lg-fact-label'>{title}</div>
+                <div className='lg-fact-label'>{title}</div>
                 <div className='lg-mono'>{value}</div>
               </div>
             ))}
+          </div>
+          <div className='lg-tlp-block lg-in3'>
+            <div className='lg-eyebrow'>SKALA TLP</div>
+            <div className='lg-tlp-scale' role='list' aria-label='Skala TLP'>
+              {tlpLevels.map((level) => (
+                <div
+                  className={`lg-tlp-item${me?.tlpMax === level ? ' current' : ''}`}
+                  role='listitem'
+                  key={level}
+                  aria-current={me?.tlpMax === level ? 'true' : undefined}
+                >
+                  <TlpMark tlp={level} />
+                </div>
+              ))}
+            </div>
           </div>
           <div className='lg-help'>
             Terkunci atau kehilangan autentikator: petugas keamanan sistem,

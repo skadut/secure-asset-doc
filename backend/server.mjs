@@ -2,7 +2,7 @@ import http from 'node:http';
 import { post as cryptoPost } from './crypto-client.mjs';
 
 import pg from 'pg';
-import { record, ownSnapshot, validateRemote, cryptoLog } from './traffic.mjs';
+import { record, ownSnapshot, validateRemote, cryptoLog, makeTrafficRoutes, startHistoryWriter } from './traffic.mjs';
 import { sanitizeName, ALLOWED_MIME, checkMagic, decodeFile, contentDispositionInline, MAX_BODY } from './uploads.mjs';
 import { INTEGRITY_ERROR } from './protection.mjs';
 import { canReadLevel, can, createLoginLimiter, checkWriteRequest, parseAllowedOrigins } from './auth.mjs';
@@ -16,6 +16,9 @@ import { makeAuditPurgeRoutes } from './audit-purge.mjs';
 import { makeGrantRoutes } from './grants.mjs';
 import { makeLevelRoutes } from './levels.mjs';
 import { makeDeriveRoutes } from './derive.mjs';
+import { makeViewerRoutes, validate } from './viewer.mjs';
+import { makeDashboardRoutes } from './dashboard.mjs';
+import { makeControlRoutes } from './controls.mjs';
 import { matchRoute } from './router.mjs';
 
 const pool = new pg.Pool({
@@ -206,7 +209,17 @@ async function grc() {
     versionsByDoc.set(r.document_id, list);
   }
 
+  // Additive UI data. Missing table (older DB) degrades to an empty list instead of failing /api/grc.
+  const ctl = await dbq('SELECT id, family, name, implementation, location FROM nist_controls ORDER BY id').catch(() => ({ rows: [] }));
+
   return {
+    controls: ctl.rows.map((r) => ({
+      id: r.id,
+      family: r.family,
+      name: r.name,
+      implementation: r.implementation,
+      location: r.location,
+    })),
     assets: a.rows.map((r) => ({
       id: r.id,
       name: r.name,
@@ -333,7 +346,11 @@ async function revealTokens(documents, assets = []) {
 }
 
 // ponytail: whole file buffered in memory (max 25 MiB); stream from object storage when files grow
-async function file(res, me, documentId, version) {
+async function file(res, me, documentId, version, viewerSession) {
+  if (viewerSession) {
+    const ok = await validate(dbq, { sessionId: viewerSession, userId: me.id, documentId });
+    if (!ok) return send(res, 403, { error: 'forbidden' });
+  }
   const r = await dbq(
     'SELECT v.file_name, v.mime_type, v.protection, v.content_base64, v.content_ciphertext, v.integrity_tag, d.tlp FROM document_versions v JOIN documents d ON d.id = v.document_id WHERE v.document_id = $1 AND v.version = $2 AND (v.content_base64 IS NOT NULL OR v.content_ciphertext IS NOT NULL)',
     [documentId, version],
@@ -493,6 +510,11 @@ const fieldDeps = { seal: sealText, reveal: (targets) => reveal(targets, fieldCr
 const grantRoutes = makeGrantRoutes({ q: dbq, send, readRaw: readBody, forbid, ...fieldDeps });
 const levelRoutes = makeLevelRoutes({ q: dbq, send, readRaw: readBody, forbid, ...fieldDeps });
 const deriveRoutes = makeDeriveRoutes({ q: dbq, send, readRaw: readBody, forbid, hasGrant, grantedIds, revealTokens, seal: sealText });
+const viewerRoutes = makeViewerRoutes({ q: dbq, send, forbid, canReadLevel, hasGrant });
+const viewerPluralRoutes = viewerRoutes;
+const dashboardRoutes = makeDashboardRoutes({ q: dbq, send, forbid });
+const controlRoutes = makeControlRoutes({ q: dbq, send });
+const trafficRoutes = makeTrafficRoutes({ q: dbq, send, forbid });
 
 // Database view (superAdmin only, read-only transactions). Long strings cut by truncate().
 async function dbviewTables(client) {
@@ -537,12 +559,17 @@ const ROUTES = [
   { re: /^\/api\/auth\/device-check$/, methods: ['GET'], pub: true, run: (req, res) => authRoutes.deviceCheck(req, res) },
   { re: /^\/api\/logout$/, methods: ['POST'], run: (req, res) => authRoutes.logout(req, res) },
   { re: /^\/api\/me$/, methods: ['GET'], run: (req, res) => authRoutes.me(req, res) },
+  { re: /^\/api\/me\/preferences$/, methods: ['GET'], run: (req, res) => authRoutes.getPreferences(req, res) },
+  { re: /^\/api\/me\/preferences$/, methods: ['PATCH'], run: (req, res) => authRoutes.patchPreferences(req, res) },
   { re: /^\/api\/ranks$/, methods: ['GET'], run: (req, res) => authRoutes.ranks(req, res) },
   { re: /^\/api\/traffic$/, methods: ['GET'], run: async (req, res) => {
     if (req.me?.superAdmin !== true) return forbid(res, req.me, 'traffic', 'view', 'traffic view denied');
     if (!takeToken()) return send(res, 429, { error: 'rate_limited' });
     return send(res, 200, await traffic(req.me?.superAdmin === true));
   } },
+  { re: /^\/api\/traffic\/history$/, methods: ['GET'], run: (req, res) => trafficRoutes.history(req, res) },
+  { re: /^\/api\/dashboard\/summary$/, methods: ['GET'], run: (req, res) => dashboardRoutes.summary(req, res) },
+  { re: /^\/api\/controls$/, methods: ['GET'], run: (req, res) => controlRoutes.list(req, res) },
   { re: /^\/api\/grc$/, methods: ['GET'], run: async (req, res) => {
     const so = req.me.securityOfficer === true;
     const out = filterGrc(await grc(), {
@@ -576,10 +603,15 @@ const ROUTES = [
   } },
   { re: /^\/api\/files\/([^/]+)\/([^/]+)$/, methods: ['GET'], run: async (req, res, [doc, ver]) => {
     if (!DOC_ID.test(doc) || !VERSION.test(ver)) return send(res, 400, { error: 'bad request' });
-    return file(res, req.me, doc, ver);
+    const viewerSession = new URL(req.url, 'http://localhost').searchParams.get('viewerSession') ?? undefined;
+    return file(res, req.me, doc, ver, viewerSession ?? undefined);
   } },
   { re: /^\/api\/audit\/purge-preview$/, methods: ['GET'], run: (req, res) => auditPurge.preview(req, res) },
   { re: /^\/api\/audit\/purge$/, methods: ['POST'], run: (req, res) => auditPurge.purge(req, res) },
+  { re: /^\/api\/documents\/([^/]+)\/viewer-session$/, methods: ['POST'], run: (req, res, [id]) => viewerRoutes.create(req, res, id) },
+  { re: /^\/api\/documents\/([^/]+)\/viewer-sessions$/, methods: ['POST'], run: (req, res, [id]) => viewerPluralRoutes.create(req, res, id) },
+  { re: /^\/api\/viewer-sessions\/([^/]+)$/, methods: ['GET'], run: (req, res, [id]) => viewerRoutes.validate(req, res, id) },
+  { re: /^\/api\/viewer-sessions\/([^/]+)$/, methods: ['DELETE'], run: (req, res, [id]) => viewerRoutes.destroy(req, res, id) },
   { re: /^\/api\/users$/, methods: ['GET'], run: (req, res) => grantRoutes.users(req, res) },
   { re: /^\/api\/access-requests$/, methods: ['GET'], run: (req, res) => grantRoutes.requests(req, res) },
   { re: /^\/api\/access-requests\/([^/]+)\/decision$/, methods: ['POST'], run: (req, res, [id]) => grantRoutes.decide(req, res, id) },
@@ -630,7 +662,7 @@ const server = http.createServer(async (req, res) => {
   const start = performance.now();
   res.on('finish', () => {
     const p = req.url.split('?')[0];
-    if (p !== '/api/traffic' && p !== '/api/health') {
+    if (p !== '/api/traffic' && p !== '/api/traffic/history' && p !== '/api/health') {
       record('frontend', 'backend', { failed: res.statusCode >= 500, ms: performance.now() - start });
     }
   });
@@ -661,4 +693,7 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+const historyWriter = startHistoryWriter(dbq);
+process.once('SIGTERM', () => { historyWriter.stop(); server.close(); });
+process.once('SIGINT', () => { historyWriter.stop(); server.close(); });
 server.listen(Number(process.env.PORT || 3000), '0.0.0.0', () => warnUnprotected());

@@ -37,13 +37,20 @@ export function ProfileDropdown() {
         <DropdownMenuTrigger asChild>
           <Button
             variant='ghost'
-            className='relative size-11 rounded-full'
-            aria-label={`Open profile menu for ${user.name}`}
+            className='relative size-10 rounded-full p-0 hover:bg-transparent'
+            aria-label={`Buka menu profil ${user.name}`}
           >
-            <Avatar className='h-8 w-8'>
+            <Avatar className='size-7 border-2 border-pass'>
               {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
-              <AvatarFallback>{initials}</AvatarFallback>
+              <AvatarFallback className='rounded-full bg-surface-2 font-mono text-[9px] font-semibold text-ink'>
+                {initials}
+              </AvatarFallback>
             </Avatar>
+            {me?.accessLevel != null && (
+              <span className='absolute -right-0.5 -bottom-0.5 bg-pass px-1 font-mono text-[7px] font-semibold leading-[13px] text-background'>
+                L{me.accessLevel}
+              </span>
+            )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className='w-56' align='end'>

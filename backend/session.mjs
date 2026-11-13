@@ -31,6 +31,7 @@ export function meFromRow(row) {
     superAdmin: row.super_admin === true && row.access_level === 5,
     unit: row.unit ?? null,
     unitHead: row.unit_head === true,
+    preferences: row.preferences ?? {},
   };
 }
 
@@ -53,12 +54,13 @@ export function meJson(me) {
     unit: me.unit ?? null,
     unitHead: me.unitHead === true,
     ownerLabel: me.ownerLabel,
+    preferences: me.preferences ?? {},
     can: perms,
   };
 }
 
 // Hard limit (expires_at, 30 min from creation) and idle lock (last_seen older than IDLE_TIMEOUT_MS) both enforced here.
-const LOOKUP_SQL = `SELECT u.id, u.username, u.name, u.rank_code, u.owner_label, u.access_level, u.security_officer, u.super_admin, u.unit, u.unit_head
+const LOOKUP_SQL = `SELECT u.id, u.username, u.name, u.rank_code, u.owner_label, u.access_level, u.security_officer, u.super_admin, u.unit, u.unit_head, u.preferences
   FROM sessions s JOIN users u ON u.id = s.user_id
   WHERE s.token_hash = $1 AND s.expires_at > now() AND s.last_seen > now() - ($2::int * interval '1 second') AND u.active`;
 
@@ -85,6 +87,41 @@ export async function createSession(q, userId) {
 export async function destroySession(q, cookieHeader) {
   const tok = parseSid(cookieHeader);
   if (tok) await q('DELETE FROM sessions WHERE token_hash = $1', [hashSessionToken(tok)]);
+}
+
+export const DEFAULT_PREFERENCES = Object.freeze({
+  theme: 'system', font: 'sans', dir: 'ltr',
+  layout: Object.freeze({ variant: 'inset', collapsible: true, sidebarOpen: true }),
+  notifications: Object.freeze({ type: 'all', mobile: false, communication_emails: false, social_emails: true, marketing_emails: false, security_emails: true }),
+  display: Object.freeze({ items: Object.freeze(['recents', 'home']) }),
+});
+export const PREFERENCE_KEYS = Object.freeze(['theme', 'font', 'dir', 'layout', 'notifications', 'display']);
+export const mergePreferences = (saved = {}) => ({ ...DEFAULT_PREFERENCES, ...(saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {}) });
+export function validatePreferencesPatch(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return 'bad request';
+  if (Object.keys(value).some((key) => !PREFERENCE_KEYS.includes(key))) return 'bad request';
+  if (value.theme !== undefined && !['light', 'dark', 'system'].includes(value.theme)) return 'bad request';
+  if (value.font !== undefined && !['sans', 'mono'].includes(value.font)) return 'bad request';
+  if (value.dir !== undefined && !['ltr', 'rtl'].includes(value.dir)) return 'bad request';
+  return null;
+}
+export const preferencesBodyTooLarge = (raw) => raw.length > 8 * 1024;
+
+export async function readPreferences(q, userId) {
+  const { rows } = await q('SELECT preferences FROM users WHERE id = $1', [userId]);
+  return rows[0]?.preferences ?? {};
+}
+export async function patchPreferences(q, userId, patch) {
+  const { rows } = await q('UPDATE users SET preferences = preferences || $1::jsonb WHERE id = $2 RETURNING preferences', [JSON.stringify(patch), userId]);
+  return rows[0]?.preferences ?? null;
+}
+export function missingPreferencesColumn(err) {
+  return err?.code === '42703' && /preferences/i.test(err.message ?? '');
+}
+
+export async function updatePreferences(q, userId, preferences) {
+  const { rows } = await q('UPDATE users SET preferences = $2::jsonb WHERE id = $1 RETURNING preferences', [userId, JSON.stringify(preferences)]);
+  return rows[0]?.preferences ?? null;
 }
 
 export async function findLoginUser(q, username) {

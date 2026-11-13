@@ -1,18 +1,14 @@
 .ui-switch {
-  --ui-switch-track: rgb(135, 150, 165);
-  --ui-switch-thumb: rgb(0, 56, 146);
-  --ui-switch-focus: rgb(0, 56, 146);
+  --ui-switch-track: var(--sunken);
+  --ui-switch-thumb: var(--ink);
+  --ui-switch-focus: var(--ring);
   position: relative;
   display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
-  min-width: 48px;
-  min-height: 44px;
   cursor: pointer;
-}
-
-:root.dark .ui-switch {
-  --ui-switch-focus: rgb(147, 197, 253);
 }
 
 .ui-switch input {
@@ -25,9 +21,10 @@
 
 .ui-switch .slider {
   position: relative;
-  width: 48px;
-  height: 20px;
-  border-radius: 999px;
+  width: 54px;
+  height: 28px;
+  border: 1px solid var(--line-2);
+  border-radius: 14px;
   background: var(--ui-switch-track);
 }
 
@@ -38,39 +35,27 @@
 
 .ui-switch .circle {
   position: absolute;
-  top: -6px;
-  left: 0;
+  top: 2px;
+  left: 2px;
   display: flex;
+  width: 22px;
+  height: 22px;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
   border-radius: 50%;
   background: var(--ui-switch-thumb);
-  color: #fff;
-  box-shadow:
-    0 2px 1px -1px rgba(0, 0, 0, 0.2),
-    0 1px 1px 0 rgba(0, 0, 0, 0.14),
-    0 1px 3px 0 rgba(0, 0, 0, 0.12);
-  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--primary-foreground);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.28);
+  transition: transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.ui-switch .circle svg {
+  width: 13px;
+  height: 13px;
 }
 
 .ui-switch input:checked + .slider .circle {
-  transform: translateX(16px);
-}
-
-.ui-switch .circle::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: #fff;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.ui-switch input:active + .slider .circle::after {
-  opacity: 0.75;
+  transform: translateX(26px);
 }
 
 @media (prefers-reduced-motion: reduce) {

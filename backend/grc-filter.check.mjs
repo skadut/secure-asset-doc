@@ -113,6 +113,15 @@ const RESTRICTED_KEYS = ['createdAt', 'grantees', 'id', 'tlp', 'versionCount'];
   assert.equal(filterGrc(grc, { accessLevel: 0, grantedIds: new Set(['DOC-0004']) }).documents[0].granted, true);
 }
 
+// Controls pass through untouched; absent input -> [].
+{
+  const controls = [{ id: 'AC-2', family: 'AC', name: 'Account Management', implementation: 'x', location: 'y' }];
+  const out = filterGrc({ ...grc, controls }, { accessLevel: 5 });
+  assert.deepEqual(out.controls, controls);
+  assert.deepEqual(filterGrc(grc, { accessLevel: 5 }).controls, []);
+  assert.equal(filterGrc(grc, { accessLevel: 2 }).controls.length, 0);
+}
+
 // Input not mutated.
 assert.equal(grc.documents.length, 4);
 assert.equal(grc.documents[3].granted, undefined);

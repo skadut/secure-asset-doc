@@ -1,4 +1,36 @@
 /* Deterrent only: hides the viewer when printing. Real control is server-side. */
+.secure-viewer {
+  isolation: isolate;
+}
+
+body.viewer-active {
+  overflow: hidden;
+}
+
+body.viewer-active #root {
+  visibility: hidden;
+}
+
+.secure-viewer :focus-visible {
+  outline-offset: 2px;
+}
+
+@media (max-width: 639px) {
+  .secure-viewer > header {
+    padding-block: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .secure-viewer *,
+  .secure-viewer *::before,
+  .secure-viewer *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Deterrent only: hides the viewer when printing. Real control is server-side. */
 .viewer-print-note {
   display: none;
 }

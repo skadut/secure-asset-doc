@@ -1,6 +1,6 @@
 // Self-check: sid cookie parsing, Me shape (incl. security officer + access flags), GRC filter via session path. Pure; DB lookup via fake q.
 import assert from 'node:assert/strict';
-import { parseSid, sidSetCookie, meJson, meFromRow, lookupSession, SID } from './session.mjs';
+import { parseSid, sidSetCookie, meJson, meFromRow, lookupSession, updatePreferences, SID } from './session.mjs';
 import { filterGrc } from './grc-filter.mjs';
 import { hashSessionToken } from './auth.mjs';
 
@@ -41,6 +41,9 @@ assert.equal(seen.length, 1, 'no DB hit without sid cookie');
   assert.equal(meFromRow({ id: 'u', username: 'k', name: 'n', rank_code: 'kolonel', owner_label: null, access_level: '2', unit_head: false }).unitHead, false);
   assert.equal(plain.unitHead, false, 'missing unit_head -> false');
   assert.equal(meFromRow({ id: 'u', username: 'k', name: 'n', rank_code: 'kapten', owner_label: null, access_level: '3', unit_head: 'true' }).unitHead, false, 'only boolean true');
+  // preferences: carried from row; missing -> {}.
+  assert.deepEqual(meFromRow({ id: 'u', username: 'k', name: 'n', rank_code: 'kapten', owner_label: null, access_level: '3', preferences: { theme: 'dark' } }).preferences, { theme: 'dark' });
+  assert.deepEqual(plain.preferences, {});
 }
 
 // Me shape
@@ -62,6 +65,9 @@ assert.equal(me.can.access.grant, false);
 assert.equal(me.can.access.request, false);
 assert.equal(me.can.access.approve, false);
 assert.equal(me.can.access.revoke, false);
+// preferences in /api/me shape: present, missing -> {}.
+assert.deepEqual(me.preferences, {});
+assert.deepEqual(meJson({ id: 'u', username: 'kapten', name: 'n', rankCode: 'kapten', ownerLabel: null, accessLevel: 2, preferences: { density: 'compact' } }).preferences, { density: 'compact' });
 const adm = meJson({ id: 'u', username: 'jend', name: 'n', rankCode: 'jenderal-tni', ownerLabel: null, accessLevel: 5 });
 assert.equal(adm.tlpMax, 'RED');
 assert.equal(adm.can.access.grant, true);
@@ -111,5 +117,18 @@ assert.equal(level1.auditEvents.length, 2, 'asset-typed event kept, hidden-doc e
 const level5 = filterGrc(grc, { accessLevel: 5 });
 assert.deepEqual(level5.documents.map((d) => d.id), ['DOC-0001', 'DOC-0002', 'DOC-0003']);
 assert.equal(grc.documents.length, 4, 'input not mutated');
+
+// updatePreferences: writes JSONB for the session user, returns stored value; missing row -> null.
+{
+  let seen;
+  const saved = await updatePreferences(async (sql, params) => {
+    seen = [sql, params];
+    return { rows: [{ preferences: { density: 'compact' } }] };
+  }, 'uid-1', { density: 'compact' });
+  assert.deepEqual(saved, { density: 'compact' });
+  assert.match(seen[0], /preferences = \$2::jsonb/);
+  assert.deepEqual(seen[1], ['uid-1', '{"density":"compact"}']);
+  assert.equal(await updatePreferences(async () => ({ rows: [] }), 'nope', {}), null);
+}
 
 console.log('session ok');

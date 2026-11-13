@@ -37,9 +37,9 @@ export function NavGroup({ title, items }: NavGroupProps) {
   const { state, isMobile } = useSidebar()
   const href = useLocation({ select: (location) => location.href })
   return (
-    <SidebarGroup>
+    <SidebarGroup className='gap-0.5 rounded-[10px] bg-black/25 px-1.5 py-1.5 shadow-[inset_0_1px_2px_rgb(0_0_0/.45),0_1px_0_rgb(255_255_255/.04)]'>
       <SidebarGroupLabel>{title}</SidebarGroupLabel>
-      <SidebarMenu>
+      <SidebarMenu className='gap-0.5'>
         {items.map((item) => {
           const key = `${item.title}-${item.url}`
 
@@ -59,7 +59,7 @@ export function NavGroup({ title, items }: NavGroupProps) {
 }
 
 function NavBadge({ children }: { children: ReactNode }) {
-  return <Badge className='rounded-full px-1 py-0 text-xs'>{children}</Badge>
+  return <Badge className='rounded-none px-1 py-0 font-mono text-[8px]'>{children}</Badge>
 }
 
 function SidebarMenuLink({ item, href }: { item: NavLink; href: string }) {
@@ -72,7 +72,11 @@ function SidebarMenuLink({ item, href }: { item: NavLink; href: string }) {
         tooltip={item.title}
       >
         <Link to={item.url} onClick={() => setOpenMobile(false)}>
-          {item.icon && <item.icon />}
+          {item.icon && (
+            <span className='nav-ic' aria-hidden='true'>
+              <item.icon />
+            </span>
+          )}
           <span>{item.title}</span>
           {item.badge && <NavBadge>{item.badge}</NavBadge>}
         </Link>
@@ -98,7 +102,11 @@ function SidebarMenuCollapsible({
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
           <SidebarMenuButton tooltip={item.title}>
-            {item.icon && <item.icon />}
+            {item.icon && (
+              <span className='nav-ic' aria-hidden='true'>
+                <item.icon />
+              </span>
+            )}
             <span>{item.title}</span>
             {item.badge && <NavBadge>{item.badge}</NavBadge>}
             <ChevronRight className='ms-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180' />

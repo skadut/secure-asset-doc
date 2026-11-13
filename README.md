@@ -304,7 +304,20 @@ docker compose exec db rm /tmp/sad-backup.sql
 
 ## Seeding after fresh start
 
-A fresh volume gets schema only (`db/init`, 0 rows). Seed order after a fresh start: `db/seed/*.sql`, then `seed-users`, then `protect-documents`, then `tokenize-titles`. Commands and checks are in [Fresh start](#fresh-start) and [TUTORIAL step 5](cryptography-service/tpm-services/TUTORIAL.md#5-reset-data-dari-nol).
+A fresh volume gets schema only (`db/init`, 0 rows). Seed order after a fresh start: `db/seed/*.sql`, then `seed-users`, then `seed-totp`, then `protect-documents`, then `tokenize-titles`. Commands and checks are in [Fresh start](#fresh-start) and [TUTORIAL step 5](cryptography-service/tpm-services/TUTORIAL.md#5-reset-data-dari-nol).
+
+`seed-totp` stores the shared demo TOTP secret for login OTP. Set `DEMO_TOTP_SECRET` to 20 printable ASCII characters, then run:
+
+```powershell
+$env:DEMO_TOTP_SECRET = "<20-char-ascii>"
+docker compose run --rm --no-deps -v "./db/scripts/seed-totp.mjs:/app/seed-totp.mjs:ro" -e PGUSER=<POSTGRES_USER> -e PGDATABASE=<POSTGRES_DB> -e PGPASSWORD=<POSTGRES_PASSWORD> -e DEMO_TOTP_SECRET backend node /app/seed-totp.mjs
+```
+
+`--print-uri` prints an `otpauth://` URI for an authenticator app. Operator-only, never in CI:
+
+```powershell
+docker compose run --rm --no-deps -v "./db/scripts/seed-totp.mjs:/app/seed-totp.mjs:ro" -e DEMO_TOTP_SECRET backend node /app/seed-totp.mjs --print-uri
+```
 
 ## Service traffic
 

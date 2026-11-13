@@ -22,6 +22,7 @@ type NavUserProps = {
     name: string
     email: string
     avatar: string
+    level?: number
   }
 }
 
@@ -44,38 +45,49 @@ export function NavUser({ user }: NavUserProps) {
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
                 size='lg'
-                className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
+                className='h-auto rounded-[10px] bg-black/25 p-2.5 shadow-[inset_0_1px_2px_rgb(0_0_0/.45),0_1px_0_rgb(255_255_255/.04)] hover:bg-black/30 data-[state=open]:bg-black/30'
               >
-                <Avatar className='h-8 w-8 rounded-lg'>
+                <Avatar className='size-7 shrink-0 rounded-full border border-rail-line'>
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className='rounded-lg'>
+                  <AvatarFallback className='rounded-full bg-rail-active font-mono text-[9px] font-semibold text-rail-ink'>
                     {initials}
                   </AvatarFallback>
                 </Avatar>
-                <div className='grid flex-1 text-start text-sm leading-tight'>
-                  <span className='truncate font-semibold'>{user.name}</span>
-                  <span className='truncate text-xs'>{user.email}</span>
+                <div className='grid min-w-0 flex-1 text-start leading-tight'>
+                  <span className='truncate text-[11.5px] font-semibold text-rail-ink'>
+                    {user.name}
+                  </span>
+                  <span className='truncate font-mono text-[7.5px] leading-[1.5] tracking-[.02em] text-rail-dim'>
+                    {user.email}
+                  </span>
+                  {user.level != null && (
+                    <span className='mt-0.5 inline-flex w-fit items-center gap-1 border border-[#3a4a8f] px-1 font-mono text-[7px] font-semibold leading-[14px] text-[#8fa6e6]'>
+                      L{user.level}
+                    </span>
+                  )}
                 </div>
-                <ChevronsUpDown className='ms-auto size-4' />
+                <ChevronsUpDown className='ms-auto size-3.5 shrink-0 text-rail-dim' aria-hidden='true' />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className='w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg'
+              className='w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-none'
               side={isMobile ? 'bottom' : 'right'}
               align='end'
               sideOffset={4}
             >
               <DropdownMenuLabel className='p-0 font-normal'>
                 <div className='flex items-center gap-2 px-1 py-1.5 text-start text-sm'>
-                  <Avatar className='h-8 w-8 rounded-lg'>
+                  <Avatar className='size-8 rounded-full'>
                     <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className='rounded-lg'>
+                    <AvatarFallback className='rounded-full font-mono text-[9px]'>
                       {initials}
                     </AvatarFallback>
                   </Avatar>
-                  <div className='grid flex-1 text-start text-sm leading-tight'>
+                  <div className='grid flex-1 text-start leading-tight'>
                     <span className='truncate font-semibold'>{user.name}</span>
-                    <span className='truncate text-xs'>{user.email}</span>
+                    <span className='truncate font-mono text-[8px] text-muted-foreground'>
+                      {user.email}
+                    </span>
                   </div>
                 </div>
               </DropdownMenuLabel>
@@ -84,13 +96,13 @@ export function NavUser({ user }: NavUserProps) {
                 <DropdownMenuItem asChild>
                   <Link to='/settings/account'>
                     <BadgeCheck />
-                    Account
+                    Akun
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to='/settings/notifications'>
                     <Bell />
-                    Notifications
+                    Notifikasi
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>

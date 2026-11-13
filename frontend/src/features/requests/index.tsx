@@ -1,3 +1,4 @@
+import { PageHead } from '@/components/page-head'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
@@ -19,20 +20,18 @@ export function Requests() {
       </Header>
 
       <Main className='flex flex-1 flex-col gap-6'>
-        <div>
-          <h1 className='page-title tracking-tight'>Otorisasi ganda</h1>
-          <p className='text-muted-foreground'>
-            Penambahan akses dan perubahan level memerlukan persetujuan dua
-            pihak.
-          </p>
-        </div>
+        <PageHead
+          title='Otorisasi ganda'
+          eyebrow='Dua pihak · Komandan + Perwira Keamanan'
+          note='Keputusan akses'
+        />
 
-        <Tabs defaultValue='akses'>
-          <TabsList className='h-auto w-full'>
-            <TabsTrigger value='akses' className='h-11'>
+        <Tabs defaultValue='akses' className='min-w-0'>
+          <TabsList className='h-auto w-full justify-start rounded-none border-b border-line bg-transparent p-0'>
+            <TabsTrigger value='akses' className='h-11 rounded-none border-b-2 border-transparent px-3 data-[state=active]:border-ink data-[state=active]:bg-transparent data-[state=active]:text-ink'>
               Permintaan akses
             </TabsTrigger>
-            <TabsTrigger value='level' className='h-11'>
+            <TabsTrigger value='level' className='h-11 rounded-none border-b-2 border-transparent px-3 data-[state=active]:border-ink data-[state=active]:bg-transparent data-[state=active]:text-ink'>
               Perubahan level
             </TabsTrigger>
           </TabsList>

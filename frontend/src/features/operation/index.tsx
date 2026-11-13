@@ -12,7 +12,8 @@ import { AccessPanel } from './components/access-matrix'
 import { AccessTester } from './components/access-tester'
 
 export function Operation() {
-  const allowed = getMe()?.accessLevel === 5
+  const me = getMe()
+  const allowed = me?.accessLevel === 5 || me?.securityOfficer === true
   return (
     <>
       <Header fixed>

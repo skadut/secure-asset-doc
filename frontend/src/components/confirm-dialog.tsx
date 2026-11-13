@@ -44,16 +44,16 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
   } = props
   return (
     <AlertDialog {...actions}>
-      <AlertDialogContent className={cn(className && className)}>
-        <AlertDialogHeader className='text-start'>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription asChild>
+      <AlertDialogContent className={cn('rounded-none border-line-2 bg-surface p-0 text-ink shadow-lg', className)}>
+        <AlertDialogHeader className='border-b border-line bg-surface-2 px-4 py-3 text-start'>
+          <AlertDialogTitle className='font-sans text-[14px] font-semibold text-ink'>{title}</AlertDialogTitle>
+          <AlertDialogDescription asChild className='text-[11.5px] leading-[1.45] text-ink-2'>
             <div>{desc}</div>
           </AlertDialogDescription>
         </AlertDialogHeader>
-        {children}
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>
+        {children && <div className='p-4'>{children}</div>}
+        <AlertDialogFooter className='border-t border-line px-4 py-3'>
+          <AlertDialogCancel disabled={isLoading} className='min-h-8 rounded-none border-line bg-surface font-sans text-[12px] text-ink focus-visible:ring-2 focus-visible:ring-ring'>
             {cancelBtnText ?? 'Cancel'}
           </AlertDialogCancel>
           <Button
@@ -62,6 +62,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
             onClick={handleConfirm}
             variant={destructive ? 'destructive' : 'default'}
             disabled={disabled || isLoading}
+            className='min-h-8 rounded-none font-sans text-[12px] focus-visible:ring-2 focus-visible:ring-ring'
           >
             {confirmText ?? 'Continue'}
           </Button>

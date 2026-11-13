@@ -13,9 +13,7 @@ import {
 } from '@/lib/access-api'
 import { getMe, type Me } from '@/lib/session'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -28,8 +26,12 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { ConfirmDialog } from '@/components/confirm-dialog'
-import { TlpBadge } from '@/components/tlp-badge'
 import { grantsKey } from '@/features/operation/api'
+import { CardPanel } from '@/components/card-panel'
+import { Chip } from '@/components/chip'
+import { EmptyState } from '@/components/empty-state'
+import { StatusDot } from '@/components/status-dot'
+import { TlpMark } from '@/components/tlp-mark'
 
 const DOC_RE = /^DOC-\d{4}$/
 const USERNAME_RE = /^[a-z0-9.-]{3,40}$/
@@ -61,11 +63,11 @@ const STEP_TEXT: Record<StepState, string> = {
 }
 
 const STEP_TONE: Record<StepState, string> = {
-  done: 'border-t-primary text-foreground',
-  wait: 'border-t-border text-muted-foreground',
-  bad: 'border-t-destructive text-destructive',
-  skip: 'border-t-border text-muted-foreground',
-  expired: 'border-t-border text-muted-foreground',
+  done: 'border-t-pass text-pass',
+  wait: 'border-t-line-strong text-ink-3',
+  bad: 'border-t-fail text-fail',
+  skip: 'border-t-line text-ink-3',
+  expired: 'border-t-warn text-warn',
 }
 
 const fmt = (iso: string) =>
@@ -183,142 +185,53 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
   const [now] = useState(() => Date.now())
   const isRequester = r.requestedBy === me.username
   const isGrantee = r.grantee === me.username
-  const decided =
-    viewerRole !== null && r.approvals.some((a) => a.role === viewerRole)
+  const decided = viewerRole !== null && r.approvals.some((a) => a.role === viewerRole)
   const locked = isRequester || isGrantee || decided || viewerRole === null
-  const showDecision =
-    r.status === 'pending' &&
-    Boolean(me.can.access?.approve) &&
-    !r.approvals.some((a) => a.approver === me.username)
+  const showDecision = r.status === 'pending' && Boolean(me.can.access?.approve) && !r.approvals.some((a) => a.approver === me.username)
   const queue = queueLabel(r, me, viewerRole)
   const steps = stepsOf(r, now)
+  const statusTone = r.status === 'approved' ? 'pass' : r.status === 'denied' ? 'fail' : r.status === 'pending' ? 'warn' : 'ink'
 
   return (
-    <Card>
-      <CardHeader className='gap-2'>
-        <div className='flex flex-wrap items-center gap-2'>
-          <TlpBadge tlp={r.tlp} />
-          <span className='font-mono text-sm break-all'>{r.documentId}</span>
-          <Badge
-            variant={queue === 'Perlu keputusan Anda' ? 'default' : 'outline'}
-          >
-            {queue}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className='flex flex-col gap-4'>
-        <ol
-          aria-label='Tahapan persetujuan'
-          className='grid grid-cols-[repeat(auto-fit,minmax(112px,1fr))] gap-2'
-        >
-          {steps.map((s) => (
-            <li
-              key={s.label}
-              className={`flex flex-col gap-0.5 border-t-4 pt-2 text-sm ${STEP_TONE[s.state]}`}
-            >
-              <span className='font-medium text-foreground'>{s.label}</span>
-              <span>{STEP_TEXT[s.state]}</span>
-            </li>
-          ))}
-        </ol>
-
-        <dl className='grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm'>
-          <dt className='text-muted-foreground'>Penerima</dt>
-          <dd className='break-words'>
-            {r.grantee} · {r.granteeUnit ?? '—'}
-          </dd>
-          <dt className='text-muted-foreground'>Pemohon</dt>
-          <dd className='break-words'>{r.requestedBy}</dd>
-          <dt className='text-muted-foreground'>Alasan</dt>
-          <dd className='break-words whitespace-pre-line'>{r.reason}</dd>
-          <dt className='text-muted-foreground'>Kedaluwarsa</dt>
-          <dd>{r.expiresAt ? fmt(r.expiresAt) : 'Tidak kedaluwarsa'}</dd>
-          <dt className='text-muted-foreground'>Status</dt>
-          <dd>{STATUS_LABEL[r.status]}</dd>
-          <dt className='text-muted-foreground'>Diajukan</dt>
-          <dd>{fmt(r.createdAt)}</dd>
-        </dl>
-
-        <div className='flex flex-col gap-2 border-t pt-4'>
-          <h3 className='text-sm font-medium'>Keputusan</h3>
-          {r.approvals.length === 0 ? (
-            <p className='text-sm text-muted-foreground'>Belum ada keputusan</p>
-          ) : (
-            <ul className='flex flex-col gap-2'>
-              {r.approvals.map((a) => (
-                <li key={a.role} className='rounded-md border p-3 text-sm'>
-                  <div className='font-medium'>
-                    {ROLE_LABEL[a.role]} · {a.approver} ·{' '}
-                    {a.decision === 'approve' ? 'Disetujui' : 'Ditolak'}
-                  </div>
-                  <div className='break-words text-muted-foreground'>
-                    {a.reason ?? '—'} · {fmt(a.at)}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {showDecision && (
-          <div className='flex flex-col gap-3 border-t pt-4'>
-            <div className='flex flex-col gap-1.5'>
-              <Label htmlFor={reasonId}>Alasan (opsional)</Label>
-              <Textarea
-                id={reasonId}
-                value={reason}
-                disabled={locked}
-                onChange={(e) => setReason(e.target.value)}
-              />
-            </div>
-            {isRequester && (
-              <p
-                id={`${reasonId}-disabled`}
-                className='text-sm text-muted-foreground'
-              >
-                Pemohon tidak dapat menyetujui permintaannya sendiri
-              </p>
-            )}
-            {!isRequester && isGrantee && (
-              <p className='text-sm text-muted-foreground'>
-                Penerima akses tidak dapat memutuskan permintaan ini
-              </p>
-            )}
-            {!isRequester && !isGrantee && decided && (
-              <p className='text-sm text-muted-foreground'>
-                Anda sudah memberi keputusan untuk permintaan ini
-              </p>
-            )}
-            {!isRequester && !isGrantee && !decided && viewerRole === null && (
-              <p className='text-sm text-muted-foreground'>
-                Peran Anda tidak memiliki wewenang persetujuan
-              </p>
-            )}
-            <div className='grid gap-2 sm:grid-cols-2'>
-              <Button
-                disabled={locked || deciding}
-                aria-describedby={
-                  isRequester ? `${reasonId}-disabled` : undefined
-                }
-                onClick={() => onDecide(r, 'approve', reason)}
-              >
-                Setujui
-              </Button>
-              <Button
-                variant='outline'
-                disabled={locked || deciding}
-                aria-describedby={
-                  isRequester ? `${reasonId}-disabled` : undefined
-                }
-                onClick={() => onDecide(r, 'deny', reason)}
-              >
-                Tolak
-              </Button>
-            </div>
+    <CardPanel
+      title={<span className='flex items-center gap-2'><TlpMark tlp={r.tlp} /><span className='text-line-strong'>/</span><span className='break-all'>{r.documentId}</span></span>}
+      meta={<StatusDot tone={statusTone}>{queue}</StatusDot>}
+      className='overflow-hidden'
+    >
+      <div className='grid min-w-0 gap-4 p-3.5 lg:grid-cols-[minmax(0,1fr)_minmax(250px,.8fr)]'>
+        <div className='flex min-w-0 flex-col gap-3'>
+          <div className='grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 text-[11px]'>
+            <span className='font-mono text-[8px] uppercase tracking-[.1em] text-ink-3'>Penerima</span>
+            <span className='break-words font-medium text-ink'>{r.grantee} <span className='font-normal text-ink-3'>· {r.granteeUnit ?? '—'}</span></span>
+            <span className='font-mono text-[8px] uppercase tracking-[.1em] text-ink-3'>Pemohon</span><span className='break-words text-ink-2'>{r.requestedBy}</span>
+            <span className='font-mono text-[8px] uppercase tracking-[.1em] text-ink-3'>Alasan</span><span className='break-words whitespace-pre-line text-ink-2'>{r.reason}</span>
+            <span className='font-mono text-[8px] uppercase tracking-[.1em] text-ink-3'>Kedaluwarsa</span><span className='text-ink-2'>{r.expiresAt ? fmt(r.expiresAt) : 'Tidak kedaluwarsa'}</span>
           </div>
-        )}
-      </CardContent>
-    </Card>
+          <div className='flex flex-wrap gap-x-3 gap-y-1 border-t border-line pt-2 font-mono text-[8px] text-ink-3'>
+            <span>DIAJUKAN {fmt(r.createdAt)}</span><span>STATUS {STATUS_LABEL[r.status].toUpperCase()}</span>
+          </div>
+          <ol aria-label='Tahapan persetujuan' className='grid grid-cols-2 gap-x-3 gap-y-2 border-t border-line pt-3 sm:grid-cols-3'>
+            {steps.map((s) => <li key={s.label} className={`flex flex-col gap-0.5 border-t-2 pt-1.5 font-mono text-[8px] ${STEP_TONE[s.state]}`}><span className='font-medium text-ink-2'>{s.label}</span><span>{STEP_TEXT[s.state]}</span></li>)}
+          </ol>
+        </div>
+        <section aria-label='Slot persetujuan' className='flex min-w-0 flex-col border border-line'>
+          {(['commander', 'security_officer'] as const).map((role) => {
+            const approval = r.approvals.find((a) => a.role === role)
+            const roleState = approval ? approval.decision === 'approve' ? 'pass' : 'fail' : r.status === 'pending' ? 'warn' : 'ink'
+            return <div key={role} className='flex min-w-0 flex-wrap items-center gap-2 border-b border-line p-2.5 last:border-b-0'>
+              <span aria-hidden='true' className={`grid size-5 shrink-0 place-items-center border font-mono text-[9px] ${approval?.decision === 'approve' ? 'border-pass text-pass' : approval?.decision === 'deny' ? 'border-fail text-fail' : 'border-line-strong text-ink-3'}`}>{approval ? approval.decision === 'approve' ? '✓' : '×' : '·'}</span>
+              <div className='min-w-0 flex-1'><p className='font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'>{ROLE_LABEL[role]}</p>{approval ? <p className='break-words text-[10px] text-ink-2'>{approval.approver} · {approval.decision === 'approve' ? 'DISETUJUI' : 'DITOLAK'} {fmt(approval.at)}</p> : <StatusDot tone={roleState}>Menunggu</StatusDot>}</div>
+              {showDecision && <div className='flex gap-1.5'><Button size='sm' className='h-7 px-2 text-[10px]' disabled={locked || deciding} aria-describedby={isRequester ? `${reasonId}-disabled` : undefined} onClick={() => onDecide(r, 'approve', reason)}>Setujui</Button><Button size='sm' variant='outline' className='h-7 px-2 text-[10px]' disabled={locked || deciding} aria-describedby={isRequester ? `${reasonId}-disabled` : undefined} onClick={() => onDecide(r, 'deny', reason)}>Tolak</Button></div>}
+            </div>
+          })}
+          {showDecision && <div className='flex flex-col gap-2 border-t border-line bg-surface-2 p-2.5'><Label htmlFor={reasonId} className='font-mono text-[8px] uppercase text-ink-3'>Catatan keputusan · opsional</Label><Textarea id={reasonId} value={reason} disabled={locked} onChange={(e) => setReason(e.target.value)} className='min-h-16 rounded-none bg-surface text-[11px]' />{(isRequester || isGrantee || decided || viewerRole === null) && <p id={`${reasonId}-disabled`} className='text-[10px] text-ink-3'>{isRequester ? 'Pemohon tidak dapat memutuskan permintaannya.' : isGrantee ? 'Penerima akses tidak dapat memutuskan permintaan ini.' : decided ? 'Anda sudah memberi keputusan.' : 'Peran Anda tidak memiliki wewenang persetujuan.'}</p>}</div>}
+        </section>
+      </div>
+      <div className='flex flex-wrap items-center justify-between gap-2 border-t border-line bg-surface-2 px-3.5 py-2'>
+        <span className='font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'>Dua persetujuan berbeda wajib · audit tercatat</span>
+        <div className='flex flex-wrap gap-1.5'>{r.approvals.map((a) => <Chip key={a.role} tone={a.decision === 'approve' ? 'pass' : 'fail'}>{ROLE_LABEL[a.role]} · {a.approver} · {a.reason ?? fmt(a.at)}</Chip>)}</div>
+      </div>
+    </CardPanel>
   )
 }
 
@@ -470,19 +383,20 @@ export function AccessSection() {
   }
 
   return (
-    <section className='flex min-w-0 flex-col gap-6'>
+    <section className='grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]'>
       <section
         aria-labelledby={`${uid}-queue`}
-        className='flex min-w-0 flex-col gap-4'
+        className='flex min-w-0 flex-col gap-3'
       >
-        <h2 id={`${uid}-queue`} className='text-lg font-semibold'>
-          Permintaan akses
-        </h2>
+        <div className='flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2'>
+          <h2 id={`${uid}-queue`} className='font-mono text-[9px] uppercase tracking-[.1em] text-ink-2'>Antrean permintaan</h2>
+          <span className='font-mono text-[8px] text-ink-3'>{list.length} tercatat</span>
+        </div>
 
         {requests.isPending ? (
           <div className='flex flex-col gap-3'>
-            <Skeleton className='h-32 w-full' />
-            <Skeleton className='h-32 w-full' />
+            <Skeleton className='h-40 w-full rounded-none' />
+            <Skeleton className='h-40 w-full rounded-none' />
           </div>
         ) : requests.isError ? (
           <Alert variant='destructive'>
@@ -490,9 +404,12 @@ export function AccessSection() {
             <AlertDescription>{errMsg(requests.error)}</AlertDescription>
           </Alert>
         ) : list.length === 0 ? (
-          <p className='text-muted-foreground'>Belum ada permintaan akses.</p>
+          <EmptyState
+            title='Belum ada permintaan akses'
+            desc='Permintaan baru akan tampil di sini untuk diputuskan dua pihak.'
+          />
         ) : (
-          <ul className='flex flex-col gap-4'>
+          <ul className='flex flex-col gap-3'>
             {list.map((r) => (
               <li key={r.id}>
                 <RequestItem
@@ -508,24 +425,22 @@ export function AccessSection() {
         )}
       </section>
 
+      <aside className='flex min-w-0 flex-col gap-3'>
       {canRequest && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Ajukan akses</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <CardPanel title='Ajukan permintaan akses' meta='2 persetujuan'>
             <form
-              className='flex flex-col gap-4'
+              className='flex flex-col gap-3.5 p-3.5'
               noValidate
               onSubmit={submitCreate}
             >
               <div className='flex flex-col gap-1.5'>
-                <Label htmlFor={`${uid}-doc`}>ID dokumen</Label>
+                <Label htmlFor={`${uid}-doc`} className='font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'>ID dokumen <span className='text-line-strong'>· format DOC-0000</span></Label>
                 <Input
                   id={`${uid}-doc`}
                   value={docId}
                   placeholder='DOC-0001'
                   autoComplete='off'
+                  className='rounded-none font-mono text-[11px]'
                   aria-invalid={Boolean(createErrs.docId)}
                   aria-describedby={
                     createErrs.docId ? `${uid}-doc-err` : undefined
@@ -536,7 +451,7 @@ export function AccessSection() {
               </div>
 
               <div className='flex flex-col gap-1.5'>
-                <Label htmlFor={`${uid}-grantee`}>Penerima akses</Label>
+                <Label htmlFor={`${uid}-grantee`} className='font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'>Penerima akses</Label>
                 <Select
                   value={grantee}
                   onValueChange={setGrantee}
@@ -544,7 +459,7 @@ export function AccessSection() {
                 >
                   <SelectTrigger
                     id={`${uid}-grantee`}
-                    className='w-full'
+                    className='w-full rounded-none text-[11px]'
                     aria-invalid={Boolean(createErrs.grantee)}
                     aria-describedby={
                       createErrs.grantee ? `${uid}-grantee-err` : undefined
@@ -566,7 +481,7 @@ export function AccessSection() {
                   </SelectContent>
                 </Select>
                 {users.isError && (
-                  <p className='text-sm text-muted-foreground'>
+                  <p className='text-[10px] text-ink-3'>
                     Daftar pengguna gagal dimuat.
                   </p>
                 )}
@@ -577,22 +492,23 @@ export function AccessSection() {
               </div>
 
               <div className='flex flex-col gap-1.5'>
-                <Label htmlFor={`${uid}-reason`}>Alasan</Label>
+                <Label htmlFor={`${uid}-reason`} className='font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'>Alasan</Label>
                 <Textarea
                   id={`${uid}-reason`}
                   value={reason}
+                  className='min-h-20 rounded-none text-[11px]'
                   aria-invalid={Boolean(createErrs.reason)}
                   aria-describedby={`${uid}-reason-count${createErrs.reason ? ` ${uid}-reason-err` : ''}`}
                   onChange={(e) => setReason(e.target.value)}
                 />
-                <div className='flex items-start justify-between gap-2 text-sm'>
+                <div className='flex items-start justify-between gap-2'>
                   <FieldError
                     id={`${uid}-reason-err`}
                     msg={createErrs.reason}
                   />
                   <span
                     id={`${uid}-reason-count`}
-                    className='ms-auto text-muted-foreground tabular-nums'
+                    className='ms-auto font-mono text-[8px] text-ink-3 tabular-nums'
                   >
                     {[...reason.trim()].length}/{REASON_MAX}
                   </span>
@@ -600,11 +516,12 @@ export function AccessSection() {
               </div>
 
               <div className='flex flex-col gap-1.5'>
-                <Label htmlFor={`${uid}-expires`}>Kedaluwarsa (opsional)</Label>
+                <Label htmlFor={`${uid}-expires`} className='font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'>Kedaluwarsa · opsional</Label>
                 <Input
                   id={`${uid}-expires`}
                   type='datetime-local'
                   value={expires}
+                  className='rounded-none text-[11px]'
                   aria-invalid={Boolean(createErrs.expires)}
                   aria-describedby={
                     createErrs.expires ? `${uid}-expires-err` : undefined
@@ -617,36 +534,41 @@ export function AccessSection() {
                 />
               </div>
 
+              <div className='border border-line bg-surface-2 p-2.5'>
+                <p className='mb-1.5 font-mono text-[8px] uppercase tracking-[.08em] text-ink-2'>Butuh dua persetujuan berbeda</p>
+                <ol className='flex flex-col gap-1 font-mono text-[8px] text-ink-3'>
+                  <li><span className='text-ink-2'>01</span> Komandan · L5</li>
+                  <li><span className='text-ink-2'>02</span> Perwira keamanan · flag SO</li>
+                </ol>
+              </div>
+
               <Button
                 type='submit'
-                className='w-full sm:w-auto'
+                className='w-full rounded-none'
                 disabled={create.isPending}
               >
-                Ajukan akses
+                Ajukan permintaan
               </Button>
+              <p className='font-mono text-[8px] leading-[1.5] text-ink-3'>Permintaan dicatat pada audit log. Akses baru aktif setelah dua persetujuan.</p>
             </form>
-          </CardContent>
-        </Card>
+        </CardPanel>
       )}
 
       {canRevoke && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Cabut akses</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <CardPanel title='Cabut akses' meta='langsung berlaku'>
             <form
-              className='flex flex-col gap-4'
+              className='flex flex-col gap-3.5 p-3.5'
               noValidate
               onSubmit={submitRevoke}
             >
               <div className='flex flex-col gap-1.5'>
-                <Label htmlFor={`${uid}-rev-doc`}>ID dokumen</Label>
+                <Label htmlFor={`${uid}-rev-doc`} className='font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'>ID dokumen</Label>
                 <Input
                   id={`${uid}-rev-doc`}
                   value={revokeDoc}
                   placeholder='DOC-0001'
                   autoComplete='off'
+                  className='rounded-none font-mono text-[11px]'
                   aria-invalid={Boolean(revokeErrs.docId)}
                   aria-describedby={
                     revokeErrs.docId ? `${uid}-rev-doc-err` : undefined
@@ -657,11 +579,12 @@ export function AccessSection() {
               </div>
 
               <div className='flex flex-col gap-1.5'>
-                <Label htmlFor={`${uid}-rev-user`}>Nama pengguna</Label>
+                <Label htmlFor={`${uid}-rev-user`} className='font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'>Nama pengguna</Label>
                 <Input
                   id={`${uid}-rev-user`}
                   value={revokeUser}
                   autoComplete='off'
+                  className='rounded-none font-mono text-[11px]'
                   aria-invalid={Boolean(revokeErrs.username)}
                   aria-describedby={
                     revokeErrs.username ? `${uid}-rev-user-err` : undefined
@@ -677,14 +600,14 @@ export function AccessSection() {
               <Button
                 type='submit'
                 variant='destructive'
-                className='w-full sm:w-auto'
+                className='w-full rounded-none'
               >
                 Cabut akses
               </Button>
             </form>
-          </CardContent>
-        </Card>
+        </CardPanel>
       )}
+      </aside>
 
       <ConfirmDialog
         open={revokeOpen}
