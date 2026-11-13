@@ -1,11 +1,10 @@
-import { LayoutGrid } from 'lucide-react'
 import { useLocation } from '@tanstack/react-router'
+import { LayoutGrid } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { SidebarTrigger } from '@/components/ui/sidebar'
+import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { SidebarTrigger } from '@/components/ui/sidebar'
 
 const crumbs: Record<string, string> = {
   '/': 'OVERVIEW / DASHBOARD',
@@ -49,18 +48,27 @@ export function Header({ className, fixed, children, ...props }: HeaderProps) {
         )}
       >
         <div className='md:hidden'>
-          <SidebarTrigger aria-label='Buka atau tutup navigasi' className='size-10 shrink-0 rounded-none border border-line bg-surface text-ink hover:bg-surface-2' />
+          <SidebarTrigger
+            aria-label='Buka atau tutup navigasi'
+            className='size-10 shrink-0 rounded-none border border-line bg-surface text-ink hover:bg-surface-2'
+          />
         </div>
         <div className='flex min-w-0 items-center gap-2 font-mono text-[10px] font-normal tracking-[.12em] text-ink-3'>
           <LayoutGrid className='size-[13px] shrink-0' aria-hidden='true' />
-          <span className='truncate'>{crumbs[location.pathname] ?? crumbs['/settings']}</span>
+          <span className='truncate'>
+            {crumbs[location.pathname] ?? crumbs['/settings']}
+          </span>
         </div>
         <div className='ms-auto flex shrink-0 items-center gap-1 sm:gap-2'>
           {children ?? (
             <>
-              <div className='hidden sm:block'><Search placeholder='Cari dokumen, aset, kontrol' /></div>
+              <div className='hidden sm:block'>
+                <Search
+                  className='h-8 min-w-0 font-bold sm:min-w-[200px]'
+                  placeholder='Cari dokumen, aset, kontrol'
+                />
+              </div>
               <ThemeSwitch />
-              <div className='hidden sm:block'><ConfigDrawer /></div>
               <ProfileDropdown />
             </>
           )}

@@ -52,7 +52,11 @@ export function parseHistory(raw: unknown): HistoryResponse | null {
   }
 }
 
-export function mergeHistory(existing: HistoryPoint[], incoming: HistoryPoint[], max: number): HistoryPoint[] {
+export function mergeHistory(
+  existing: HistoryPoint[],
+  incoming: HistoryPoint[],
+  max: number
+): HistoryPoint[] {
   const byTs = new Map<number, HistoryPoint>()
   for (const point of existing) byTs.set(point.ts, point)
   for (const point of incoming) byTs.set(point.ts, point)
@@ -67,34 +71,72 @@ export type GraphNode = { id: string; label: string; x: number; y: number } // x
 
 export const NODE_W = 152
 export const NODE_H = 50
-// Static layout on a 940x260 canvas. Service IDs must match the backend recorder.
+// Pen frame layout; service IDs must match the backend recorder.
 export const NODES: GraphNode[] = [
-  { id: 'client', label: 'client', x: 0, y: 40 },
-  { id: 'frontend', label: 'frontend', x: 224, y: 40 },
-  { id: 'backend', label: 'backend', x: 448, y: 40 },
-  { id: 'crypto-service', label: 'crypto-service', x: 768, y: 40 },
-  { id: 'db', label: 'db', x: 768, y: 198 },
+  { id: 'client', label: 'client', x: 24, y: 120 },
+  { id: 'frontend', label: 'frontend', x: 196, y: 120 },
+  { id: 'backend', label: 'backend', x: 392, y: 120 },
+  { id: 'crypto-service', label: 'crypto-service', x: 716, y: 38 },
+  { id: 'db', label: 'db', x: 716, y: 196 },
 ]
-export const VIEW_W = 940
-export const VIEW_H = 260
+export const VIEW_W = 892
+export const VIEW_H = 270
 export const HISTORY_MAX = 120 // 120 samples: 60 prefill + 60 live
 
 // Orthogonal route per known link. x, y: baseline of the first of two label lines.
 // ponytail: hand-placed for the known links; an unknown link stays in the table but is not drawn.
-export type Route = { d: string; x: number; y: number; anchor: 'start' | 'middle' }
+export type Route = {
+  d: string
+  x: number
+  y: number
+  anchor: 'start' | 'middle'
+}
 export const ROUTES: Record<string, Route> = {
-  'client>frontend': { d: 'M152 65 H224', x: 188, y: 47, anchor: 'middle' },
-  'frontend>backend': { d: 'M376 65 H448', x: 412, y: 47, anchor: 'middle' },
-  'backend>crypto-service': { d: 'M600 65 H768', x: 636, y: 47, anchor: 'middle' },
-  'backend>db': { d: 'M600 65 H672 V223 H768', x: 682, y: 150, anchor: 'start' },
-  'client>crypto-service': { d: 'M76 40 V30 H844 V40', x: 460, y: 12, anchor: 'middle' },
+  'client>frontend': { d: 'M176 145 H196', x: 186, y: 108, anchor: 'middle' },
+  'frontend>backend': { d: 'M348 145 H392', x: 370, y: 108, anchor: 'middle' },
+  'backend>crypto-service': {
+    d: 'M544 145 H600 V63 H716',
+    x: 616,
+    y: 55,
+    anchor: 'middle',
+  },
+  'backend>db': {
+    d: 'M544 145 H600 V221 H716',
+    x: 616,
+    y: 213,
+    anchor: 'middle',
+  },
+  'client>crypto-service': {
+    d: 'M100 120 V63 H716',
+    x: 408,
+    y: 55,
+    anchor: 'middle',
+  },
+}
+
+// Keeps an edge label fully inside the viewBox so it is never clipped at the panel edge.
+export const LABEL_PAD = 4
+export function clampLabelX(
+  x: number,
+  anchor: Route['anchor'],
+  labelWidth: number
+) {
+  const left =
+    anchor === 'start'
+      ? x
+      : anchor === 'middle'
+        ? x - labelWidth / 2
+        : x - labelWidth
+  const shift =
+    Math.min(Math.max(left, LABEL_PAD), VIEW_W - LABEL_PAD - labelWidth) - left
+  return x + shift
 }
 
 export const LEVEL_LABEL: Record<Level, string> = {
   idle: 'Idle',
-  good: 'Healthy',
-  warning: 'Degraded',
-  danger: 'Failing',
+  good: 'Sehat',
+  warning: 'Menurun',
+  danger: 'Gagal',
 }
 export const LEVEL_COLOR: Record<Level, string> = {
   idle: 'var(--viz-neutral)',

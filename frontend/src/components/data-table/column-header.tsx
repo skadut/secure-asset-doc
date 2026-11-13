@@ -21,31 +21,44 @@ type DataTableColumnHeaderProps<TData, TValue> =
     title: string
   }
 
+// Pen: mono 7.5px uppercase, .09em tracking, 8px chevrons, no ghost-button chrome.
+const headerText =
+  'font-mono text-[7.5px] uppercase tracking-[.09em] text-ink-3'
+const sortButton =
+  'inline-flex h-auto min-h-0 items-center gap-1 rounded-none bg-transparent p-0 font-mono text-[7.5px] font-normal uppercase tracking-[.09em] text-ink-3 shadow-none hover:bg-transparent hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus)]'
+const sortIcon = 'ms-1 size-2 shrink-0'
+
+const sortLabel = (sorted: false | 'asc' | 'desc') =>
+  sorted === 'asc' ? 'ascending' : sorted === 'desc' ? 'descending' : 'none'
+
 export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
+  const sorted = column.getIsSorted()
+  const ariaSort = sortLabel(sorted)
+
   if (!column.getCanSort()) {
-    return <div className={cn(className)}>{title}</div>
+    return (
+      <div className={cn(headerText, className)} aria-sort={ariaSort}>
+        {title}
+      </div>
+    )
   }
 
   return (
-    <div className={cn('flex items-center space-x-2', className)}>
+    <div className={cn(headerText, className)} aria-sort={ariaSort}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant='ghost'
-            size='sm'
-            className='h-8 data-[state=open]:bg-accent'
-          >
+          <Button variant='ghost' className={sortButton}>
             <span>{title}</span>
-            {column.getIsSorted() === 'desc' ? (
-              <ArrowDownIcon className='ms-2 h-4 w-4' />
-            ) : column.getIsSorted() === 'asc' ? (
-              <ArrowUpIcon className='ms-2 h-4 w-4' />
+            {sorted === 'desc' ? (
+              <ArrowDownIcon className={sortIcon} aria-hidden='true' />
+            ) : sorted === 'asc' ? (
+              <ArrowUpIcon className={sortIcon} aria-hidden='true' />
             ) : (
-              <CaretSortIcon className='ms-2 h-4 w-4' />
+              <CaretSortIcon className={sortIcon} aria-hidden='true' />
             )}
           </Button>
         </DropdownMenuTrigger>

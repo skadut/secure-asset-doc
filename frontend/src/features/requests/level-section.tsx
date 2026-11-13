@@ -1,5 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { ArrowRight } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   ApiError,
@@ -15,7 +16,6 @@ import {
 import { getMe, type Me } from '@/lib/session'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { CardPanel } from '@/components/card-panel'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -27,9 +27,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { CardPanel } from '@/components/card-panel'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { StatusDot } from '@/components/status-dot'
-import { ArrowRight } from 'lucide-react'
 
 type Decision = 'approve' | 'deny'
 
@@ -74,7 +74,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <>
       <dt className={LABEL}>{label}</dt>
-      <dd className='min-w-0 break-words text-[11px] text-ink'>{children}</dd>
+      <dd className='min-w-0 text-[11px] break-words text-ink'>{children}</dd>
     </>
   )
 }
@@ -120,8 +120,12 @@ function RequestItem({ r, me }: { r: LevelRequest; me: Me }) {
   return (
     <li className='flex flex-col gap-3 border border-line bg-surface p-3.5'>
       <div className='flex flex-wrap items-center justify-between gap-2'>
-        <p className='min-w-0 text-[13px] font-medium break-all text-ink'>{r.targetUser}</p>
-        <StatusDot tone={STATUS_TONE[r.status] ?? 'ink'}>{STATUS[r.status] ?? r.status}</StatusDot>
+        <p className='min-w-0 text-[13px] font-medium break-all text-ink'>
+          {r.targetUser}
+        </p>
+        <StatusDot tone={STATUS_TONE[r.status] ?? 'ink'}>
+          {STATUS[r.status] ?? r.status}
+        </StatusDot>
       </div>
 
       <dl className='grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5'>
@@ -161,7 +165,9 @@ function RequestItem({ r, me }: { r: LevelRequest; me: Me }) {
                 : 'Anda tidak dapat memutuskan permintaan ini'}
             </p>
           )}
-          <Label className={LABEL} htmlFor={reasonId}>Alasan keputusan (opsional)</Label>
+          <Label className={LABEL} htmlFor={reasonId}>
+            Alasan keputusan (opsional)
+          </Label>
           <Textarea
             id={reasonId}
             value={reason}
@@ -358,7 +364,9 @@ function CreateForm({ me }: { me: Me }) {
           )}
 
           <div className='flex flex-col gap-2'>
-            <Label className={LABEL} htmlFor='lvl-target'>Pengguna</Label>
+            <Label className={LABEL} htmlFor='lvl-target'>
+              Pengguna
+            </Label>
             <Select value={target} onValueChange={setTarget}>
               <SelectTrigger
                 id='lvl-target'
@@ -381,13 +389,13 @@ function CreateForm({ me }: { me: Me }) {
 
           <p className='text-[11px] text-ink-3'>
             Level sekarang:{' '}
-            <span className='font-medium text-ink'>
-              {current ?? '—'}
-            </span>
+            <span className='font-medium text-ink'>{current ?? '—'}</span>
           </p>
 
           <div className='flex flex-col gap-2'>
-            <Label className={LABEL} htmlFor='lvl-new'>Level baru</Label>
+            <Label className={LABEL} htmlFor='lvl-new'>
+              Level baru
+            </Label>
             <Select
               value={newLevel}
               onValueChange={(v) => {
@@ -425,7 +433,9 @@ function CreateForm({ me }: { me: Me }) {
 
           <div className='flex flex-col gap-2'>
             <div className='flex items-center justify-between gap-2'>
-              <Label className={LABEL} htmlFor='lvl-justification'>Justifikasi</Label>
+              <Label className={LABEL} htmlFor='lvl-justification'>
+                Justifikasi
+              </Label>
               <span className='text-[10px] text-ink-3'>
                 {len(justification)}/500
               </span>
@@ -442,9 +452,7 @@ function CreateForm({ me }: { me: Me }) {
 
           {isRaise && (
             <fieldset className='flex flex-col gap-4 border border-line bg-surface-2 p-3.5'>
-              <legend className={`px-1 ${LABEL}`}>
-                Syarat kenaikan level
-              </legend>
+              <legend className={`px-1 ${LABEL}`}>Syarat kenaikan level</legend>
 
               <div className='flex flex-col gap-2'>
                 <div className='flex items-center gap-3'>
@@ -532,7 +540,9 @@ function CreateForm({ me }: { me: Me }) {
               </div>
 
               <div className='flex flex-col gap-2'>
-                <Label className={LABEL} htmlFor='lvl-fips'>Basis FIPS 199</Label>
+                <Label className={LABEL} htmlFor='lvl-fips'>
+                  Basis FIPS 199
+                </Label>
                 <Select
                   value={fips}
                   onValueChange={(v) => setFips(v as Fips199)}
@@ -616,7 +626,9 @@ export function LevelSection() {
             </div>
           ) : list.data ? (
             list.data.length === 0 ? (
-              <p className='p-3.5 text-[11px] text-ink-3'>Belum ada permintaan.</p>
+              <p className='p-3.5 text-[11px] text-ink-3'>
+                Belum ada permintaan.
+              </p>
             ) : (
               <ul className='flex flex-col gap-3 p-3.5'>
                 {list.data.map((r) => (

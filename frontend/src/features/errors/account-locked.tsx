@@ -1,19 +1,17 @@
-import { Link } from '@tanstack/react-router'
+import { LockKeyhole } from 'lucide-react'
 import { ErrorState } from '@/components/error-state'
-import { Button } from '@/components/ui/button'
 
 export function AccountLocked() {
   return (
     <ErrorState
       tone='fail'
-      code='423 · AKUN DIKUNCI'
+      code='423'
+      headerLabel='LOGIN · TERKUNCI'
+      headerValue='423'
+      icon={<LockKeyhole />}
       title='Akun dikunci'
-      desc='Terlalu banyak percobaan masuk. Hubungi petugas keamanan sistem.'
-      action={
-        <Button asChild size='sm' className='rounded-none bg-primary text-primary-foreground hover:bg-primary/90'>
-          <Link to='/'>Kembali ke Beranda</Link>
-        </Button>
-      }
+      desc='Terlalu banyak percobaan gagal. Akun terkunci selama 15 menit setelah percobaan terakhir. Percobaan telah dicatat.'
+      footer='PETUGAS KEAMANAN · [EKSTENSI TELEPON]'
     />
   )
 }

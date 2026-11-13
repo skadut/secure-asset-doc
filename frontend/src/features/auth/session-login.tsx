@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { setMe, type Me } from '@/lib/session'
-import { TlpMark } from '@/components/tlp-mark'
 import { ThemeSwitch } from '@/components/theme-switch'
 import './session-login.css'
 
@@ -29,6 +28,7 @@ type AuthUser = {
 }
 
 const labels = ['Pemberitahuan', 'Masuk', 'Kode', 'Perangkat', 'Konfirmasi']
+const stepNames = ['PEMBERITAHUAN', 'MASUK', 'KODE', 'PERANGKAT', 'KONFIRMASI']
 const rowNames = ['Jaringan', 'Kode autentikator', 'Modul Enkripsi', 'Jam']
 const tlpLevels = [
   'CLEAR',
@@ -58,8 +58,8 @@ function CheckIcon() {
 }
 function ArrowIcon() {
   return (
-    <svg className='lg-glyph' viewBox='0 0 24 24' aria-hidden='true'>
-      <path d='M5 12h14M13 6l6 6-6 6' />
+    <svg className='lg-arrow' viewBox='0 0 16 16' aria-hidden='true'>
+      <path d='M2.8 8h9.9M8.6 3.9 12.7 8l-4.1 4.1' />
     </svg>
   )
 }
@@ -406,96 +406,102 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
 
   const invalid = Boolean(error) && attemptsLeft !== null
 
+  const pill =
+    step === 'notice'
+      ? accepted
+        ? { text: 'DISETUJUI', tone: 'pass' }
+        : { text: 'BELUM DISETUJUI', tone: 'warn' }
+      : step === 'password'
+        ? username.trim() && password
+          ? { text: 'INPUT VALID', tone: 'pass' }
+          : { text: 'MENUNGGU INPUT', tone: 'muted' }
+        : step === 'code'
+          ? { text: 'KODE 6 DIGIT', tone: 'pass' }
+          : step === 'device'
+            ? !checks
+              ? { text: 'MEMERIKSA', tone: 'muted' }
+              : hasFail && allShown
+                ? { text: 'ADA GAGAL', tone: 'fail' }
+                : allShown
+                  ? { text: 'SEMUA LULUS', tone: 'pass' }
+                  : { text: 'MEMERIKSA', tone: 'muted' }
+            : step === 'welcome'
+              ? { text: 'AAL2 TERPENUHI', tone: 'pass' }
+              : { text: 'TERMINAL', tone: 'fail' }
+
   return (
     <main className='lg-root'>
-      <span className='lg-scanline' aria-hidden='true' />
       <div className='lg-layout'>
         <section className='lg-about' aria-label='Tentang sistem'>
-          <div className='lg-brand lg-in'>
-            <span className='lg-mark' aria-hidden='true'>
-              S
-            </span>
-            <div>
-              <div className='lg-brand-name'>Secure Asset Doc</div>
-              <div className='lg-muted lg-brand-sub'>
-                Manajemen dokumen terkendali
-              </div>
+          <span className='lg-scanline' aria-hidden='true' />
+          <div className='lg-brand-row lg-in'>
+            <div className='lg-brand'>
+              <span className='lg-mark' aria-hidden='true'>
+                S
+              </span>
+              <div className='lg-brand-name'>SECURE ASSET DOC</div>
             </div>
+            <div className='lg-org'>ARASAKA CORPORATION · INTERNAL</div>
           </div>
-          <div className='lg-intro lg-in2'>
-            <h1>Masuk ke Secure Asset Doc</h1>
-            <p>
+          <div className='lg-hero lg-in2'>
+            <div className='lg-eyebrow'>KENDALI AKSES DOKUMEN / AAL2</div>
+            <h1>
+              Masuk ke
+              <br />
+              Secure Asset Doc
+            </h1>
+            <p className='lg-sub'>
               Akses ditentukan untuk setiap dokumen. Nama yang tercantum dalam
               dokumen RED yang memberikan akses, bukan pangkat.
             </p>
-          </div>
-          <div className='lg-facts lg-in3'>
-            {[
-              ['FAKTOR', 'Kata sandi + kode autentikator'],
-              ['JAMINAN', 'AAL2 · SP 800-63B'],
-              ['KUNCI', 'MSK tersegel di TPM 2.0'],
-              ['SESI', 'Idle 5 mnt · batas 30 mnt'],
-            ].map(([title, value]) => (
-              <div className='lg-fact' key={title}>
-                <div className='lg-fact-label'>{title}</div>
-                <div className='lg-mono'>{value}</div>
-              </div>
-            ))}
-          </div>
-          <div className='lg-tlp-block lg-in3'>
-            <div className='lg-eyebrow'>SKALA TLP</div>
-            <div className='lg-tlp-scale' role='list' aria-label='Skala TLP'>
-              {tlpLevels.map((level) => (
-                <div
-                  className={`lg-tlp-item${me?.tlpMax === level ? ' current' : ''}`}
-                  role='listitem'
-                  key={level}
-                  aria-current={me?.tlpMax === level ? 'true' : undefined}
-                >
-                  <TlpMark tlp={level} />
+            <dl className='lg-facts'>
+              {[
+                ['FAKTOR', 'Kata sandi + kode autentikator'],
+                ['JAMINAN', 'AAL2 · SP 800-63B'],
+                ['KUNCI', 'MSK tersegel di TPM 2.0'],
+                ['SESI', 'Idle 5 mnt · batas 30 mnt'],
+              ].map(([title, value]) => (
+                <div className='lg-fact' key={title}>
+                  <dt>{title}</dt>
+                  <dd>{value}</dd>
                 </div>
               ))}
+            </dl>
+            <div className='lg-tlp-block'>
+              <div className='lg-tlp-label'>
+                SKALA TLP — HAK BACA DITENTUKAN PER DOKUMEN
+              </div>
+              <div className='lg-tlp-scale' role='list' aria-label='Skala TLP'>
+                {tlpLevels.map((level) => (
+                  <div
+                    className='lg-tlp-item'
+                    role='listitem'
+                    key={level}
+                    aria-current={me?.tlpMax === level ? 'true' : undefined}
+                  >
+                    <i className='lg-tlp-bar' aria-hidden='true' />
+                    <span>{level}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-          <div className='lg-help'>
-            Terkunci atau kehilangan autentikator:
-            <br />
-            petugas keamanan sistem · [EKSTENSI TELEPON]
+          <div className='lg-footer lg-in3'>
+            <div className='lg-help'>
+              Terkunci atau kehilangan autentikator:
+              <br />
+              petugas keamanan sistem · [EKSTENSI TELEPON]
+            </div>
+            <div className='lg-stamp'>SP 800-53 REV.5 / FIPS 199</div>
           </div>
         </section>
         <section className='lg-main' aria-label='Masuk'>
+          <span className='lg-scanline' aria-hidden='true' />
           <div className='lg-column lg-in'>
-            <div className='lg-toolbar'>
+            <div className='lg-sessionbar'>
+              <span>SESI MASUK</span>
               <ThemeSwitch />
             </div>
-            <div className='lg-bars' aria-hidden='true'>
-              {labels.map((_, i) => (
-                <i
-                  key={i}
-                  className={
-                    i < enterStep ? 'done' : i === enterStep ? 'now' : ''
-                  }
-                />
-              ))}
-            </div>
-            <div className='lg-nums' aria-hidden='true'>
-              {labels.map((_, i) => (
-                <b key={i} className={i === enterStep ? 'now' : ''}>
-                  {String(i + 1).padStart(2, '0')}
-                </b>
-              ))}
-            </div>
-            <ol className='lg-sr-only' aria-label='Tahapan masuk'>
-              {labels.map((label, i) => (
-                <li
-                  key={label}
-                  aria-current={i === enterStep ? 'step' : undefined}
-                  className={`${i < enterStep ? 'done' : i === enterStep ? 'current' : ''} ${step === 'locked' && i === 1 ? 'locked' : ''}`}
-                >
-                  {label}
-                </li>
-              ))}
-            </ol>
             <div
               ref={cardRef}
               tabIndex={-1}
@@ -505,14 +511,64 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
               }}
               key={step}
             >
+              <div className='lg-card-head'>
+                <span className='lg-card-head-label'>
+                  <b>
+                    {step === 'locked'
+                      ? 'LOCKED'
+                      : String(enterStep + 1).padStart(2, '0')}
+                  </b>
+                  <span>
+                    {step === 'locked'
+                      ? 'TERKUNCI · 423'
+                      : stepNames[enterStep]}
+                  </span>
+                </span>
+                <span className={`lg-pill ${pill.tone}`}>
+                  <i aria-hidden='true' />
+                  {pill.text}
+                </span>
+              </div>
+              <div className='lg-progress'>
+                <div className='lg-bars' aria-hidden='true'>
+                  {labels.map((_, i) => (
+                    <i
+                      key={i}
+                      className={
+                        i < enterStep ? 'done' : i === enterStep ? 'now' : ''
+                      }
+                    />
+                  ))}
+                </div>
+                <div className='lg-nums' aria-hidden='true'>
+                  {labels.map((_, i) => (
+                    <b key={i} className={i === enterStep ? 'now' : ''}>
+                      {String(i + 1).padStart(2, '0')}
+                    </b>
+                  ))}
+                </div>
+              </div>
+              <ol className='lg-sr-only' aria-label='Tahapan masuk'>
+                {labels.map((label, i) => (
+                  <li
+                    key={label}
+                    aria-current={i === enterStep ? 'step' : undefined}
+                    className={`${i < enterStep ? 'done' : i === enterStep ? 'current' : ''} ${step === 'locked' && i === 1 ? 'locked' : ''}`}
+                  >
+                    {label}
+                  </li>
+                ))}
+              </ol>
               <div
-                className={outgoing || leaving ? 'lg-step lg-step-out' : 'lg-step'}
+                className={
+                  outgoing || leaving ? 'lg-step lg-step-out' : 'lg-step'
+                }
                 inert={outgoing || leaving}
               >
                 {step === 'notice' && (
                   <div className='lg-stack'>
                     <header>
-                      <div className='lg-eyebrow'>Tahap 1 dari 5</div>
+                      <div className='lg-eyebrow'>TAHAP 1 DARI 5</div>
                       <h2>Pemberitahuan penggunaan sistem</h2>
                     </header>
                     <div className='lg-notice'>
@@ -523,14 +579,7 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                       </p>
                       <p>
                         Semua aktivitas dipantau dan dicatat, termasuk setiap
-                        keputusan akses dan setiap percobaan gagal. Catatan
-                        dapat ditinjau untuk keperluan keamanan, audit, dan
-                        hukum.
-                      </p>
-                      <p>
-                        Upaya mengakses dokumen yang tidak mencantumkan nama
-                        Anda dapat berujung pada tindakan disipliner atau hukum.
-                        [TEKS HUKUM DARI ORGANISASI]
+                        keputusan akses dan setiap percobaan gagal.
                       </p>
                     </div>
                     <label className='lg-consent'>
@@ -552,14 +601,21 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                       disabled={!accepted || busy}
                       onClick={() => go('password')}
                     >
-                      Lanjutkan
+                      <span>Lanjutkan</span>
+                      {accepted ? (
+                        <ArrowIcon />
+                      ) : (
+                        <span className='lg-primary-hint'>
+                          TERKUNCI SAMPAI DISETUJUI
+                        </span>
+                      )}
                     </button>
                   </div>
                 )}
                 {step === 'password' && (
                   <div className='lg-stack'>
                     <header>
-                      <div className='lg-eyebrow'>Tahap 2 dari 5</div>
+                      <div className='lg-eyebrow'>TAHAP 2 DARI 5</div>
                       <h2>Masuk</h2>
                       <p>
                         Kredensial dinas diverifikasi, lalu kode autentikator
@@ -628,6 +684,13 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                           </button>
                         </div>
                       </div>
+                      <div className='lg-meta'>
+                        <span>
+                          {attemptsLeft !== null
+                            ? `${attemptsLeft} percobaan tersisa sebelum akun dikunci`
+                            : 'Akun dikunci 15 menit setelah 5 percobaan gagal'}
+                        </span>
+                      </div>
                       <button
                         className='lg-primary'
                         type='submit'
@@ -635,7 +698,8 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                         aria-busy={busy}
                       >
                         {busy && <Spinner />}
-                        {busy ? 'Memeriksa' : 'Lanjutkan'}
+                        <span>{busy ? 'Memeriksa' : 'Lanjutkan'}</span>
+                        <ArrowIcon />
                       </button>
                     </form>
                     <button
@@ -655,14 +719,14 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                 {step === 'code' && (
                   <div className='lg-stack'>
                     <header>
-                      <div className='lg-eyebrow'>Tahap 3 dari 5</div>
+                      <div className='lg-eyebrow'>TAHAP 3 DARI 5</div>
                       <h2>Masukkan kode autentikator</h2>
-                      <p>
-                        Buka Google Authenticator pada telepon terdaftar, lalu
-                        masukkan kode 6 digit untuk Secure Asset Doc.
-                      </p>
                     </header>
-                    <div className='lg-account'>
+                    <div className='lg-who'>
+                      <span className='lg-mono'>{username}</span>
+                      <span>30 detik per kode</span>
+                    </div>
+                    <div className='lg-ring-row'>
                       <svg
                         viewBox='0 0 36 36'
                         role='img'
@@ -671,14 +735,6 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                         <circle cx='18' cy='18' r='16' className='track' />
                         <circle cx='18' cy='18' r='16' className='lg-totp' />
                       </svg>
-                      <div className='lg-account-caption'>
-                        <div className='lg-mono lg-account-name'>
-                          {username}
-                        </div>
-                        <div className='lg-muted'>
-                          Kode berubah setiap 30 detik
-                        </div>
-                      </div>
                     </div>
                     {error && (
                       <div id='lg-alert' role='alert' className='lg-error'>
@@ -705,21 +761,11 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                             setError('')
                           }}
                           placeholder='······'
-                          className={
-                            invalid ? 'lg-code-input invalid' : 'lg-code-input'
-                          }
+                          className={invalid ? 'invalid' : undefined}
                           aria-invalid={invalid || undefined}
                           aria-describedby={invalid ? 'lg-alert' : undefined}
                           required
                         />
-                      </div>
-                      <div className='lg-dots' aria-hidden='true'>
-                        {Array.from({ length: 6 }, (_, i) => (
-                          <span
-                            key={i}
-                            className={i < code.length ? 'filled' : ''}
-                          />
-                        ))}
                       </div>
                       <button
                         className='lg-primary'
@@ -728,7 +774,10 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                         aria-busy={busy}
                       >
                         {busy && <Spinner />}
-                        {busy ? 'Memverifikasi' : 'Verifikasi kode'}
+                        <span>
+                          {busy ? 'Memverifikasi' : 'Verifikasi kode'}
+                        </span>
+                        <ArrowIcon />
                       </button>
                     </form>
                     <button
@@ -764,12 +813,8 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                 {step === 'device' && (
                   <div className='lg-stack'>
                     <header>
-                      <div className='lg-eyebrow'>Tahap 4 dari 5</div>
+                      <div className='lg-eyebrow'>TAHAP 4 DARI 5</div>
                       <h2>Memeriksa perangkat ini</h2>
-                      <p>
-                        Sistem memeriksa jaringan, kode autentikator, modul
-                        enkripsi, dan jam perangkat ini sebelum sesi dibuka.
-                      </p>
                     </header>
                     {deviceError && (
                       <div role='alert' className='lg-error'>
@@ -787,6 +832,7 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                         const isLoading = checks
                           ? i === revealed && !allShown
                           : i === 0 && !deviceError
+                        const tone = shown ? (item?.status ?? '') : ''
                         return (
                           <div
                             className={
@@ -794,9 +840,7 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                             }
                             key={name}
                           >
-                            <span
-                              className={`lg-check-mark ${shown ? (item?.status ?? '') : ''}`}
-                            >
+                            <span className={`lg-check-mark ${tone}`}>
                               {isLoading ? (
                                 <Spinner />
                               ) : item?.status === 'pass' ? (
@@ -808,25 +852,23 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                             <span className='lg-check-copy'>
                               <span>{name}</span>
                               {shown && (
-                                <span className='lg-muted'>
+                                <span className='lg-check-desc'>
                                   {rowValue(item!, i)}
                                 </span>
                               )}
                             </span>
-                            <span
-                              className={`lg-check-status ${shown ? (item?.status ?? '') : ''}`}
-                            >
+                            <span className={`lg-check-status ${tone}`}>
                               {isLoading
-                                ? 'Memeriksa'
+                                ? 'MEMERIKSA'
                                 : shown
                                   ? item?.status === 'pass'
-                                    ? 'Lulus'
+                                    ? 'LULUS'
                                     : item?.status === 'warn'
-                                      ? 'Perhatian'
+                                      ? 'PERHATIAN'
                                       : item?.status === 'fail'
-                                        ? 'Gagal'
-                                        : 'Belum terverifikasi'
-                                  : 'Menunggu'}
+                                        ? 'GAGAL'
+                                        : 'BELUM TERVERIFIKASI'
+                                  : 'MENUNGGU'}
                             </span>
                           </div>
                         )
@@ -869,7 +911,8 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                         disabled={!allShown || hasFail}
                         onClick={() => go('welcome')}
                       >
-                        Lanjutkan
+                        <span>Lanjutkan</span>
+                        <ArrowIcon />
                       </button>
                     )}
                   </div>
@@ -877,26 +920,25 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                 {step === 'welcome' && (
                   <div className='lg-stack'>
                     <header>
-                      <div className='lg-eyebrow'>Tahap 5 dari 5</div>
+                      <div className='lg-eyebrow'>TAHAP 5 DARI 5</div>
                       <h2>Identitas terverifikasi</h2>
                     </header>
                     <div className='lg-verified'>
-                      <CheckIcon />
+                      <span className='lg-check-mark pass'>
+                        <CheckIcon />
+                      </span>
                       <div>
-                        <strong>Identitas terverifikasi</strong>
-                        <span>
-                          Password, kode autentikator, dan perangkat telah lulus
-                          pemeriksaan.
-                        </span>
+                        <strong>Password, kode, dan perangkat lulus</strong>
+                        <span>Sesi 30 menit · idle 5 menit</span>
                       </div>
                     </div>
                     <div className='lg-details'>
                       <div>
-                        <small>Nama</small>
+                        <small>NAMA</small>
                         <div>{me?.name ?? authUser?.username}</div>
                       </div>
                       <div>
-                        <small>Peran</small>
+                        <small>PERAN</small>
                         <div>
                           {me?.rankName ?? authUser?.rankName}
                           {(me?.unit ?? authUser?.unit)
@@ -905,35 +947,29 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                         </div>
                       </div>
                       <div>
-                        <small>Masuk sebelumnya</small>
+                        <small>MASUK SEBELUMNYA</small>
                         <div>
                           {lastLoginAt
                             ? new Date(lastLoginAt).toLocaleString('id-ID')
                             : 'Ini adalah masuk pertama Anda'}
                         </div>
                       </div>
-                      <div>
-                        <small>Percobaan gagal sejak saat itu</small>
-                        <div className='lg-mono'>{failedSinceLast}</div>
-                      </div>
                     </div>
-                    <p
-                      className={failedSinceLast > 0 ? 'lg-warning' : 'lg-note'}
-                    >
-                      Jika percobaan masuk ini bukan dari Anda, segera laporkan
-                      kepada petugas keamanan.
-                    </p>
-                    <div className='lg-session-note'>
-                      Sesi terkunci setelah 5 menit tanpa aktivitas dan berakhir
-                      setelah 30 menit.
-                    </div>
+                    {failedSinceLast > 0 && (
+                      <p className='lg-warning'>
+                        {failedSinceLast} percobaan gagal sejak masuk terakhir.
+                        Jika bukan Anda, laporkan kepada petugas keamanan.
+                      </p>
+                    )}
                     <button
                       className='lg-primary'
                       type='button'
                       onClick={enter}
                       disabled={leaving}
                     >
-                      {leaving ? 'Membuka' : 'Masuk ke Secure Asset Doc'}
+                      <span>
+                        {leaving ? 'Membuka' : 'Masuk ke Secure Asset Doc'}
+                      </span>
                       <ArrowIcon />
                     </button>
                     <button
@@ -948,30 +984,34 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                 )}
                 {step === 'locked' && (
                   <div className='lg-locked' role='alert'>
-                    <svg
-                      className='lg-lock-icon'
-                      viewBox='0 0 24 24'
-                      aria-hidden='true'
-                    >
-                      <rect x='5' y='11' width='14' height='9' rx='1' />
-                      <path d='M8 11V8a4 4 0 0 1 8 0v3' />
-                    </svg>
+                    <div className='lg-lock-mark' aria-hidden='true'>
+                      !
+                    </div>
                     <h2>Akun dikunci</h2>
                     <p>
                       Terlalu banyak percobaan gagal. Akun ini dikunci selama 15
-                      menit. Percobaan telah dicatat. Jika bukan Anda, segera
-                      hubungi petugas keamanan.
+                      menit. Percobaan telah dicatat.
                     </p>
                     {lockedUntil && (
-                      <p>
-                        Akun dapat digunakan kembali:{' '}
+                      <p className='lg-lock-when'>
+                        Akun dapat digunakan kembali
+                        <br />
                         {new Date(lockedUntil).toLocaleString('id-ID')}
                       </p>
                     )}
-                    <p>Petugas keamanan sistem: [EKSTENSI TELEPON]</p>
+                    <p className='lg-lock-call'>
+                      Petugas keamanan sistem: [EKSTENSI TELEPON]
+                    </p>
+                    <div className='lg-lock-noaction'>
+                      TIDAK ADA AKSI PEMULIHAN DI UI
+                    </div>
                   </div>
                 )}
               </div>
+            </div>
+            <div className='lg-session-note'>
+              Sesi terkunci setelah 5 menit tanpa aktivitas dan berakhir setelah
+              30 menit.
             </div>
           </div>
         </section>

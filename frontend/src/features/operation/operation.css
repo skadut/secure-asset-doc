@@ -1,6 +1,36 @@
+/* The route owns a single viewport; each panel scrolls its own content. */
+[data-layout='fixed'] {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.op-panel-row {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.op-panel {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.op-panel > header {
+  flex: 0 0 auto;
+}
+
+.op-panel-scroll {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
 /* Prototype motion for Akses operasi. Gated like the global motion utilities. */
 @media (prefers-reduced-motion: no-preference) {
-  /* Prototype .sw i: knob slides .18s on the matrix toggles only. */
   .op-switch [data-slot='switch-thumb'] {
     transition: transform 0.18s cubic-bezier(0.2, 0.7, 0.2, 1);
   }

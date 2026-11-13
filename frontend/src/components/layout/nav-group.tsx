@@ -37,7 +37,7 @@ export function NavGroup({ title, items }: NavGroupProps) {
   const { state, isMobile } = useSidebar()
   const href = useLocation({ select: (location) => location.href })
   return (
-    <SidebarGroup className='gap-0.5 rounded-[10px] bg-black/25 px-1.5 pb-1.5 pt-0 shadow-[inset_0_1px_2px_rgb(0_0_0/.45),0_1px_0_rgb(255_255_255/.04)]'>
+    <SidebarGroup className='gap-0.5 rounded-[10px] bg-black/25 px-1.5 pt-0 pb-1.5 shadow-[inset_0_1px_2px_rgb(0_0_0/.45),0_1px_0_rgb(255_255_255/.04)]'>
       <SidebarGroupLabel>{title}</SidebarGroupLabel>
       <SidebarMenu className='gap-0.5'>
         {items.map((item) => {
@@ -59,10 +59,14 @@ export function NavGroup({ title, items }: NavGroupProps) {
 }
 
 const NAV_ACTIVE =
-  'data-[active=true]:bg-[linear-gradient(180deg,var(--rail-active-from),var(--rail-active-to))] data-[active=true]:border-t data-[active=true]:border-t-[#ffffff14] data-[active=true]:shadow-none data-[active=true]:[filter:drop-shadow(0_4px_5px_#00000059)]'
+  'data-[active=true]:bg-rail-active data-[active=true]:shadow-none'
 
 function NavBadge({ children }: { children: ReactNode }) {
-  return <Badge className='rounded-none px-1 py-0 font-mono text-[8px]'>{children}</Badge>
+  return (
+    <Badge className='rounded-none px-1 py-0 font-mono text-[8px]'>
+      {children}
+    </Badge>
+  )
 }
 
 function SidebarMenuLink({ item, href }: { item: NavLink; href: string }) {
@@ -123,7 +127,7 @@ function SidebarMenuCollapsible({
                 <SidebarMenuSubButton
                   asChild
                   isActive={checkIsActive(href, subItem)}
-        className={NAV_ACTIVE}
+                  className={NAV_ACTIVE}
                 >
                   <Link to={subItem.url} onClick={() => setOpenMobile(false)}>
                     {subItem.icon && <subItem.icon />}
@@ -154,7 +158,7 @@ function SidebarMenuCollapsedDropdown({
           <SidebarMenuButton
             tooltip={item.title}
             isActive={checkIsActive(href, item)}
-        className={NAV_ACTIVE}
+            className={NAV_ACTIVE}
           >
             {item.icon && <item.icon />}
             <span>{item.title}</span>

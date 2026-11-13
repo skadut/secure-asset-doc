@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { BadgeCheck, Bell, ChevronsUpDown, LogOut } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
+import { BadgeCheck, Bell, ChevronsUpDown, LogOut } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -82,11 +82,14 @@ export function NavUser({ user }: NavUserProps) {
                     )}
                   </div>
                   {level != null && (
-                    <span className='inline-flex shrink-0 items-center border border-[#3a4a8f] px-1 font-mono text-[7px] font-semibold leading-[14px] text-[#8fa6e6]'>
+                    <span className='inline-flex shrink-0 items-center border border-[#3a4a8f] px-1 font-mono text-[7px] leading-[14px] font-semibold text-[#8fa6e6]'>
                       L{level}
                     </span>
                   )}
-                  <ChevronsUpDown className='size-3.5 shrink-0 text-rail-dim' aria-hidden='true' />
+                  <ChevronsUpDown
+                    className='size-3.5 shrink-0 text-rail-dim'
+                    aria-hidden='true'
+                  />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -104,7 +107,9 @@ export function NavUser({ user }: NavUserProps) {
                       </AvatarFallback>
                     </Avatar>
                     <div className='grid flex-1 text-start leading-tight'>
-                      <span className='truncate font-semibold'>{user.name}</span>
+                      <span className='truncate font-semibold'>
+                        {user.name}
+                      </span>
                       <span className='truncate font-mono text-[8px] text-muted-foreground'>
                         {user.email}
                       </span>
@@ -146,7 +151,11 @@ export function NavUser({ user }: NavUserProps) {
             )}
 
             <div className='flex items-center justify-between gap-2 px-0.5'>
-              {user.exp != null ? <SessionCountdown exp={user.exp} /> : <span />}
+              {user.exp != null ? (
+                <SessionCountdown exp={user.exp} />
+              ) : (
+                <span />
+              )}
               <Button
                 type='button'
                 variant='ghost'

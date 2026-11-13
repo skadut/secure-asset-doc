@@ -3,9 +3,11 @@ import {
   type SortingState,
   flexRender,
   getCoreRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   Table,
@@ -36,19 +38,33 @@ export function DocumentsTable({
     columns,
     state: { sorting },
     onSortingChange: setSorting,
+    initialState: {
+      pagination: {
+        pageSize: 8,
+      },
+    },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   })
 
   const versionCount = data.reduce((sum, doc) => sum + doc.versions.length, 0)
+  const pageIndex = table.getState().pagination.pageIndex
+  const pageCount = Math.max(1, table.getPageCount())
 
   return (
-    <section aria-label='Daftar dokumen' className='flex min-w-0 flex-col gap-2'>
+    <section
+      aria-label='Daftar dokumen'
+      className='flex min-w-0 flex-col gap-2'
+    >
       <div className='focus-strong min-w-0 overflow-x-auto border border-line bg-surface'>
         <Table className='doc-table w-full min-w-[760px] table-fixed'>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className='h-[26px] border-line bg-surface-2 hover:bg-surface-2'>
+              <TableRow
+                key={headerGroup.id}
+                className='h-[26px] border-line bg-surface-2 hover:bg-surface-2'
+              >
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
@@ -58,7 +74,7 @@ export function DocumentsTable({
                         ? { width: header.getSize() }
                         : undefined
                     }
-                    className='h-[26px] px-2.5 py-0 font-mono text-[8px] font-normal uppercase tracking-[.09em] text-ink-3'
+                    className='h-[26px] border-b border-line px-2.5 py-0 font-mono text-[7.5px] font-normal tracking-[.09em] text-ink-3 uppercase'
                   >
                     {header.isPlaceholder
                       ? null
@@ -79,7 +95,8 @@ export function DocumentsTable({
                   aria-selected={row.original.id === selectedId}
                   tabIndex={0}
                   onClick={(event) => {
-                    if ((event.target as HTMLElement).closest('a,button')) return
+                    if ((event.target as HTMLElement).closest('a,button'))
+                      return
                     onSelect(row.original)
                   }}
                   onKeyDown={(event) => {
@@ -90,8 +107,9 @@ export function DocumentsTable({
                     }
                   }}
                   className={cn(
-                    'h-[52px] cursor-pointer border-line-subtle focus-visible:outline focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-[var(--focus)]',
-                    row.original.id === selectedId && 'bg-surface-active shadow-[inset_2px_0_0_var(--ink)]'
+                    'focus-visible:outline-inset h-[52px] cursor-pointer border-b border-line bg-surface transition-colors hover:bg-surface-active focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]',
+                    row.original.id === selectedId &&
+                      'shadow-[inset_2px_0_0_var(--ink)]'
                   )}
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -120,9 +138,35 @@ export function DocumentsTable({
           </TableBody>
         </Table>
       </div>
-      <p className='font-mono text-[9px] text-ink-3' aria-live='polite'>
-        Menampilkan {data.length} dokumen, {versionCount} versi · AKSES: Level = dari level Anda, Grant = izin khusus
-      </p>
+      <div className='flex flex-wrap items-center justify-between gap-3 border-t border-line bg-surface-2 px-3.5 py-2.5 font-mono text-[8.5px] tracking-[.08em] text-ink-3'>
+        <p aria-live='polite'>
+          Menampilkan {data.length} dokumen, {versionCount} versi · AKSES: Level
+          = dari level Anda, Grant = izin khusus
+        </p>
+        <div className='flex items-center gap-2'>
+          <button
+            type='button'
+            aria-label='Halaman sebelumnya'
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className='inline-flex size-4 items-center justify-center text-ink-3 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus)] disabled:opacity-40'
+          >
+            <ChevronLeft aria-hidden='true' className='size-3' />
+          </button>
+          <span aria-live='polite'>
+            HALAMAN {pageIndex + 1} / {pageCount}
+          </span>
+          <button
+            type='button'
+            aria-label='Halaman berikutnya'
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className='inline-flex size-4 items-center justify-center text-ink-3 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus)] disabled:opacity-40'
+          >
+            <ChevronRight aria-hidden='true' className='size-3' />
+          </button>
+        </div>
+      </div>
     </section>
   )
 }

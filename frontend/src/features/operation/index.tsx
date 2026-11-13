@@ -27,17 +27,20 @@ export function Operation() {
         <ProfileDropdown />
       </Header>
 
-      <Main className='focus-strong flex min-w-0 flex-1 flex-col gap-4 sm:gap-6'>
+      <Main
+        fixed
+        className='focus-strong flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-hidden sm:gap-4'
+      >
         <header className='flex min-w-0 flex-wrap items-end justify-between gap-4'>
           <div className='min-w-0'>
-            <p className='mb-1 font-mono text-[9px] uppercase tracking-[.14em] text-ink-3'>
+            <p className='mb-1 font-mono text-[9px] tracking-[.14em] text-ink-3 uppercase'>
               Grant per dokumen · khusus level 5
             </p>
             <h1 className='page-title tracking-tight'>Akses operasi</h1>
           </div>
           {allowed && (
             <div className='ms-auto flex flex-wrap items-center justify-end gap-3'>
-              <span className='font-mono text-[9px] uppercase tracking-[.08em] text-ink-3'>
+              <span className='font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'>
                 Grant baru lewat otorisasi ganda
               </span>
               <Button variant='outline' asChild>
@@ -89,7 +92,7 @@ function OperationContent() {
     return <p className='text-muted-foreground'>Belum ada pengguna</p>
 
   return (
-    <div className='grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,.8fr)_minmax(0,1.5fr)_minmax(0,1fr)]'>
+    <div className='op-panel-row grid min-h-0 min-w-0 flex-1 items-stretch gap-4 xl:grid-cols-[minmax(0,.8fr)_minmax(0,1.5fr)_minmax(0,1fr)] xl:grid-rows-[minmax(0,1fr)]'>
       <AccessPanel users={users.data} docs={docs.data} />
       <AccessTester users={users.data} docs={docs.data} />
     </div>

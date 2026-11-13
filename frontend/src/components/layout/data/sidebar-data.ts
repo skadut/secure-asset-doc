@@ -10,10 +10,6 @@ import {
   ScrollText,
   Settings,
   Shield,
-  Bell,
-  Monitor,
-  Palette,
-  UserCog,
 } from 'lucide-react'
 import { type Me } from '@/lib/session'
 import { type NavGroup, type SidebarData } from '../types'
@@ -60,13 +56,7 @@ export const sidebarData: SidebarData = {
     },
     {
       title: 'Pengaturan',
-      items: [
-        { title: 'Pengaturan', url: '/settings', icon: Settings },
-        { title: 'Account', url: '/settings/account', icon: UserCog },
-        { title: 'Appearance', url: '/settings/appearance', icon: Palette },
-        { title: 'Notifications', url: '/settings/notifications', icon: Bell },
-        { title: 'Display', url: '/settings/display', icon: Monitor },
-      ],
+      items: [{ title: 'Pengaturan', url: '/settings', icon: Settings }],
     },
   ],
 }

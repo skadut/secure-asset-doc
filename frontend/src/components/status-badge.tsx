@@ -51,13 +51,25 @@ export function DocStatusBadge({ status }: { status: Document['status'] }) {
   return <StateBadge tone={tone}>{label}</StateBadge>
 }
 
-export function CoverageBadge({ coverage }: { coverage: keyof typeof coverageLabel }) {
+export function CoverageBadge({
+  coverage,
+}: {
+  coverage: keyof typeof coverageLabel
+}) {
   const { label, tone } = coverageLabel[coverage]
   return <StateBadge tone={tone}>{label}</StateBadge>
 }
 
-export function CriticalityBadge({ criticality }: { criticality: Criticality }) {
-  return <StateBadge tone={criticalityTone[criticality]}>{criticalityLabel[criticality]}</StateBadge>
+export function CriticalityBadge({
+  criticality,
+}: {
+  criticality: Criticality
+}) {
+  return (
+    <StateBadge tone={criticalityTone[criticality]}>
+      {criticalityLabel[criticality]}
+    </StateBadge>
+  )
 }
 
 export function AssetStatusBadge({ status }: { status: Asset['status'] }) {
@@ -65,14 +77,34 @@ export function AssetStatusBadge({ status }: { status: Asset['status'] }) {
   return <StateBadge tone={tone}>{label}</StateBadge>
 }
 
-export function ReviewStatusBadge({ days, date }: { days: number; date?: string }) {
+export function ReviewStatusBadge({
+  days,
+  date,
+}: {
+  days: number
+  date?: string
+}) {
   const overdue = days < 0
   const dueSoon = days >= 0 && days <= 30
-  const label = overdue ? 'Overdue' : dueSoon ? days === 0 ? 'Due today' : `Due in ${days} day${days === 1 ? '' : 's'}` : date
-  return <StateBadge tone={overdue ? 'fail' : dueSoon ? 'warn' : 'ink'}>{label}</StateBadge>
+  const label = overdue
+    ? 'Overdue'
+    : dueSoon
+      ? days === 0
+        ? 'Due today'
+        : `Due in ${days} day${days === 1 ? '' : 's'}`
+      : date
+  return (
+    <StateBadge tone={overdue ? 'fail' : dueSoon ? 'warn' : 'ink'}>
+      {label}
+    </StateBadge>
+  )
 }
 
 export function FileTypeBadge({ type }: { type: 'PDF' | 'Excel' | 'None' }) {
   if (type === 'None') return <span>None</span>
-  return <span className='inline-flex border border-line px-1.5 py-0.5 font-mono text-[9px] uppercase leading-[1.4] text-ink-2'>{type}</span>
+  return (
+    <span className='inline-flex border border-line px-1.5 py-0.5 font-mono text-[9px] leading-[1.4] text-ink-2 uppercase'>
+      {type}
+    </span>
+  )
 }

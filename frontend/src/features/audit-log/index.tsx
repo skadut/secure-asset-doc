@@ -1,40 +1,56 @@
 // ponytail: local filter state; move to URL search params when filters need sharing
 import { useMemo, useState, type Dispatch, type SetStateAction } from 'react'
 import { Link } from '@tanstack/react-router'
-import { Eraser } from 'lucide-react'
 import { auditEvents, type AuditEvent } from '@/data/grc'
+import {
+  ChevronDown,
+  ChevronUp,
+  Eraser,
+  Search as SearchIcon,
+} from 'lucide-react'
 import { getMe } from '@/lib/session'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { CardPanel } from '@/components/card-panel'
 import { ConfigDrawer } from '@/components/config-drawer'
+import { EmptyState } from '@/components/empty-state'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
+import { PageHead } from '@/components/page-head'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { CardPanel } from '@/components/card-panel'
-import { EmptyState } from '@/components/empty-state'
-import { PageHead } from '@/components/page-head'
 import { StatStrip } from '@/components/stat-strip'
+import { ThemeSwitch } from '@/components/theme-switch'
 import { PurgeDialog } from './purge-dialog'
 
 const PAGE_SIZE = 20
 const PAGER_WINDOW = 3
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000
-const fieldClass =
-  'h-8 w-full border border-line bg-surface px-2 font-mono text-[10px] text-ink focus-visible:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+const selectClass =
+  'h-[34px] rounded-none border-line bg-surface px-2.5 font-mono text-[10px] text-ink-2 shadow-none hover:bg-surface-2 dark:bg-surface dark:hover:bg-surface-2 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink [&_svg]:size-3 [&_svg]:opacity-100'
 const pagerClass =
-  'grid h-8 min-w-8 place-items-center border border-line px-2 font-mono text-[10px] text-ink-2 hover:bg-surface-2 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+  'grid h-[30px] min-w-[30px] place-items-center border border-line px-2 font-sans text-[11.5px] font-semibold text-ink-2 hover:bg-surface-2 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
 
-const CHIP_TONE: Partial<Record<AuditEvent['action'], string>> = {
+// Keys beyond AuditEvent['action'] (deny, login.*) are not in the data type; kept so backend values get the warn tone.
+const CHIP_TONE: Record<string, string> = {
   approve: 'border-pass text-pass',
   'access.denied': 'border-fail text-fail',
+  deny: 'border-warn text-warn',
+  'login.fail': 'border-warn text-warn',
+  'login.code.fail': 'border-warn text-warn',
   delete: 'border-fail text-fail',
   purge: 'border-erase text-erase',
 }
 
-function ActionChip({ action }: { action: AuditEvent['action'] }) {
+function ActionChip({ action }: { action: string }) {
   return (
     <span
-      className={`inline-flex h-4 items-center border px-1.5 font-mono text-[7.5px] lowercase tracking-[.3px] ${CHIP_TONE[action] ?? 'border-line text-ink-2'}`}
+      className={`inline-flex h-4 items-center border px-1.5 font-mono text-[7.5px] tracking-[.3px] lowercase ${CHIP_TONE[action] ?? 'border-ink-2 text-ink-2'}`}
     >
       {action}
     </span>
@@ -42,25 +58,40 @@ function ActionChip({ action }: { action: AuditEvent['action'] }) {
 }
 
 function ObjectLink({ event }: { event: AuditEvent }) {
-  const className = 'font-mono text-[9px] underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+  const className =
+    'font-mono text-[9px] underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
   if (event.objectType === 'asset') {
     return (
-      <Link to='/assets/$assetId' params={{ assetId: event.objectId }} className={className}>
+      <Link
+        to='/assets/$assetId'
+        params={{ assetId: event.objectId }}
+        className={className}
+      >
         {event.objectId}
       </Link>
     )
   }
   if (event.objectType === 'document') {
     return (
-      <Link to='/documents/$documentId' params={{ documentId: event.objectId }} className={className}>
+      <Link
+        to='/documents/$documentId'
+        params={{ documentId: event.objectId }}
+        className={className}
+      >
         {event.objectId}
       </Link>
     )
   }
   if (event.objectType !== 'evidence')
-    return <span className='font-mono text-[9px] text-ink-2'>{event.objectId}</span>
+    return (
+      <span className='font-mono text-[9px] text-ink-2'>{event.objectId}</span>
+    )
   return (
-    <Link to='/evidence' hash={`subcategory-${event.objectId}`} className={className}>
+    <Link
+      to='/evidence'
+      hash={`subcategory-${event.objectId}`}
+      className={className}
+    >
       {event.objectId}
     </Link>
   )
@@ -73,7 +104,6 @@ export function AuditLog() {
   const [action, setAction] = useState('all')
   const [objectType, setObjectType] = useState('all')
   const [actor, setActor] = useState('all')
-  const [range, setRange] = useState<'7d' | 'all'>('7d')
   const [page, setPage] = useState(0)
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   // ponytail: auditEvents is mutated in place on purge; version forces recompute. Upgrade to a store if a second source appears.
@@ -82,7 +112,9 @@ export function AuditLog() {
   const { actions, objectTypes, actors } = useMemo(
     () => ({
       actions: [...new Set(auditEvents.map((event) => event.action))].sort(),
-      objectTypes: [...new Set(auditEvents.map((event) => event.objectType))].sort(),
+      objectTypes: [
+        ...new Set(auditEvents.map((event) => event.objectType)),
+      ].sort(),
       actors: [...new Set(auditEvents.map((event) => event.actor))].sort(),
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -90,7 +122,10 @@ export function AuditLog() {
   )
   const me = getMe()
   const canPurge = me?.can?.audit?.purge === true
-  const note = [me?.securityOfficer && 'PERWIRA KEAMANAN', me?.superAdmin && 'SUPER ADMIN']
+  const note = [
+    me?.securityOfficer && 'PERWIRA KEAMANAN',
+    me?.superAdmin && 'SUPER ADMIN',
+  ]
     .filter(Boolean)
     .join(' / ')
   const [purgeOpen, setPurgeOpen] = useState(false)
@@ -110,6 +145,7 @@ export function AuditLog() {
     }
   }
 
+  // Pen offers only "7 hari terakhir"; no all-time option.
   const withinWeek = (event: AuditEvent) => {
     const at = Date.parse(event.at)
     return Number.isFinite(at) && at >= now - WEEK_MS
@@ -124,35 +160,49 @@ export function AuditLog() {
             (action === 'all' || event.action === action) &&
             (objectType === 'all' || event.objectType === objectType) &&
             (actor === 'all' || event.actor === actor) &&
-            (range === 'all' || withinWeek(event))
+            withinWeek(event)
         )
         .sort((a, b) => (a.at < b.at ? 1 : -1)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [search, action, objectType, actor, range, now, version]
+    [search, action, objectType, actor, now, version]
   )
 
   const pageCount = Math.ceil(filteredEvents.length / PAGE_SIZE)
   const safePage = Math.min(page, Math.max(0, pageCount - 1))
-  const visible = filteredEvents.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE)
-  const windowStart = Math.max(0, Math.min(safePage - 1, pageCount - PAGER_WINDOW))
-  const pageNumbers = Array.from({ length: Math.min(PAGER_WINDOW, pageCount) }, (_, i) => windowStart + i)
+  const visible = filteredEvents.slice(
+    safePage * PAGE_SIZE,
+    safePage * PAGE_SIZE + PAGE_SIZE
+  )
+  const windowStart = Math.max(
+    0,
+    Math.min(safePage - 1, pageCount - PAGER_WINDOW)
+  )
+  const pageNumbers = Array.from(
+    { length: Math.min(PAGER_WINDOW, pageCount) },
+    (_, i) => windowStart + i
+  )
 
   const counts = useMemo(() => {
     const lastSevenDays = auditEvents.filter(withinWeek)
     return {
       total: lastSevenDays.length,
-      denied: lastSevenDays.filter((event) => event.action === 'access.denied').length,
+      denied: lastSevenDays.filter((event) => event.action === 'access.denied')
+        .length,
       purges: lastSevenDays.filter((event) => event.action === 'purge').length,
       actors: new Set(lastSevenDays.map((event) => event.actor)).size,
-      objects: new Set(lastSevenDays.map((event) => `${event.objectType}:${event.objectId}`)).size,
+      objects: new Set(
+        lastSevenDays.map((event) => `${event.objectType}:${event.objectId}`)
+      ).size,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [now, version])
 
-  const resetPage = <T,>(setter: Dispatch<SetStateAction<T>>) => (value: T) => {
-    setter(value)
-    setPage(0)
-  }
+  const resetPage =
+    <T,>(setter: Dispatch<SetStateAction<T>>) =>
+    (value: T) => {
+      setter(value)
+      setPage(0)
+    }
 
   return (
     <>
@@ -172,10 +222,10 @@ export function AuditLog() {
             canPurge ? (
               <button
                 type='button'
-                className='inline-flex min-h-9 items-center gap-1.5 border border-fail bg-surface px-2.5 font-mono text-[10px] text-fail hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+                className='inline-flex min-h-9 items-center gap-1.5 border border-fail bg-surface px-2.5 font-sans text-[12.5px] font-semibold text-fail hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
                 onClick={() => setPurgeOpen(true)}
               >
-                <Eraser aria-hidden='true' className='size-3.5' />
+                <Eraser aria-hidden='true' className='size-[13px]' />
                 Purge entri lama
               </button>
             ) : undefined
@@ -183,9 +233,14 @@ export function AuditLog() {
         />
 
         <StatStrip
+          compact
           items={[
             { label: 'KEJADIAN · 7 HARI', value: counts.total },
-            { label: 'PENOLAKAN', value: counts.denied, tone: counts.denied ? 'fail' : 'ink' },
+            {
+              label: 'PENOLAKAN',
+              value: counts.denied,
+              tone: counts.denied ? 'fail' : 'ink',
+            },
             { label: 'PURGE', value: counts.purges },
             { label: 'AKTOR UNIK', value: counts.actors },
             { label: 'OBJEK DISENTUH', value: counts.objects },
@@ -193,59 +248,149 @@ export function AuditLog() {
         />
 
         {canPurge && (
-          <PurgeDialog open={purgeOpen} onOpenChange={setPurgeOpen} onPurged={() => void reloadAudit()} />
+          <PurgeDialog
+            open={purgeOpen}
+            onOpenChange={setPurgeOpen}
+            onPurged={() => void reloadAudit()}
+          />
         )}
 
-        <CardPanel>
-          <div role='toolbar' aria-label='Filter audit' className='flex flex-wrap items-center gap-2 border-b border-line p-2.5'>
-            <label className='sr-only' htmlFor='audit-search'>Cari ringkasan</label>
+        <div
+          role='toolbar'
+          aria-label='Filter audit'
+          className='flex flex-wrap items-center gap-2'
+        >
+          <div className='flex h-[34px] w-[300px] max-w-full items-center gap-2 border border-line bg-surface px-2.5 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ink max-sm:w-full'>
+            <label className='sr-only' htmlFor='audit-search'>
+              Cari ringkasan
+            </label>
+            <SearchIcon
+              aria-hidden='true'
+              className='size-3 shrink-0 text-ink-3'
+            />
             <input
               id='audit-search'
               type='search'
               value={search}
               onChange={(e) => resetPage(setSearch)(e.target.value)}
               placeholder='Cari ringkasan kejadian'
-              className={`${fieldClass} sm:w-[260px]`}
+              className='h-full min-w-0 flex-1 bg-transparent font-mono text-[10px] text-ink outline-none placeholder:text-ink-3'
             />
-            <label className='sr-only' htmlFor='audit-action'>Aksi</label>
-            <select id='audit-action' value={action} onChange={(e) => resetPage(setAction)(e.target.value)} className={`${fieldClass} sm:w-[136px]`}>
-              <option value='all'>Aksi: semua</option>
-              {actions.map((value) => (
-                <option key={value} value={value}>{value}</option>
-              ))}
-            </select>
-            <label className='sr-only' htmlFor='audit-object'>Objek</label>
-            <select id='audit-object' value={objectType} onChange={(e) => resetPage(setObjectType)(e.target.value)} className={`${fieldClass} sm:w-[136px]`}>
-              <option value='all'>Objek: semua</option>
-              {objectTypes.map((value) => (
-                <option key={value} value={value}>{value}</option>
-              ))}
-            </select>
-            <label className='sr-only' htmlFor='audit-actor'>Aktor</label>
-            <select id='audit-actor' value={actor} onChange={(e) => resetPage(setActor)(e.target.value)} className={`${fieldClass} sm:w-[136px]`}>
-              <option value='all'>Aktor: semua</option>
-              {actors.map((value) => (
-                <option key={value} value={value}>{value}</option>
-              ))}
-            </select>
-            <label className='sr-only' htmlFor='audit-range'>Rentang waktu</label>
-            <select id='audit-range' value={range} onChange={(e) => resetPage(setRange)(e.target.value as '7d' | 'all')} className={`${fieldClass} sm:w-[160px]`}>
-              <option value='7d'>7 hari terakhir</option>
-              <option value='all'>Semua waktu</option>
-            </select>
-            <span className='ms-auto font-mono text-[9px] uppercase tracking-[.08em] text-ink-3'>{PAGE_SIZE} / halaman</span>
           </div>
 
+          <label className='sr-only' htmlFor='audit-action'>
+            Aksi
+          </label>
+          <Select value={action} onValueChange={resetPage(setAction)}>
+            <SelectTrigger
+              id='audit-action'
+              className={`w-[107px] max-sm:w-full ${selectClass}`}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className='rounded-none'>
+              <SelectItem value='all' className='font-mono text-[10px]'>
+                Aksi: semua
+              </SelectItem>
+              {actions.map((value) => (
+                <SelectItem
+                  key={value}
+                  value={value}
+                  className='font-mono text-[10px]'
+                >
+                  {value}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <label className='sr-only' htmlFor='audit-object'>
+            Objek
+          </label>
+          <Select value={objectType} onValueChange={resetPage(setObjectType)}>
+            <SelectTrigger
+              id='audit-object'
+              className={`w-[113px] max-sm:w-full ${selectClass}`}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className='rounded-none'>
+              <SelectItem value='all' className='font-mono text-[10px]'>
+                Objek: semua
+              </SelectItem>
+              {objectTypes.map((value) => (
+                <SelectItem
+                  key={value}
+                  value={value}
+                  className='font-mono text-[10px]'
+                >
+                  {value}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <label className='sr-only' htmlFor='audit-actor'>
+            Aktor
+          </label>
+          <Select value={actor} onValueChange={resetPage(setActor)}>
+            <SelectTrigger
+              id='audit-actor'
+              className={`w-[113px] max-sm:w-full ${selectClass}`}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className='rounded-none'>
+              <SelectItem value='all' className='font-mono text-[10px]'>
+                Aktor: semua
+              </SelectItem>
+              {actors.map((value) => (
+                <SelectItem
+                  key={value}
+                  value={value}
+                  className='font-mono text-[10px]'
+                >
+                  {value}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <label className='sr-only' htmlFor='audit-range'>
+            Rentang waktu
+          </label>
+          <Select value='7d'>
+            <SelectTrigger
+              id='audit-range'
+              className={`min-w-0 flex-1 max-sm:w-full ${selectClass}`}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className='rounded-none'>
+              <SelectItem value='7d' className='font-mono text-[10px]'>
+                7 hari terakhir
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          <span className='ms-auto font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'>
+            {PAGE_SIZE} / halaman
+          </span>
+        </div>
+
+        <CardPanel>
           <div className='scroll-x min-w-0 overflow-x-auto'>
             <table className='w-full min-w-[880px] border-collapse text-left'>
               <thead>
-                <tr className='border-b border-line bg-surface-2 font-mono text-[7.5px] uppercase tracking-[.08em] text-ink-3'>
+                <tr className='border-b border-line bg-surface-2 font-mono text-[7.5px] tracking-[.08em] text-ink-3 uppercase'>
                   <th className='w-24 px-2.5 py-2 font-normal'>WAKTU</th>
-                  <th className='w-32 px-2.5 py-2 font-normal'>AKTOR</th>
-                  <th className='w-32 px-2.5 py-2 font-normal'>AKSI</th>
-                  <th className='w-32 px-2.5 py-2 font-normal'>OBJEK</th>
+                  <th className='w-[130px] px-2.5 py-2 font-normal'>AKTOR</th>
+                  <th className='w-[132px] px-2.5 py-2 font-normal'>AKSI</th>
+                  <th className='w-[120px] px-2.5 py-2 font-normal'>OBJEK</th>
                   <th className='px-2.5 py-2 font-normal'>RINGKASAN</th>
-                  <th className='w-28 px-2.5 py-2 text-right font-normal'>PERUBAHAN</th>
+                  <th className='w-[110px] px-2.5 py-2 text-right font-normal'>
+                    PERUBAHAN
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -254,20 +399,31 @@ export function AuditLog() {
                   const isExpanded = !!expanded[event.id]
                   const panelId = `changes-${event.id}`
                   return [
-                    <tr key={event.id} className='border-b border-line align-top transition-colors duration-150 hover:bg-surface-2'>
+                    <tr
+                      key={event.id}
+                      className='border-b border-line align-middle transition-colors duration-150 hover:bg-surface-2'
+                    >
                       <td className='px-2.5 py-2'>
-                        <time dateTime={event.at} title={event.at} className='font-mono text-[9px] tabular-nums text-ink-2'>
+                        <time
+                          dateTime={event.at}
+                          title={event.at}
+                          className='font-mono text-[8.5px] text-ink-2 tabular-nums'
+                        >
                           {timeOf(event.at)}
                         </time>
                       </td>
-                      <td className='px-2.5 py-2 font-mono text-[9px] text-ink-2'>{event.actor}</td>
+                      <td className='px-2.5 py-2 font-mono text-[8.5px] text-ink-2'>
+                        {event.actor}
+                      </td>
                       <td className='px-2.5 py-2'>
                         <ActionChip action={event.action} />
                       </td>
                       <td className='px-2.5 py-2'>
                         <ObjectLink event={event} />
                       </td>
-                      <td className='px-2.5 py-2 text-[10.5px] leading-[1.45] text-ink-2'>{event.summary}</td>
+                      <td className='px-2.5 py-2 text-[10px] leading-[1.45] text-ink-2'>
+                        {event.summary}
+                      </td>
                       <td className='px-2.5 py-2 text-right'>
                         {changes.length ? (
                           <button
@@ -275,26 +431,55 @@ export function AuditLog() {
                             aria-expanded={isExpanded}
                             aria-controls={panelId}
                             onClick={() =>
-                              setExpanded((current) => ({ ...current, [event.id]: !current[event.id] }))
+                              setExpanded((current) => ({
+                                ...current,
+                                [event.id]: !current[event.id],
+                              }))
                             }
-                            className='min-h-8 w-[110px] border border-line px-2 font-mono text-[9px] text-ink-2 hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+                            className='inline-flex h-[30px] w-[110px] items-center justify-center gap-1.5 border border-line bg-surface font-sans text-[11.5px] font-semibold text-ink hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
                           >
-                            {changes.length} field {isExpanded ? '▴' : '▾'}
+                            {changes.length} field
+                            {isExpanded ? (
+                              <ChevronUp
+                                aria-hidden='true'
+                                className='size-3 text-ink-2'
+                              />
+                            ) : (
+                              <ChevronDown
+                                aria-hidden='true'
+                                className='size-3 text-ink-2'
+                              />
+                            )}
                           </button>
                         ) : (
-                          <span className='font-mono text-[10px] text-ink-3'>—</span>
+                          <span className='font-mono text-[10px] text-ink-3'>
+                            —
+                          </span>
                         )}
                       </td>
                     </tr>,
                     changes.length && isExpanded ? (
-                      <tr key={`${event.id}-changes`} id={panelId} className='border-b border-line bg-surface-2'>
+                      <tr
+                        key={`${event.id}-changes`}
+                        id={panelId}
+                        className='border-b border-line bg-surface-2'
+                      >
                         <td colSpan={6} className='px-2.5 py-2'>
                           <ul className='flex flex-col gap-1'>
                             {changes.map((change, index) => (
-                              <li key={`${change.field}-${index}`} className='flex flex-wrap items-baseline gap-2 font-mono text-[9px]'>
-                                <span className='w-28 shrink-0 text-ink-3'>{change.field}</span>
-                                <span className='text-ink-3 line-through'>{change.from}</span>
-                                <span aria-hidden='true' className='text-ink-3'>→</span>
+                              <li
+                                key={`${change.field}-${index}`}
+                                className='flex flex-wrap items-baseline gap-2 font-mono text-[9px]'
+                              >
+                                <span className='w-28 shrink-0 text-ink-3'>
+                                  {change.field}
+                                </span>
+                                <span className='text-ink-3 line-through'>
+                                  {change.from}
+                                </span>
+                                <span aria-hidden='true' className='text-ink-3'>
+                                  →
+                                </span>
                                 <span className='text-ink'>{change.to}</span>
                               </li>
                             ))}
@@ -317,8 +502,9 @@ export function AuditLog() {
           </div>
 
           <footer className='flex flex-wrap items-center justify-between gap-2 border-t border-line bg-surface-2 px-3 py-2'>
-            <span className='font-mono text-[9px] text-ink-3'>
-              Menampilkan {visible.length} dari {filteredEvents.length} kejadian · waktu menurun
+            <span className='font-mono text-[8.5px] tracking-[.68px] text-ink-3'>
+              Menampilkan {visible.length} dari {filteredEvents.length} kejadian
+              · waktu menurun
             </span>
             <nav aria-label='Halaman audit' className='flex items-center gap-1'>
               <button

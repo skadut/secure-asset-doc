@@ -1,12 +1,22 @@
 /* Prototype motion for Otorisasi ganda. Gated like the global motion utilities. */
 @media (prefers-reduced-motion: no-preference) {
   @keyframes req-enter {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: none; }
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
   @keyframes req-slot-fill {
-    from { background-color: transparent; }
-    to { background-color: var(--surface-2); }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   .req-card {

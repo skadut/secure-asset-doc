@@ -117,7 +117,9 @@
   border-radius: 6px;
   background: rgb(255 255 255 / 0.04);
   color: #c7d0c8;
-  transition: background-color 150ms, color 150ms;
+  transition:
+    background-color 150ms,
+    color 150ms;
 }
 
 .nav-ic svg {

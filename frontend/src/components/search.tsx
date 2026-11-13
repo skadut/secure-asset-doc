@@ -21,7 +21,9 @@ export function Search({
       onClick={() => setOpen(true)}
     >
       <SearchIcon aria-hidden='true' size={13} className='shrink-0' />
-      <span className='sr-only sm:not-sr-only sm:ms-2 sm:truncate'>{placeholder}</span>
+      <span className='sr-only sm:not-sr-only sm:ms-2 sm:truncate'>
+        {placeholder}
+      </span>
       <kbd className='pointer-events-none absolute inset-e-2 top-1/2 hidden h-5 -translate-y-1/2 items-center gap-0.5 rounded-none border border-line bg-surface-2 px-1 font-mono text-[9px] text-ink-3 select-none sm:flex'>
         <span>⌘</span>K
       </kbd>

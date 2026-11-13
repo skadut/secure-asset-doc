@@ -8,6 +8,9 @@ import {
   pushHistory,
   seriesFor,
   NODES,
+  ROUTES,
+  VIEW_W,
+  clampLabelX,
   type HistoryPoint,
 } from './graph.ts'
 
@@ -80,3 +83,14 @@ const parsed = parseTraffic({
 })
 assert.equal(parsed?.edges.length, 1)
 assert.deepEqual(parsed?.down, ['db'])
+
+// edge labels stay inside the viewBox at any x
+assert.equal(clampLabelX(0, 'start', 100), 4)
+assert.equal(clampLabelX(VIEW_W, 'start', 100), VIEW_W - 104)
+assert.equal(clampLabelX(0, 'middle', 100), 54)
+assert.equal(clampLabelX(400, 'middle', 100), 400)
+// every declared route label fits after clamping
+for (const route of Object.values(ROUTES)) {
+  const x = clampLabelX(route.x, route.anchor, 120)
+  assert.ok(x >= 4 && x + 120 <= VIEW_W, 'label inside viewBox')
+}

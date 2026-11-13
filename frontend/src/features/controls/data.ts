@@ -8,23 +8,19 @@ export type ControlRow = {
 export const decisionFlow = [
   {
     label: '1. PAP: Administrasi kebijakan',
-    detail:
-      'Pengaturan akses operasi dan perubahan yang memerlukan otorisasi ganda.',
+    detail: 'Menetapkan aturan akses dan level TLP.',
   },
   {
     label: '2. PIP: Informasi kebijakan',
-    detail:
-      'Informasi pengguna, persetujuan akses, dan status sesi yang tersedia bagi server.',
+    detail: 'Menyimpan grant, permintaan, dan keputusan.',
   },
   {
     label: '3. PDP: Keputusan kebijakan',
-    detail:
-      'Server memeriksa level akses, klasifikasi TLP, dan hibah dokumen aktif sebelum memutuskan.',
+    detail: 'Server memutuskan izin per request.',
   },
   {
     label: '4. PEP: Penegakan kebijakan',
-    detail:
-      'Endpoint server menegakkan keputusan. Pelepasan kunci HSM setelah izin belum dibuktikan.',
+    detail: '404 / 403 dan penyaringan /api/grc.',
   },
 ] as const
 

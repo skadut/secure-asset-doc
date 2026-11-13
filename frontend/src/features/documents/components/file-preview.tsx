@@ -59,7 +59,12 @@ function PdfPreview({ file, secure }: { file: DocFile; secure: boolean }) {
 
   return (
     <div className='flex flex-col gap-3'>
-      <FileHeader file={file} label='PDF' size={head.data?.size} secure={secure} />
+      <FileHeader
+        file={file}
+        label='PDF'
+        size={head.data?.size}
+        secure={secure}
+      />
       {!wide ? (
         <p className='text-sm text-muted-foreground'>
           Inline preview is available on larger screens.

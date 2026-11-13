@@ -26,7 +26,7 @@ export function CoverageSegment({
         return (
           <label
             key={option.value}
-            className={`relative inline-flex min-h-11 cursor-pointer select-none items-center gap-1.5 px-2.5 font-mono text-[8.5px] transition-colors motion-safe:duration-150 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink ${active ? 'bg-surface-2 text-ink' : 'text-ink-2 hover:bg-surface-2'}`}
+            className={`relative inline-flex h-8 cursor-pointer items-center gap-1.5 border px-2.5 font-mono text-[8.5px] transition-colors select-none before:absolute before:-inset-x-0 before:-inset-y-1.5 before:content-[''] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink motion-safe:duration-150 ${active ? 'border-ink bg-surface-2 text-ink' : 'border-line bg-surface text-ink-2 hover:bg-surface-2'}`}
           >
             <input
               type='radio'
@@ -36,7 +36,12 @@ export function CoverageSegment({
               onChange={() => onChange(option.value)}
               className='absolute inset-0 m-0 size-full cursor-pointer opacity-0'
             />
-            {option.dot && <i aria-hidden='true' className={`size-[5px] ${option.dot}`} />}
+            {option.dot && (
+              <i
+                aria-hidden='true'
+                className={`size-[5px] rounded-full ${option.dot}`}
+              />
+            )}
             {option.label}
           </label>
         )

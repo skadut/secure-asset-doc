@@ -36,7 +36,7 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
           >
             <div
               key={location.pathname}
-              className='view-enter flex min-w-0 flex-1 flex-col'
+              className='view-enter flex min-h-0 min-w-0 flex-1 flex-col'
             >
               {children ?? <Outlet />}
             </div>

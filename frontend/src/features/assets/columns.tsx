@@ -52,62 +52,125 @@ export const assetColumns: ColumnDef<Asset>[] = [
   {
     accessorKey: 'id',
     size: 112,
-    header: ({ column }) => <DataTableColumnHeader column={column} title='ID' />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='ID' />
+    ),
     cell: ({ row }) => (
-      <Link to='/assets/$assetId' params={{ assetId: row.original.id }} className='font-mono text-[10px] underline underline-offset-4'>
+      <Link
+        to='/assets/$assetId'
+        params={{ assetId: row.original.id }}
+        className='font-mono text-[9.5px] text-ink'
+      >
         {row.original.id}
       </Link>
     ),
   },
   {
     accessorKey: 'name',
-    size: 486,
-    header: ({ column }) => <DataTableColumnHeader column={column} title='NAMA' />,
-    cell: ({ row }) => <span className='font-medium text-ink'>{row.original.name}</span>,
+    // Sized so PURDUE/SITE widening keeps the row total at 1416px (table min-w).
+    size: 434,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='NAMA' />
+    ),
+    cell: ({ row }) => (
+      <span className='text-[11.5px] font-medium text-ink'>
+        {row.original.name}
+      </span>
+    ),
   },
   {
     accessorKey: 'type',
     size: 180,
-    header: ({ column }) => <DataTableColumnHeader column={column} title='TIPE' />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='TIPE' />
+    ),
+    cell: ({ row }) => (
+      <span className='text-[10.5px] text-ink-2'>{row.original.type}</span>
+    ),
     filterFn: includesAny,
   },
   {
     accessorKey: 'site',
-    size: 160,
-    header: ({ column }) => <DataTableColumnHeader column={column} title='SITE' />,
+    size: 190,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='SITE' />
+    ),
+    cell: ({ row }) => (
+      <span className='text-[10.5px] text-ink-2'>{row.original.site}</span>
+    ),
   },
   {
     accessorKey: 'purdueLevel',
-    size: 74,
-    header: ({ column }) => <DataTableColumnHeader column={column} title='PURDUE' />,
-    cell: ({ row }) => <span className='font-mono tabular-nums'>{row.original.purdueLevel}</span>,
+    // Wider than pen 74px: the PURDUE header + sort icon overlapped KRITIKALITAS.
+    size: 96,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='PURDUE' />
+    ),
+    cell: ({ row }) => (
+      <span className='font-mono text-[9.5px] tabular-nums'>
+        {row.original.purdueLevel}
+      </span>
+    ),
     filterFn: includesAny,
   },
   {
     accessorKey: 'criticality',
     size: 126,
-    header: ({ column }) => <DataTableColumnHeader column={column} title='KRITIKALITAS' />,
-    cell: ({ row }) => <StatusDot tone={criticalityTone[row.original.criticality]}>{criticalityLabel[row.original.criticality]}</StatusDot>,
-    sortingFn: (rowA, rowB, columnId) => criticalityRank[rowA.getValue<Criticality>(columnId)] - criticalityRank[rowB.getValue<Criticality>(columnId)],
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='KRITIKALITAS' />
+    ),
+    cell: ({ row }) => (
+      <StatusDot tone={criticalityTone[row.original.criticality]}>
+        {criticalityLabel[row.original.criticality]}
+      </StatusDot>
+    ),
+    sortingFn: (rowA, rowB, columnId) =>
+      criticalityRank[rowA.getValue<Criticality>(columnId)] -
+      criticalityRank[rowB.getValue<Criticality>(columnId)],
     filterFn: includesAny,
   },
   {
     accessorKey: 'status',
     size: 112,
-    header: ({ column }) => <DataTableColumnHeader column={column} title='STATUS' />,
-    cell: ({ row }) => <StatusDot tone={row.original.status === 'active' ? 'pass' : row.original.status === 'maintenance' ? 'warn' : 'ink'}>{statusLabel[row.original.status]}</StatusDot>,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='STATUS' />
+    ),
+    cell: ({ row }) => (
+      <StatusDot
+        tone={
+          row.original.status === 'active'
+            ? 'pass'
+            : row.original.status === 'maintenance'
+              ? 'warn'
+              : 'ink'
+        }
+      >
+        {statusLabel[row.original.status]}
+      </StatusDot>
+    ),
     filterFn: includesAny,
   },
   {
     accessorKey: 'lastReviewed',
     size: 166,
-    header: ({ column }) => <DataTableColumnHeader column={column} title='TINJAUAN' />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='TINJAUAN' />
+    ),
     cell: ({ row }) => {
       const overdue = isReviewOverdue(row.original.lastReviewed)
       return (
         <div className='flex flex-col gap-0.5'>
-          <time className='font-mono text-[9.5px] tabular-nums text-ink-2' dateTime={row.original.lastReviewed}>{row.original.lastReviewed}</time>
-          <span className={`font-mono text-[7.5px] ${overdue ? 'text-fail' : 'text-ink-3'}`}>{overdue ? 'Terlambat' : 'Dalam 365 hari'}</span>
+          <time
+            className='font-mono text-[9.5px] text-ink-2 tabular-nums'
+            dateTime={row.original.lastReviewed}
+          >
+            {row.original.lastReviewed}
+          </time>
+          <span
+            className={`font-mono text-[7.5px] ${overdue ? 'text-fail' : 'text-ink-3'}`}
+          >
+            {overdue ? 'Terlambat' : 'Dalam 365 hari'}
+          </span>
         </div>
       )
     },

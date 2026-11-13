@@ -1,19 +1,26 @@
 import { Link } from '@tanstack/react-router'
+import { FileQuestion } from 'lucide-react'
 import { ErrorState } from '@/components/error-state'
-import { Button } from '@/components/ui/button'
 
 export function DocumentUnavailable() {
   return (
     <div className='flex min-h-[60svh] w-full items-center justify-center px-4 py-8'>
       <ErrorState
-        code='DOKUMEN · TIDAK TERSEDIA'
+        code='404'
+        headerLabel='INLINE · DOKUMEN'
+        headerValue='404 / 403'
+        icon={<FileQuestion />}
         title='Dokumen tidak tersedia'
         desc='Dokumen ini tidak ada atau Anda tidak memiliki akses.'
         action={
-          <Button asChild variant='outline' size='sm' className='rounded-none'>
-            <Link to='/documents'>Kembali ke registri</Link>
-          </Button>
+          <Link
+            to='/documents'
+            className='font-mono text-[9px] text-ink-2 underline underline-offset-4 hover:text-ink'
+          >
+            Kembali ke registri
+          </Link>
         }
+        footer='TIDAK MENAMPILKAN ID, JUDUL, ATAU TLP'
       />
     </div>
   )

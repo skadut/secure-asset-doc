@@ -1,5 +1,5 @@
-import { getMe } from '@/lib/session'
 import { useAuthStore } from '@/stores/auth-store'
+import { getMe } from '@/lib/session'
 import { useLayout } from '@/context/layout-provider'
 import {
   Sidebar,
@@ -24,15 +24,18 @@ export function AppSidebar() {
           <span
             aria-hidden='true'
             className='flex size-[30px] shrink-0 items-center justify-center rounded-[8px] font-heading text-[14px] font-bold text-[#0f1411] shadow-[0_4px_12px_rgb(0_0_0/.35)]'
-            style={{ background: 'linear-gradient(160deg, #e8ede6 10.99%, #b9c4b8 89.01%)' }}
+            style={{
+              background:
+                'linear-gradient(160deg, #e8ede6 10.99%, #b9c4b8 89.01%)',
+            }}
           >
             S
           </span>
           <div className='min-w-0'>
-            <div className='truncate font-heading text-[13px] font-semibold leading-[1.15] text-rail-ink'>
+            <div className='truncate font-heading text-[13px] leading-[1.15] font-semibold text-rail-ink'>
               Secure Asset Doc
             </div>
-            <div className='truncate font-mono text-[8px] uppercase leading-[1.4] tracking-[.08em] text-rail-dim'>
+            <div className='truncate font-mono text-[8px] leading-[1.4] tracking-[.08em] text-rail-dim uppercase'>
               Kontrol akses dokumen
             </div>
           </div>
@@ -52,7 +55,11 @@ export function AppSidebar() {
               : '',
             avatar: '',
             level: me?.accessLevel,
-            role: me ? (me.superAdmin ? 'Super Admin' : me.rankName) : undefined,
+            role: me
+              ? me.superAdmin
+                ? 'Super Admin'
+                : me.rankName
+              : undefined,
             exp,
           }}
         />

@@ -98,10 +98,9 @@ export function daysUntil(iso: string): number {
 // ponytail: day count is UTC-date based; fine for ISO dates, not for times
 export function reviewLabel(iso: string): string {
   const days = daysUntil(iso)
-  if (days < 0) return 'Overdue'
-  if (days === 0) return 'Due today'
-  if (days <= 30) return `Due in ${days} days`
-  return iso
+  if (days < 0) return `lewat ${Math.abs(days)} hari`
+  if (days === 0) return 'hari ini'
+  return `${days} hari lagi`
 }
 
 // Server decides access; this only explains the result for the signed-in user. Null when no session.

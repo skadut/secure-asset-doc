@@ -306,10 +306,7 @@ function SidebarInset({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot='sidebar-inset'
-      className={cn(
-        'relative flex w-full flex-1 flex-col',
-                className
-      )}
+      className={cn('relative flex w-full flex-1 flex-col', className)}
       {...props}
     />
   )
@@ -402,7 +399,7 @@ function SidebarGroupLabel({
       data-slot='sidebar-group-label'
       data-sidebar='group-label'
       className={cn(
-        'flex h-7 shrink-0 items-center px-2 text-[7.5px] font-medium tracking-[.16em] text-rail-dim font-mono uppercase ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 motion-reduce:transition-none [&>svg]:size-4 [&>svg]:shrink-0',
+        'flex h-7 shrink-0 items-center px-2 font-mono text-[7.5px] font-medium tracking-[.16em] text-rail-dim uppercase ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 motion-reduce:transition-none [&>svg]:size-4 [&>svg]:shrink-0',
         'group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0',
         className
       )}

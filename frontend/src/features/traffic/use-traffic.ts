@@ -16,6 +16,7 @@ export type TrafficState = {
   forbidden: boolean
   loading: boolean
   historyAvailable: boolean | null
+  refetch: () => void
 }
 
 // Polls /api/traffic. Pauses while the tab is hidden. Keeps last good data on error.
@@ -25,6 +26,8 @@ export function useTraffic(intervalMs = 2000): TrafficState {
   const [error, setError] = useState(false)
   const [forbidden, setForbidden] = useState(false)
   const [historyAvailable, setHistoryAvailable] = useState<boolean | null>(null)
+  const [refreshKey, setRefreshKey] = useState(0)
+  const refetch = () => setRefreshKey((key) => key + 1)
 
   useEffect(() => {
     let active = true
@@ -49,7 +52,11 @@ export function useTraffic(intervalMs = 2000): TrafficState {
         }
       })
       .catch((err) => {
-        if (!active || (err instanceof DOMException && err.name === 'AbortError')) return
+        if (
+          !active ||
+          (err instanceof DOMException && err.name === 'AbortError')
+        )
+          return
         setHistoryAvailable(false)
       })
 
@@ -69,7 +76,10 @@ export function useTraffic(intervalMs = 2000): TrafficState {
       inFlight = true
       controller = new AbortController()
       try {
-        const res = await fetch('/api/traffic', { credentials: 'include', signal: controller.signal })
+        const res = await fetch('/api/traffic', {
+          credentials: 'include',
+          signal: controller.signal,
+        })
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const parsed = parseTraffic(await res.json())
         if (!parsed) throw new Error('bad payload')
@@ -80,7 +90,11 @@ export function useTraffic(intervalMs = 2000): TrafficState {
         )
         setError(false)
       } catch (err) {
-        if (!active || (err instanceof DOMException && err.name === 'AbortError')) return
+        if (
+          !active ||
+          (err instanceof DOMException && err.name === 'AbortError')
+        )
+          return
         if (err instanceof Error && err.message === 'HTTP 403') {
           denied = true
           if (active) setForbidden(true)
@@ -103,7 +117,15 @@ export function useTraffic(intervalMs = 2000): TrafficState {
       clearInterval(id)
       document.removeEventListener('visibilitychange', onVis)
     }
-  }, [intervalMs])
+  }, [intervalMs, refreshKey])
 
-  return { data, history, error, forbidden, loading: data === null && !error, historyAvailable }
+  return {
+    data,
+    history,
+    error,
+    forbidden,
+    loading: data === null && !error,
+    historyAvailable,
+    refetch,
+  }
 }

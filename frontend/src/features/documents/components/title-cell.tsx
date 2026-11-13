@@ -16,7 +16,7 @@ export function TitleCell({ doc }: { doc: DocRow }) {
         }
         aria-expanded={expanded}
         onClick={() => setExpanded((value) => !value)}
-        className='-ms-1 mt-px inline-flex size-6 flex-none items-center justify-center text-ink-3 hover:text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-[var(--focus)]'
+        className='-ms-1 mt-px inline-flex size-5 flex-none items-center justify-center text-ink-3 hover:text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-[var(--focus)]'
       >
         <Icon className='size-3.5' aria-hidden='true' />
       </button>
@@ -25,7 +25,7 @@ export function TitleCell({ doc }: { doc: DocRow }) {
           to='/documents/$documentId'
           params={{ documentId: doc.id }}
           title={doc.title}
-          className={`min-w-0 text-[11.5px] font-medium leading-[1.35] text-ink underline decoration-line-strong underline-offset-2 hover:decoration-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-[var(--focus)] ${expanded ? 'break-words' : 'line-clamp-2'}`}
+          className={`min-w-0 text-[11.5px] leading-[1.3] font-normal text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-[var(--focus)] ${expanded ? 'break-words' : 'line-clamp-2'}`}
         >
           {doc.title}
         </Link>

@@ -1,6 +1,34 @@
 /* Deterrent only: hides the viewer when printing. Real control is server-side. */
 .secure-viewer {
   isolation: isolate;
+  /* Pen viewer is always dark, independent of app theme: pin the rail palette. */
+  --rail: #0f1411;
+  --rail-ink: #d7ded6;
+  --rail-dim: #98a49a;
+  --rail-line: #2b342e;
+  --rail-active: #1c241f;
+  /* Paper stays a light document: pin the light-mode ink values. */
+  --paper-bg: #ffffff;
+  --paper-ink: #0f1411;
+  --paper-mute: #717b72;
+  --paper-body: #3b443d;
+  --paper-line: #cbd0c9;
+}
+
+/* The shared switch keeps a large hit target while matching the pen's compact control. */
+.secure-viewer .ui-switch .slider {
+  width: 48px;
+  height: 26px;
+}
+
+.secure-viewer .ui-switch .circle {
+  top: 2px;
+  width: 20px;
+  height: 20px;
+}
+
+.secure-viewer .ui-switch input:checked + .slider .circle {
+  transform: translateX(22px);
 }
 
 body.viewer-active {

@@ -1,7 +1,7 @@
 import { useId, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { ArrowRight, Check, Clock, Shield, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { ArrowRight } from 'lucide-react'
 import {
   ApiError,
   createAccessRequest,
@@ -12,6 +12,7 @@ import {
   type AccessRequest,
   type Approval,
 } from '@/lib/access-api'
+import { getDocument } from '@/lib/grc'
 import { getMe, type Me } from '@/lib/session'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -26,12 +27,12 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
-import { ConfirmDialog } from '@/components/confirm-dialog'
-import { grantsKey } from '@/features/operation/api'
 import { CardPanel } from '@/components/card-panel'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { EmptyState } from '@/components/empty-state'
 import { StatusDot } from '@/components/status-dot'
 import { TlpMark } from '@/components/tlp-mark'
+import { grantsKey } from '@/features/operation/api'
 
 const DOC_RE = /^DOC-\d{4}$/
 const USERNAME_RE = /^[a-z0-9.-]{3,40}$/
@@ -58,6 +59,10 @@ const fmt = (iso: string) =>
     dateStyle: 'medium',
     timeStyle: 'short',
   })
+const fmtTime = (iso: string) => {
+  const d = new Date(iso)
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
 const errMsg = (e: unknown) =>
   e instanceof ApiError ? e.message : 'Terjadi kesalahan'
 const isConflict = (e: unknown) => e instanceof ApiError && e.status === 409
@@ -74,17 +79,6 @@ const viewerRoleOf = (me: Me, r: AccessRequest): ViewerRole => {
     : me.securityOfficer
       ? 'security_officer'
       : null
-}
-
-function queueLabel(r: AccessRequest, me: Me, viewerRole: ViewerRole): string {
-  if (r.status === 'approved') return 'Diberikan'
-  if (r.status === 'denied') return 'Ditolak'
-  if (r.status === 'cancelled') return 'Dibatalkan'
-  if (r.requestedBy === me.username) return 'Permintaan Anda'
-  if (r.grantee === me.username) return 'Menunggu persetujuan'
-  if (viewerRole && !r.approvals.some((a) => a.role === viewerRole))
-    return 'Perlu keputusan Anda'
-  return 'Menunggu persetujuan'
 }
 
 function validateCreate(f: {
@@ -144,7 +138,7 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
     r.status === 'pending' &&
     Boolean(me.can.access?.approve) &&
     !r.approvals.some((a) => a.approver === me.username)
-  const queue = queueLabel(r, me, viewerRole)
+  const documentTitle = getDocument(r.documentId)?.title
   const statusTone =
     r.status === 'approved'
       ? 'pass'
@@ -163,34 +157,38 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
   return (
     <CardPanel
       title={
-        <span className='flex items-center gap-2'>
+        <span className='flex min-w-0 items-center gap-2'>
           <TlpMark tlp={r.tlp} />
-          <span className='text-line-strong'>/</span>
-          <span className='break-all'>{r.documentId}</span>
+          <span className='text-ink-3'>/</span>
+          <span className='shrink-0'>{r.documentId}</span>
+          {documentTitle && (
+            <span className='truncate font-mono text-[9px] font-normal tracking-normal text-ink-3 normal-case'>
+              {documentTitle}
+            </span>
+          )}
         </span>
       }
-      meta={meta}
+      actions={meta}
       className='req-card overflow-hidden'
     >
       <div className='grid min-w-0 gap-4 p-3.5 lg:grid-cols-[minmax(0,1fr)_minmax(260px,.8fr)]'>
         <div className='flex min-w-0 flex-col gap-3'>
           <p className='flex flex-wrap items-baseline gap-x-2 text-[11px]'>
-            <span className='font-mono text-[8px] uppercase tracking-[.1em] text-ink-3'>
+            <span className='font-mono text-[8px] tracking-[.1em] text-ink-3 uppercase'>
               Penerima
             </span>
-            <span className='break-all font-medium text-ink'>{r.grantee}</span>
+            <span className='font-medium break-all text-ink'>{r.grantee}</span>
             <span className='break-words text-ink-3'>
               · {r.granteeUnit ?? '—'}
             </span>
           </p>
-          <p className='break-words whitespace-pre-line text-[13px] leading-normal text-ink'>
+          <p className='text-[13px] leading-normal break-words whitespace-pre-line text-ink'>
             {r.reason}
           </p>
           <p className='font-mono text-[8px] leading-[1.6] text-ink-3'>
             Diajukan {r.requestedBy} · {fmt(r.createdAt)} · kedaluwarsa{' '}
             {r.expiresAt ? fmt(r.expiresAt) : 'tanpa kedaluwarsa'}
           </p>
-          <p className='font-mono text-[8px] text-ink-3'>STATUS {queue}</p>
         </div>
 
         <section
@@ -203,41 +201,37 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
             return (
               <div
                 key={role}
-                className='flex min-w-0 flex-wrap items-center gap-3 border-b border-line p-2.5 last:border-b-0'
+                className='flex min-w-0 flex-wrap items-center gap-2.5 border-b border-line px-2.5 py-2 last:border-b-0'
               >
                 <span
                   aria-hidden='true'
-                  className={`req-slot-mark grid size-5 shrink-0 place-items-center border font-mono text-[10px] ${
+                  className={`req-slot-mark grid size-5 shrink-0 place-items-center border ${
                     approval?.decision === 'approve'
-                      ? 'border-pass text-pass'
+                      ? 'border-pass bg-pass text-surface'
                       : approval?.decision === 'deny'
-                        ? 'border-fail text-fail'
-                        : 'border-line-strong text-ink-3'
+                        ? 'border-fail bg-fail text-surface'
+                        : 'border-line bg-surface-2 text-ink-3'
                   }`}
                 >
-                  {approval
-                    ? approval.decision === 'approve'
-                      ? '✓'
-                      : '×'
-                    : '·'}
+                  {!approval ? (
+                    <Clock className='size-3' />
+                  ) : approval.decision === 'approve' ? (
+                    <Check className='size-3' />
+                  ) : (
+                    <X className='size-3' />
+                  )}
                 </span>
-                <div className='min-w-0 flex-1'>
-                  <p className='font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'>
+                <div className='flex min-w-0 flex-1 flex-col gap-1'>
+                  <p className='font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'>
                     {ROLE_LABEL[role]}
                   </p>
                   {approval ? (
                     <>
-                      <p className='break-words text-[11px] font-medium text-ink'>
+                      <p className='text-[11px] font-medium break-words text-ink'>
                         {approval.approver}
                       </p>
-                      <p className='font-mono text-[8px] text-ink-3'>
-                        {approval.decision === 'approve'
-                          ? 'DISETUJUI'
-                          : 'DITOLAK'}{' '}
-                        {fmt(approval.at)}
-                      </p>
                       {approval.reason && (
-                        <p className='break-words text-[10px] text-ink-2'>
+                        <p className='text-[10px] break-words text-ink-2'>
                           {approval.reason}
                         </p>
                       )}
@@ -248,11 +242,25 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
                     </StatusDot>
                   )}
                 </div>
+                {approval && (
+                  <time
+                    dateTime={approval.at}
+                    title={fmt(approval.at)}
+                    className={`shrink-0 font-mono text-[8px] ${
+                      approval.decision === 'approve'
+                        ? 'text-pass'
+                        : 'text-fail'
+                    }`}
+                  >
+                    {approval.decision === 'approve' ? 'DISETUJUI' : 'DITOLAK'}{' '}
+                    {fmtTime(approval.at)}
+                  </time>
+                )}
                 {canAct && (
-                  <div className='flex gap-1.5'>
+                  <div className='flex shrink-0 gap-1.5'>
                     <Button
                       size='sm'
-                      className='h-7 px-2 text-[10px]'
+                      className='h-[30px] rounded-none px-2.5 text-[11.5px] font-semibold'
                       disabled={locked || deciding}
                       aria-describedby={
                         isRequester ? `${reasonId}-disabled` : undefined
@@ -264,7 +272,7 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
                     <Button
                       size='sm'
                       variant='outline'
-                      className='h-7 px-2 text-[10px]'
+                      className='h-[30px] rounded-none px-2.5 text-[11.5px] font-semibold'
                       disabled={locked || deciding}
                       aria-describedby={
                         isRequester ? `${reasonId}-disabled` : undefined
@@ -282,7 +290,7 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
             <div className='flex flex-col gap-2 border-t border-line bg-surface-2 p-2.5'>
               <Label
                 htmlFor={reasonId}
-                className='font-mono text-[8px] uppercase text-ink-3'
+                className='font-mono text-[8px] text-ink-3 uppercase'
               >
                 Catatan keputusan · opsional
               </Label>
@@ -294,7 +302,10 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
                 className='min-h-16 rounded-none bg-surface text-[11px]'
               />
               {locked && (
-                <p id={`${reasonId}-disabled`} className='text-[10px] text-ink-3'>
+                <p
+                  id={`${reasonId}-disabled`}
+                  className='text-[10px] text-ink-3'
+                >
                   {isRequester
                     ? 'Pemohon tidak dapat memutuskan permintaannya.'
                     : isGrantee
@@ -362,6 +373,14 @@ export function AccessSection() {
   const [reason, setReason] = useState('')
   const [expires, setExpires] = useState('')
   const [createAttempted, setCreateAttempted] = useState(false)
+  const resetCreate = () => {
+    setDocId('')
+    setGrantee('')
+    setReason('')
+    setExpires('')
+    setCreateAttempted(false)
+  }
+  const hasDraft = Boolean(docId || grantee || reason || expires)
 
   const create = useMutation({
     mutationFn: () =>
@@ -372,10 +391,7 @@ export function AccessSection() {
       }),
     onSuccess: () => {
       toast.success('Permintaan akses diajukan')
-      setGrantee('')
-      setReason('')
-      setExpires('')
-      setCreateAttempted(false)
+      resetCreate()
       void refreshRequests()
     },
     onError: (e) => {
@@ -461,7 +477,10 @@ export function AccessSection() {
 
   return (
     <section className='grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]'>
-      <section aria-label='Antrean permintaan' className='flex min-w-0 flex-col gap-3'>
+      <section
+        aria-label='Antrean permintaan'
+        className='flex min-w-0 flex-col gap-3'
+      >
         {requests.isPending ? (
           <div className='flex flex-col gap-3'>
             <Skeleton className='h-40 w-full rounded-none' />
@@ -492,9 +511,16 @@ export function AccessSection() {
                 </li>
               ))}
             </ul>
-            <p className='border border-line bg-surface-2 px-3.5 py-2.5 text-[11px] text-ink-2'>
-              Pemohon dan penerima tidak dapat menyetujui. Satu orang tidak boleh
-              mengisi dua slot. Penolakan satu pihak mengakhiri permintaan.
+            <p className='flex items-start gap-2.5 border border-line bg-surface px-3.5 py-2.5 text-[11px] text-ink-2'>
+              <Shield
+                aria-hidden='true'
+                className='mt-px size-3.5 shrink-0 text-ink'
+              />
+              <span>
+                Pemohon dan penerima tidak dapat menyetujui. Satu orang tidak
+                boleh mengisi dua slot. Penolakan satu pihak mengakhiri
+                permintaan.
+              </span>
             </p>
           </>
         )}
@@ -502,7 +528,21 @@ export function AccessSection() {
 
       <aside className='flex min-w-0 flex-col gap-3'>
         {canRequest && (
-          <CardPanel title='Ajukan permintaan akses'>
+          <CardPanel
+            title='Ajukan permintaan akses'
+            actions={
+              hasDraft ? (
+                <button
+                  type='button'
+                  onClick={resetCreate}
+                  aria-label='Reset formulir'
+                  className='text-ink-3 transition-colors hover:text-ink'
+                >
+                  <X className='size-3.5' />
+                </button>
+              ) : undefined
+            }
+          >
             <form
               className='flex flex-col gap-3.5 p-3.5'
               noValidate
@@ -512,7 +552,7 @@ export function AccessSection() {
                 <div className='flex items-baseline justify-between gap-2'>
                   <Label
                     htmlFor={`${uid}-doc`}
-                    className='font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'
+                    className='font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'
                   >
                     ID dokumen
                   </Label>
@@ -523,9 +563,9 @@ export function AccessSection() {
                 <Input
                   id={`${uid}-doc`}
                   value={docId}
-                  placeholder='DOC-0001'
+                  placeholder='DOC-0011'
                   autoComplete='off'
-                  className='rounded-none font-mono text-[11px]'
+                  className='h-[34px] rounded-none font-mono text-[10px] md:text-[10px]'
                   aria-invalid={Boolean(createErrs.docId)}
                   aria-describedby={
                     createErrs.docId ? `${uid}-doc-err` : undefined
@@ -538,9 +578,9 @@ export function AccessSection() {
               <div className='flex flex-col gap-1.5'>
                 <Label
                   htmlFor={`${uid}-grantee`}
-                  className='font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'
+                  className='font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'
                 >
-                  Penerima akses
+                  Penerima
                 </Label>
                 <Select
                   value={grantee}
@@ -585,7 +625,7 @@ export function AccessSection() {
                 <div className='flex items-baseline justify-between gap-2'>
                   <Label
                     htmlFor={`${uid}-reason`}
-                    className='font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'
+                    className='font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'
                   >
                     Alasan
                   </Label>
@@ -608,55 +648,71 @@ export function AccessSection() {
               </div>
 
               <div className='flex flex-col gap-1.5'>
-                <Label
-                  htmlFor={`${uid}-expires`}
-                  className='font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'
-                >
-                  Kedaluwarsa · opsional
-                </Label>
-                <Input
-                  id={`${uid}-expires`}
-                  type='datetime-local'
-                  value={expires}
-                  className='rounded-none text-[11px]'
-                  aria-invalid={Boolean(createErrs.expires)}
-                  aria-describedby={
-                    createErrs.expires ? `${uid}-expires-err` : undefined
-                  }
-                  onChange={(e) => setExpires(e.target.value)}
-                />
+                <div className='flex items-baseline justify-between gap-2'>
+                  <Label
+                    htmlFor={`${uid}-expires`}
+                    className='font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'
+                  >
+                    Kedaluwarsa
+                  </Label>
+                  <span className='font-mono text-[8px] text-ink-3'>
+                    opsional
+                  </span>
+                </div>
+                <div className='relative'>
+                  <Clock
+                    aria-hidden='true'
+                    className='pointer-events-none absolute top-1/2 left-2.5 size-3 -translate-y-1/2 text-ink-3'
+                  />
+                  <Input
+                    id={`${uid}-expires`}
+                    type='datetime-local'
+                    value={expires}
+                    className='h-[34px] rounded-none pl-7 font-mono text-[10px] md:text-[10px]'
+                    aria-invalid={Boolean(createErrs.expires)}
+                    aria-describedby={
+                      createErrs.expires ? `${uid}-expires-err` : undefined
+                    }
+                    onChange={(e) => setExpires(e.target.value)}
+                  />
+                </div>
                 <FieldError
                   id={`${uid}-expires-err`}
                   msg={createErrs.expires}
                 />
               </div>
 
-              <div className='border border-line bg-surface-2 p-2.5'>
-                <p className='mb-1.5 font-mono text-[8px] uppercase tracking-[.08em] text-ink-2'>
+              <div className='border border-line bg-surface-2 p-3'>
+                <p className='mb-2.5 font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'>
                   Butuh dua persetujuan berbeda
                 </p>
-                <ol className='flex flex-col gap-1 font-mono text-[8px] text-ink-3'>
-                  <li>
-                    <span className='text-ink-2'>01</span> Komandan · L5
+                <ol className='flex flex-col gap-2 text-[10.5px] text-ink-2'>
+                  <li className='flex items-center gap-2'>
+                    <span className='grid size-3.5 shrink-0 place-items-center border border-line-2 font-mono text-[7px] leading-none text-ink-3'>
+                      01
+                    </span>
+                    Komandan · L5
                   </li>
-                  <li>
-                    <span className='text-ink-2'>02</span> Perwira keamanan ·
-                    flag SO
+                  <li className='flex items-center gap-2'>
+                    <span className='grid size-3.5 shrink-0 place-items-center border border-line-2 font-mono text-[7px] leading-none text-ink-3'>
+                      02
+                    </span>
+                    Perwira keamanan · flag SO
                   </li>
                 </ol>
               </div>
 
               <Button
                 type='submit'
-                className='w-full justify-between rounded-none'
+                className='h-10 w-full justify-between rounded-none text-[12.5px] font-semibold'
                 disabled={create.isPending}
               >
                 Ajukan permintaan
                 <ArrowRight aria-hidden='true' />
               </Button>
-              <p className='font-mono text-[8px] leading-[1.5] text-ink-3'>
-                Permintaan dicatat pada audit log. Akses baru aktif setelah dua
-                persetujuan.
+              <p className='font-mono text-[9px] leading-[1.5] text-ink-3'>
+                Permintaan tidak dapat dibatalkan setelah diajukan. Keputusan
+                dicatat di audit log.
               </p>
             </form>
           </CardPanel>
@@ -672,7 +728,7 @@ export function AccessSection() {
               <div className='flex flex-col gap-1.5'>
                 <Label
                   htmlFor={`${uid}-rev-doc`}
-                  className='font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'
+                  className='font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'
                 >
                   ID dokumen
                 </Label>
@@ -681,7 +737,7 @@ export function AccessSection() {
                   value={revokeDoc}
                   placeholder='DOC-0001'
                   autoComplete='off'
-                  className='rounded-none font-mono text-[11px]'
+                  className='h-[34px] rounded-none font-mono text-[10px] md:text-[10px]'
                   aria-invalid={Boolean(revokeErrs.docId)}
                   aria-describedby={
                     revokeErrs.docId ? `${uid}-rev-doc-err` : undefined
@@ -694,7 +750,7 @@ export function AccessSection() {
               <div className='flex flex-col gap-1.5'>
                 <Label
                   htmlFor={`${uid}-rev-user`}
-                  className='font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'
+                  className='font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'
                 >
                   Nama pengguna
                 </Label>
@@ -702,7 +758,7 @@ export function AccessSection() {
                   id={`${uid}-rev-user`}
                   value={revokeUser}
                   autoComplete='off'
-                  className='rounded-none font-mono text-[11px]'
+                  className='h-[34px] rounded-none font-mono text-[10px] md:text-[10px]'
                   aria-invalid={Boolean(revokeErrs.username)}
                   aria-describedby={
                     revokeErrs.username ? `${uid}-rev-user-err` : undefined
@@ -718,7 +774,7 @@ export function AccessSection() {
               <Button
                 type='submit'
                 variant='destructive'
-                className='w-full rounded-none'
+                className='h-10 w-full rounded-none text-[12.5px] font-semibold'
               >
                 Cabut akses
               </Button>

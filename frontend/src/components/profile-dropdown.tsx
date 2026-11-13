@@ -47,7 +47,7 @@ export function ProfileDropdown() {
               </AvatarFallback>
             </Avatar>
             {me?.accessLevel != null && (
-              <span className='absolute -right-0.5 -bottom-0.5 bg-pass px-1 font-mono text-[7px] font-semibold leading-[13px] text-background'>
+              <span className='absolute -right-0.5 -bottom-0.5 bg-pass px-1 font-mono text-[7px] leading-[13px] font-semibold text-background'>
                 L{me.accessLevel}
               </span>
             )}

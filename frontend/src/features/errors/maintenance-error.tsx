@@ -1,16 +1,22 @@
 import { RotateCw } from 'lucide-react'
-import { ErrorState } from '@/components/error-state'
 import { Button } from '@/components/ui/button'
+import { ErrorState } from '@/components/error-state'
 
 export function MaintenanceError() {
   return (
     <ErrorState
-      code='503 · PEMELIHARAAN'
+      code='503'
+      headerLabel='SISTEM · 5xx'
+      headerValue='503'
+      icon={<RotateCw aria-hidden='true' />}
       title='Layanan sedang dipelihara'
-      desc='Coba beberapa menit lagi.'
+      desc='Modul enkripsi sedang dipelihara. Data yang Anda lihat tetap yang terakhir berhasil dimuat.'
       action={
-        <Button size='sm' className='rounded-none bg-primary text-primary-foreground hover:bg-primary/90' onClick={() => window.location.reload()}>
-          <RotateCw aria-hidden='true' />
+        <Button
+          size='sm'
+          className='h-[30px] rounded-none bg-primary px-3 text-[10.5px] font-semibold text-primary-foreground hover:bg-primary/90'
+          onClick={() => window.location.reload()}
+        >
           Coba lagi
         </Button>
       }

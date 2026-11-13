@@ -1,4 +1,5 @@
 import { type Document } from '@/data/grc'
+import { Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -42,7 +43,7 @@ export function DocumentsToolbar({
       aria-label='Filter registri dokumen'
       className='flex min-w-0 flex-col gap-2 min-[1200px]:flex-row min-[1200px]:items-stretch'
     >
-      <div className='grid min-w-0 flex-1 grid-cols-2 gap-px border border-line bg-line sm:grid-cols-3 xl:grid-cols-6'>
+      <div className='grid min-w-0 flex-1 grid-cols-2 gap-[.67px] border-[.67px] border-line bg-line sm:grid-cols-3 xl:grid-cols-6'>
         {TILES.map((tile) => {
           const active = level === tile.value
           const isAll = tile.value === 'ALL'
@@ -57,20 +58,44 @@ export function DocumentsToolbar({
               aria-pressed={active}
               onClick={() => onLevelChange(tile.value)}
               className={cn(
-                'flex min-h-[60px] min-w-0 flex-col justify-between border-t-[3px] border-t-transparent bg-surface px-3 py-2 text-left transition-colors hover:bg-surface-active focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--focus)]',
+                'flex h-[52px] min-w-0 flex-col justify-center gap-1 border-[.67px] border-line bg-surface px-3 text-left transition-colors hover:bg-surface-active focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--focus)]',
                 tile.accent,
                 active && !isAll && 'bg-surface-active',
-                isAll && 'border-t-ink bg-ink text-bg hover:bg-ink'
+                isAll && 'border-ink bg-ink text-bg hover:bg-ink'
               )}
             >
-              <span className='flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'>
-                {isAll ? 'Semua versi' : <TlpMark tlp={tile.value} />}
+              <span
+                className={cn(
+                  'flex items-center gap-1.5 font-mono text-[7.5px] tracking-[.05em] uppercase',
+                  isAll ? 'text-ink-3' : 'text-ink-2'
+                )}
+              >
+                {isAll ? (
+                  <span className='text-ink-3'>Semua versi</span>
+                ) : (
+                  <>
+                    <TlpMark tlp={tile.value} compact />
+                    <span>{tile.value}</span>
+                  </>
+                )}
               </span>
               <span className='flex items-baseline gap-1.5'>
-                <span className={cn('font-heading text-[19px] font-semibold leading-none tabular-nums', isAll ? 'text-bg' : 'text-ink')}>
+                <span
+                  className={cn(
+                    'font-heading text-[19px] leading-none font-semibold tabular-nums',
+                    isAll ? 'text-bg' : 'text-ink'
+                  )}
+                >
                   {versions}
                 </span>
-                <span className={cn('font-mono text-[8px]', isAll ? 'text-bg/70' : 'text-ink-3')}>versi</span>
+                <span
+                  className={cn(
+                    'font-mono text-[7.5px]',
+                    isAll ? 'text-ink-3' : 'text-ink-3'
+                  )}
+                >
+                  versi
+                </span>
               </span>
             </button>
           )
@@ -81,21 +106,27 @@ export function DocumentsToolbar({
         <Label htmlFor='document-search' className='sr-only'>
           Cari dokumen
         </Label>
-        <Input
-          id='document-search'
-          type='search'
-          value={query}
-          onChange={(event) => onQueryChange(event.target.value)}
-          placeholder='Cari ID atau judul'
-          className='h-9 min-w-0 flex-1 rounded-none border-line-strong bg-surface text-[11px] placeholder:text-ink-3 min-[1200px]:w-[260px] min-[1200px]:flex-none'
-        />
+        <div className='relative min-w-0 flex-1 min-[1200px]:w-[242px] min-[1200px]:flex-none'>
+          <Search
+            aria-hidden='true'
+            className='pointer-events-none absolute top-1/2 left-2.5 size-3 -translate-y-1/2 text-ink-3'
+          />
+          <Input
+            id='document-search'
+            type='search'
+            value={query}
+            onChange={(event) => onQueryChange(event.target.value)}
+            placeholder='Cari ID atau judul'
+            className='h-[34px] min-w-0 rounded-none border-[.67px] border-line bg-surface pr-2.5 pl-8 font-mono text-[10px] placeholder:text-ink-3'
+          />
+        </div>
         <Select
           value={level}
           onValueChange={(value) => onLevelChange(value as LevelFilter)}
         >
           <SelectTrigger
             id='document-level'
-            className='h-9 w-44 rounded-none border-line-strong bg-surface text-[11px]'
+            className='h-[34px] w-[218px] rounded-none border-[.67px] border-line bg-surface px-[10.67px] font-mono text-[10px] text-ink-2 [&_svg]:size-3'
             aria-label='Filter tingkat TLP'
           >
             <SelectValue />

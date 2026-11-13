@@ -1,5 +1,5 @@
-import { Link, useLocation } from '@tanstack/react-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { Link, useLocation } from '@tanstack/react-router'
 import { fonts } from '@/config/fonts'
 import { getCookie } from '@/lib/cookies'
 import { getMe } from '@/lib/session'
@@ -10,16 +10,16 @@ import { useLayout } from '@/context/layout-provider'
 import { useTheme } from '@/context/theme-provider'
 import { CardPanel } from '@/components/card-panel'
 import { Chip } from '@/components/chip'
-import { EmptyState } from '@/components/empty-state'
-import { PageHead } from '@/components/page-head'
 import { ConfigDrawer } from '@/components/config-drawer'
+import { EmptyState } from '@/components/empty-state'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
+import { PageHead } from '@/components/page-head'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { NotificationsForm } from './notifications/notifications-form'
 import { DisplayForm } from './display/display-form'
+import { NotificationsForm } from './notifications/notifications-form'
 
 const tabs = [
   { to: '/settings', label: 'Profil' },
@@ -62,7 +62,8 @@ const DIR_OPTIONS = [
 ] as const
 
 const LABEL = 'font-mono text-[7.5px] uppercase tracking-[1px] text-ink-3'
-const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+const FOCUS =
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
 
 function normalizePath(pathname: string) {
   if (pathname === '/') return pathname
@@ -83,18 +84,45 @@ export function Settings() {
     if (hydratedRef.current) return
     hydratedRef.current = true
     fetch('/api/me/preferences', { method: 'GET', credentials: 'same-origin' })
-      .then((response) => response.ok ? response.json() : null)
+      .then((response) => (response.ok ? response.json() : null))
       .then((data: unknown) => {
         if (typeof data !== 'object' || data === null) return
         const prefs = data as Record<string, unknown>
-        if (!getCookie('vite-ui-theme') && (prefs.theme === 'light' || prefs.theme === 'dark' || prefs.theme === 'system')) setTheme(prefs.theme)
-        if (!getCookie('font') && typeof prefs.font === 'string' && fonts.some((font) => font === prefs.font)) setFont(prefs.font as (typeof fonts)[number])
-        if (!getCookie('dir') && (prefs.dir === 'ltr' || prefs.dir === 'rtl')) setDir(prefs.dir)
-        const layout = (typeof prefs.layout === 'object' && prefs.layout !== null) ? (prefs.layout as Record<string, unknown>) : undefined
+        if (
+          !getCookie('vite-ui-theme') &&
+          (prefs.theme === 'light' ||
+            prefs.theme === 'dark' ||
+            prefs.theme === 'system')
+        )
+          setTheme(prefs.theme)
+        if (
+          !getCookie('font') &&
+          typeof prefs.font === 'string' &&
+          fonts.some((font) => font === prefs.font)
+        )
+          setFont(prefs.font as (typeof fonts)[number])
+        if (!getCookie('dir') && (prefs.dir === 'ltr' || prefs.dir === 'rtl'))
+          setDir(prefs.dir)
+        const layout =
+          typeof prefs.layout === 'object' && prefs.layout !== null
+            ? (prefs.layout as Record<string, unknown>)
+            : undefined
         const layoutVariant = layout?.variant
-        if (!getCookie('layout_variant') && (layoutVariant === 'inset' || layoutVariant === 'sidebar' || layoutVariant === 'floating')) setVariant(layoutVariant)
+        if (
+          !getCookie('layout_variant') &&
+          (layoutVariant === 'inset' ||
+            layoutVariant === 'sidebar' ||
+            layoutVariant === 'floating')
+        )
+          setVariant(layoutVariant)
         const layoutCollapsible = layout?.collapsible
-        if (!getCookie('layout_collapsible') && (layoutCollapsible === 'offcanvas' || layoutCollapsible === 'icon' || layoutCollapsible === 'none')) setCollapsible(layoutCollapsible)
+        if (
+          !getCookie('layout_collapsible') &&
+          (layoutCollapsible === 'offcanvas' ||
+            layoutCollapsible === 'icon' ||
+            layoutCollapsible === 'none')
+        )
+          setCollapsible(layoutCollapsible)
       })
       .catch(() => {})
   }, [setDir, setFont, setTheme, setVariant, setCollapsible])
@@ -112,10 +140,13 @@ export function Settings() {
         <PageHead
           title='Pengaturan'
           eyebrow='PREFERENSI · 5 HALAMAN · ROUTE TETAP'
-          note='Disimpan di cookie browser dan dikirim ke /api/me/preferences'
+          note='Disimpan di cookie dan disinkronkan ke server'
         />
 
-        <nav aria-label='Bagian pengaturan' className='flex min-w-0 overflow-x-auto border-b border-line'>
+        <nav
+          aria-label='Bagian pengaturan'
+          className='flex min-w-0 overflow-x-auto border-b border-line'
+        >
           {tabs.map((tab) => (
             <Link
               key={tab.to}
@@ -144,10 +175,16 @@ export function Settings() {
   )
 }
 
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
+function Row({
+  label,
+  children,
+}: {
+  label: string
+  children: React.ReactNode
+}) {
   return (
     <div className='grid grid-cols-[minmax(96px,160px)_minmax(0,1fr)] gap-3 border-b border-line px-3.5 py-2.5 last:border-0'>
-      <dt className='font-mono text-[9px] uppercase leading-[1.4] tracking-[.08em] text-ink-3'>
+      <dt className='font-mono text-[9px] leading-[1.4] tracking-[.08em] text-ink-3 uppercase'>
         {label}
       </dt>
       <dd className='min-w-0 text-[12px] leading-5 text-ink'>{children}</dd>
@@ -188,7 +225,9 @@ function ProfileTab() {
           <Row label='Nama'>{me.name}</Row>
           <Row label='Pangkat'>
             {me.rankName || me.rank}
-            <span className='ms-2 font-mono text-[10px] text-ink-3'>{me.rank}</span>
+            <span className='ms-2 font-mono text-[10px] text-ink-3'>
+              {me.rank}
+            </span>
           </Row>
           <Row label='Golongan'>{me.golongan}</Row>
           <Row label='Unit'>{me.unit ?? 'Belum ditetapkan'}</Row>
@@ -206,18 +245,33 @@ function ProfileTab() {
         <dl>
           <Row label='Peran'>
             <span className='flex flex-wrap gap-1.5'>
-              {roles.length ? roles.map((role) => <Chip key={role} tone='line'>{role}</Chip>) : <Chip tone='line'>Personel</Chip>}
+              {roles.length ? (
+                roles.map((role) => (
+                  <Chip key={role} tone='line'>
+                    {role}
+                  </Chip>
+                ))
+              ) : (
+                <Chip tone='line'>Personel</Chip>
+              )}
             </span>
           </Row>
           <Row label='Kepala unit'>{me.unitHead ? 'Ya' : 'Tidak'}</Row>
           <Row label='Label pemilik'>{me.ownerLabel ?? 'Tidak ada'}</Row>
-          <Row label='Kelola akun'>{me.can.account.u ? 'Diizinkan' : 'Tidak diizinkan'}</Row>
-          <Row label='Setujui dokumen'>{me.can.document.approve ? 'Diizinkan' : 'Tidak diizinkan'}</Row>
-          <Row label='Purge audit'>{me.can.audit?.purge ? 'Diizinkan' : 'Tidak diizinkan'}</Row>
+          <Row label='Kelola akun'>
+            {me.can.account.u ? 'Diizinkan' : 'Tidak diizinkan'}
+          </Row>
+          <Row label='Setujui dokumen'>
+            {me.can.document.approve ? 'Diizinkan' : 'Tidak diizinkan'}
+          </Row>
+          <Row label='Purge audit'>
+            {me.can.audit?.purge ? 'Diizinkan' : 'Tidak diizinkan'}
+          </Row>
         </dl>
         <div className='border-t border-line p-3.5'>
           <PendingNote>
-            Data profil dibaca dari sesi. Penyuntingan profil ke server belum tersedia.
+            Data profil dibaca dari sesi. Penyuntingan profil ke server belum
+            tersedia.
           </PendingNote>
         </div>
       </CardPanel>
@@ -233,10 +287,14 @@ function AccountTab() {
       <CardPanel title='Akun' meta='Read-only'>
         <dl>
           <Row label='Username'>
-            <span className='font-mono text-[11px]'>{me?.username ?? 'Tidak tersedia'}</span>
+            <span className='font-mono text-[11px]'>
+              {me?.username ?? 'Tidak tersedia'}
+            </span>
           </Row>
           <Row label='ID akun'>
-            <span className='font-mono text-[11px]'>{me?.id ?? 'Tidak tersedia'}</span>
+            <span className='font-mono text-[11px]'>
+              {me?.id ?? 'Tidak tersedia'}
+            </span>
           </Row>
           <Row label='Unit'>{me?.unit ?? 'Belum ditetapkan'}</Row>
           <Row label='Kepala unit'>{me?.unitHead ? 'Ya' : 'Tidak'}</Row>
@@ -247,7 +305,8 @@ function AccountTab() {
       <CardPanel title='Penyimpanan akun'>
         <div className='space-y-3 p-3.5'>
           <PendingNote>
-            Formulir perubahan akun tidak mengirim data ke server. Penyimpanan akun di server belum tersedia.
+            Formulir perubahan akun tidak mengirim data ke server. Penyimpanan
+            akun di server belum tersedia.
           </PendingNote>
           <p className='text-[11px] leading-[1.5] text-ink-2'>
             Nilai di samping berasal dari sesi aktif dan hanya dapat dibaca.
@@ -258,7 +317,12 @@ function AccountTab() {
   )
 }
 
-type Pending = Partial<{ theme: string; font: string; dir: string; layout: { variant: string; collapsible: string } }>
+type Pending = Partial<{
+  theme: string
+  font: string
+  dir: string
+  layout: { variant: string; collapsible: string }
+}>
 
 function Seg<T extends string>({
   legend,
@@ -286,7 +350,9 @@ function Seg<T extends string>({
               className={cn(
                 'h-[34px] min-w-0 flex-1 px-3 font-mono text-[9px] transition-colors motion-reduce:transition-none',
                 FOCUS,
-                pressed ? 'bg-ink text-surface' : 'bg-surface text-ink-2 hover:bg-surface-2'
+                pressed
+                  ? 'bg-ink text-surface'
+                  : 'bg-surface text-ink-2 hover:bg-surface-2'
               )}
             >
               {option.label}
@@ -330,7 +396,12 @@ function AppearanceTab() {
   }, [])
 
   // Pending changes still go out if the user leaves the tab before the debounce ends.
-  useEffect(() => () => { void send() }, [send])
+  useEffect(
+    () => () => {
+      void send()
+    },
+    [send]
+  )
 
   const queue = (patch: Pending) => {
     pendingRef.current = { ...pendingRef.current, ...patch }
@@ -346,7 +417,9 @@ function AppearanceTab() {
     setVariant(value)
     queue({ layout: { variant: value, collapsible } })
   }
-  const updateCollapsible = (value: (typeof COLLAPSE_OPTIONS)[number]['value']) => {
+  const updateCollapsible = (
+    value: (typeof COLLAPSE_OPTIONS)[number]['value']
+  ) => {
     setCollapsible(value)
     queue({ layout: { variant, collapsible: value } })
   }
@@ -365,16 +438,23 @@ function AppearanceTab() {
     setDir('ltr')
     setVariant('inset')
     setCollapsible('icon')
-    queue({ theme: 'system', font: fonts[0], dir: 'ltr', layout: { variant: 'inset', collapsible: 'icon' } })
+    queue({
+      theme: 'system',
+      font: fonts[0],
+      dir: 'ltr',
+      layout: { variant: 'inset', collapsible: 'icon' },
+    })
     setStatus('Default diterapkan. Dikirim ke server setelah jeda singkat.')
   }
 
   const save = async () => {
     setStatus('Menyimpan...')
     const ok = await send()
-    setStatus(ok
-      ? 'Tersimpan. Cookie dan server sudah sinkron.'
-      : 'Tersimpan di cookie browser. Server belum menerima preferensi, coba simpan lagi.')
+    setStatus(
+      ok
+        ? 'Tersimpan. Cookie dan server sudah sinkron.'
+        : 'Tersimpan di cookie browser. Server belum menerima preferensi, coba simpan lagi.'
+    )
   }
 
   return (
@@ -389,7 +469,8 @@ function AppearanceTab() {
         <div className='flex flex-col gap-1'>
           <h2 className='text-[17px] font-semibold text-ink'>Tampilan</h2>
           <p className='text-[10.5px] leading-[1.5] text-ink-3'>
-            Perubahan langsung berlaku di browser ini. Server menerima preferensi setelah jeda singkat.
+            Perubahan langsung berlaku di browser ini dan dikirim ke server
+            setelah jeda singkat.
           </p>
         </div>
 
@@ -397,11 +478,18 @@ function AppearanceTab() {
           <span className={LABEL}>Font antarmuka</span>
           <select
             value={font}
-            onChange={(event) => updateFont(event.target.value as (typeof fonts)[number])}
-            className={cn('h-[38px] w-full border border-line bg-surface px-2.5 text-[12px] text-ink', FOCUS)}
+            onChange={(event) =>
+              updateFont(event.target.value as (typeof fonts)[number])
+            }
+            className={cn(
+              'h-[38px] w-full border border-line bg-surface px-2.5 text-[12px] text-ink',
+              FOCUS
+            )}
           >
             {fonts.map((option) => (
-              <option key={option} value={option}>{option}</option>
+              <option key={option} value={option}>
+                {option}
+              </option>
             ))}
           </select>
         </label>
@@ -423,7 +511,13 @@ function AppearanceTab() {
                     pressed ? 'border-ink' : 'border-line hover:bg-surface-2'
                   )}
                 >
-                  <span className={cn('flex h-[46px] flex-col justify-center gap-1 border border-line p-2', option.preview)} aria-hidden>
+                  <span
+                    className={cn(
+                      'flex h-[46px] flex-col justify-center gap-1 border border-line p-2',
+                      option.preview
+                    )}
+                    aria-hidden
+                  >
                     <span className={cn('h-1 w-10', option.bar)} />
                     <span className={cn('h-1 w-[66px]', option.bar)} />
                   </span>
@@ -434,23 +528,50 @@ function AppearanceTab() {
           </div>
         </fieldset>
 
-        <Seg legend='Varian sidebar' options={VARIANT_OPTIONS} value={variant} onChange={updateVariant} />
-        <Seg legend='Mode lipat sidebar' options={COLLAPSE_OPTIONS} value={collapsible} onChange={updateCollapsible} />
-        <Seg legend='Arah teks' options={DIR_OPTIONS} value={dir} onChange={updateDir} />
+        <Seg
+          legend='Varian sidebar'
+          options={VARIANT_OPTIONS}
+          value={variant}
+          onChange={updateVariant}
+        />
+        <Seg
+          legend='Mode lipat sidebar'
+          options={COLLAPSE_OPTIONS}
+          value={collapsible}
+          onChange={updateCollapsible}
+        />
+        <Seg
+          legend='Arah teks'
+          options={DIR_OPTIONS}
+          value={dir}
+          onChange={updateDir}
+        />
 
         <div className='flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4'>
-          <p role='status' aria-live='polite' className='min-w-0 text-[10.5px] text-ink-3'>{status}</p>
+          <p
+            role='status'
+            aria-live='polite'
+            className='min-w-0 text-[10.5px] text-ink-3'
+          >
+            {status}
+          </p>
           <div className='flex gap-2'>
             <button
               type='button'
               onClick={reset}
-              className={cn('h-9 border border-line px-3.5 text-[12px] text-ink-2 transition-colors hover:bg-surface-2 motion-reduce:transition-none', FOCUS)}
+              className={cn(
+                'h-9 border border-line px-3.5 text-[12px] text-ink-2 transition-colors hover:bg-surface-2 motion-reduce:transition-none',
+                FOCUS
+              )}
             >
               Reset ke default
             </button>
             <button
               type='submit'
-              className={cn('h-9 bg-ink px-4 text-[12px] font-semibold text-surface transition-opacity hover:opacity-90 motion-reduce:transition-none', FOCUS)}
+              className={cn(
+                'h-9 bg-ink px-4 text-[12px] font-semibold text-surface transition-opacity hover:opacity-90 motion-reduce:transition-none',
+                FOCUS
+              )}
             >
               Simpan preferensi
             </button>
@@ -464,26 +585,37 @@ function AppearanceTab() {
         <section className='flex flex-col gap-2 border border-line bg-surface p-3.5'>
           <h3 className={LABEL}>Catatan</h3>
           <p className='text-[10.5px] leading-[1.5] text-ink-2'>
-            Sakelar tema di header hanya dua keadaan (terang atau gelap). Opsi Sistem tersedia lewat kartu Tema di formulir ini.
+            Sakelar tema di header hanya dua keadaan (terang atau gelap). Opsi
+            Sistem tersedia lewat kartu Tema di formulir ini.
           </p>
           <p className='text-[10.5px] leading-[1.5] text-ink-2'>
             Bila server menolak, cookie tetap berlaku di browser ini.
           </p>
         </section>
 
-        <section className='flex flex-col bg-[#0f1411] text-[#d7ded6]' aria-label='Pratinjau permukaan gelap'>
+        <section
+          className='flex flex-col bg-rail text-rail-ink'
+          aria-label='Pratinjau mode gelap'
+        >
           <div className='flex h-[29.5px] items-center justify-between gap-2 px-3'>
-            <span className='font-mono text-[7px] uppercase tracking-[1px] text-[#98a49a]'>Pratinjau · mode gelap</span>
-            <span className='min-w-0 truncate font-mono text-[7px] text-[#98a49a]'>{`vite-ui-theme=${getCookie('vite-ui-theme') ?? 'tidak diset'}`}</span>
+            <span className='font-mono text-[7px] tracking-[1px] text-rail-dim uppercase'>
+              PRATINJAU · MODE GELAP
+            </span>
+            <span className='min-w-0 truncate font-mono text-[7px] text-rail-dim'>{`vite-ui-theme=${getCookie('vite-ui-theme') ?? 'tidak diset'}`}</span>
           </div>
           <div className='flex flex-col gap-2 p-3.5'>
-            <p className='text-[18px] font-semibold'>Permukaan gelap</p>
-            <p className='text-[10px] leading-[1.5] text-[#98a49a]'>
-              Latar memakai --ink dan teks memakai --rail-ink. Warna status tetap sama.
+            <p className='text-[18px] font-semibold text-rail-ink'>
+              Registri dokumen
             </p>
-            <div className='flex items-center gap-2 bg-[#1c241f] px-2.5 py-2'>
-              <span className='size-1.5 bg-[#1e7b45]' aria-hidden />
-              <span className='font-mono text-[8.5px] text-[#d7ded6]'>Status pass tetap hijau di kedua mode</span>
+            <p className='text-[10px] leading-[1.5] text-rail-dim'>
+              Surface gelap memakai --ink sebagai latar dan --rail-ink untuk
+              teks. Token status tetap sama.
+            </p>
+            <div className='flex items-center gap-2 bg-rail-active px-2.5 py-2'>
+              <span className='size-1.5 bg-pass' aria-hidden />
+              <span className='font-mono text-[8.5px] text-rail-ink'>
+                TLP:GREEN · Approved 2.3
+              </span>
             </div>
           </div>
         </section>
@@ -511,9 +643,17 @@ function CookiePanel() {
             }
           }
           return (
-            <div key={name} className='flex h-[31.5px] items-center justify-between gap-3 border-t border-line px-3'>
+            <div
+              key={name}
+              className='flex h-[31.5px] items-center justify-between gap-3 border-t border-line px-3'
+            >
               <dt className='font-mono text-[8.5px] text-ink-2'>{name}</dt>
-              <dd className='min-w-0 truncate text-right font-mono text-[8.5px] text-ink' title={value ?? undefined}>{value ?? 'Tidak diset'}</dd>
+              <dd
+                className='min-w-0 truncate text-right font-mono text-[8.5px] text-ink'
+                title={value ?? undefined}
+              >
+                {value ?? 'Tidak diset'}
+              </dd>
             </div>
           )
         })}
@@ -526,7 +666,8 @@ function NotificationsTab() {
   return (
     <div className='grid min-w-0 gap-3'>
       <PendingNote>
-        Formulir notifikasi tidak mengirim data ke server. Penyimpanan preferensi notifikasi belum tersedia.
+        Formulir notifikasi tidak mengirim data ke server. Penyimpanan
+        preferensi notifikasi belum tersedia.
       </PendingNote>
       <CardPanel title='Notifikasi'>
         <div className='max-w-xl p-3.5'>
@@ -541,7 +682,8 @@ function DisplayTab() {
   return (
     <div className='grid min-w-0 gap-3'>
       <PendingNote>
-        Pilihan display tidak mengirim data ke server. Penyimpanan preferensi display belum tersedia.
+        Pilihan display tidak mengirim data ke server. Penyimpanan preferensi
+        display belum tersedia.
       </PendingNote>
       <CardPanel title='Display'>
         <div className='max-w-xl p-3.5'>

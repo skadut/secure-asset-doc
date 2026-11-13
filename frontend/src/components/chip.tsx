@@ -15,5 +15,11 @@ export function Chip({
     fail: 'border-fail text-fail',
     erase: 'border-erase text-erase',
   }[tone]
-  return <span className={`inline-flex items-center border px-2 py-[3px] font-mono text-[9px] uppercase leading-[1.3] tracking-[.06em] ${colors}`}>{children}</span>
+  return (
+    <span
+      className={`inline-flex items-center border px-2 py-[3px] font-mono text-[9px] leading-[1.3] tracking-[.06em] uppercase ${colors}`}
+    >
+      {children}
+    </span>
+  )
 }
