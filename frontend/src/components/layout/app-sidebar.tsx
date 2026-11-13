@@ -8,7 +8,6 @@ import {
   SidebarHeader,
   SidebarRail,
 } from '@/components/ui/sidebar'
-// import { AppTitle } from './app-title'
 import { navGroupsFor } from './data/sidebar-data'
 import { NavGroup } from './nav-group'
 import { NavUser } from './nav-user'
@@ -29,14 +28,14 @@ export function AppSidebar() {
                 'linear-gradient(160deg, #e8ede6 10.99%, #b9c4b8 89.01%)',
             }}
           >
-            S
+            AR
           </span>
           <div className='min-w-0'>
             <div className='truncate font-heading text-[15px] leading-[1.15] font-semibold text-rail-ink'>
-              Secure Asset Doc
+              ARCA
             </div>
             <div className='truncate font-mono text-[9px] leading-[1.4] tracking-[.08em] text-rail-dim uppercase'>
-              Kontrol akses dokumen
+              Digital Asset Security
             </div>
           </div>
         </div>
@@ -63,6 +62,17 @@ export function AppSidebar() {
             exp,
           }}
         />
+        <div className='px-2 pb-1 text-center font-mono text-[9px] leading-[1.4] tracking-[.08em] text-rail-dim uppercase'>
+          Aeru Team ·{' '}
+          <a
+            href='https://github.com/skadut'
+            target='_blank'
+            rel='noopener noreferrer'
+            className='underline underline-offset-2'
+          >
+            github.com/skadut
+          </a>
+        </div>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

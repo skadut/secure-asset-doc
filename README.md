@@ -1,4 +1,9 @@
-# Secure Asset Doc
+# ARCA
+
+Hardware-Backed Digital Asset Security
+Secure Asset Document Management · TPM 2.0 · Cryptographic Key Protection
+
+Mengamankan dokumen operasional TNI-AD.
 
 Dashboard GRC fiktif untuk aset dan dokumen terkendali. Aplikasi mencatat aset bergaya OT, dokumen dengan label TLP dan riwayat versi, serta 21 subkategori NIST CSF 2.0 yang tertaut ke bukti. File dokumen dilindungi melalui crypto-api dengan hierarki kunci berakar TPM.
 
@@ -173,6 +178,8 @@ Komponen, zona, port, diagram, dan urutan baca dokumen lengkap: [docs/arsitektur
 
 ## Lisensi dan kredit
 
-UI dashboard dimulai dari [satnaing/shadcn-admin](https://github.com/satnaing/shadcn-admin) (MIT, Copyright (c) 2024 Sat Naing) lalu diadaptasi untuk proyek ini. Repositori memakai MIT License. Lihat [LICENSE](LICENSE).
+Dibangun dari template shadcn-admin (MIT, satnaing). Repositori memakai MIT License. Lihat [LICENSE](LICENSE).
+
+Dikembangkan oleh Aeru Team. Bantuan teknis: https://github.com/skadut
 
 Komponen shadcn/ui yang dimodifikasi dan perubahan terkait RTL ada di `frontend/src/components/ui/`. Referensi tampilan pihak ketiga, sumber, dan lisensinya ada di [docs/referensi/third-party-notices.md](docs/referensi/third-party-notices.md).

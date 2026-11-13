@@ -17,9 +17,9 @@ import { type NavGroup, type SidebarData } from '../types'
 export const sidebarData: SidebarData = {
   teams: [
     {
-      name: 'Secure Asset Doc',
+      name: 'ARCA',
       logo: Shield,
-      plan: 'Kontrol akses dokumen',
+      plan: 'Digital Asset Security',
     },
   ],
   navGroups: [

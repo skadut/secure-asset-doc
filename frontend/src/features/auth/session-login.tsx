@@ -437,22 +437,24 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
           <div className='lg-brand-row lg-in'>
             <div className='lg-brand'>
               <span className='lg-mark' aria-hidden='true'>
-                S
+                AR
               </span>
-              <div className='lg-brand-name'>SECURE ASSET DOC</div>
+              <div className='lg-brand-name'>ARCA</div>
             </div>
-            <div className='lg-org'>ARASAKA CORPORATION · INTERNAL</div>
+            <div className='lg-org'>TNI-AD · DOKUMEN OPERASIONAL</div>
+            <div className='lg-org'>Secure Asset Document Management · TPM 2.0 · Cryptographic Key Protection</div>
           </div>
           <div className='lg-hero lg-in2'>
             <div className='lg-eyebrow'>KENDALI AKSES DOKUMEN / AAL2</div>
             <h1>
               Masuk ke
               <br />
-              Secure Asset Doc
+              ARCA
             </h1>
             <p className='lg-sub'>
-              Akses ditentukan untuk setiap dokumen. Nama yang tercantum dalam
-              dokumen RED yang memberikan akses, bukan pangkat.
+              Mengamankan dokumen operasional TNI-AD. Akses ditentukan untuk
+              setiap dokumen. Nama yang tercantum dalam dokumen RED yang
+              memberikan akses, bukan pangkat.
             </p>
             <dl className='lg-facts'>
               {[
@@ -488,9 +490,17 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
           </div>
           <div className='lg-footer lg-in3'>
             <div className='lg-help'>
-              Terkunci atau kehilangan autentikator:
+              Bantuan teknis:{' '}
+              <a
+                href='https://github.com/skadut'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='underline'
+              >
+                github.com/skadut
+              </a>
               <br />
-              petugas keamanan sistem · 0812-3456-7890
+              <span>Dikembangkan oleh Aeru Team</span>
             </div>
             <div className='lg-stamp'>SP 800-53 REV.5 / FIPS 199</div>
           </div>
@@ -968,7 +978,7 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                       disabled={leaving}
                     >
                       <span>
-                        {leaving ? 'Membuka' : 'Masuk ke Secure Asset Doc'}
+                        {leaving ? 'Membuka' : 'Masuk ke ARCA'}
                       </span>
                       <ArrowIcon />
                     </button>
@@ -1000,7 +1010,15 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                       </p>
                     )}
                     <p className='lg-lock-call'>
-                      Petugas keamanan sistem: 0812-3456-7890
+                      Bantuan teknis:{' '}
+                      <a
+                        href='https://github.com/skadut'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='underline'
+                      >
+                        github.com/skadut
+                      </a>
                     </p>
                     <div className='lg-lock-noaction'>
                       TIDAK ADA AKSI PEMULIHAN DI UI

@@ -27,7 +27,19 @@ export function AccountLocked({
           ? `Terlalu banyak percobaan gagal. Akun aktif kembali pukul ${time}. Percobaan telah dicatat.`
           : 'Terlalu banyak percobaan gagal. Akun ini dikunci selama 15 menit. Percobaan telah dicatat.'
       }
-      footer='PETUGAS KEAMANAN · 0812-3456-7890'
+      footer={
+        <>
+          PETUGAS KEAMANAN ·{' '}
+          <a
+            href='https://github.com/skadut'
+            target='_blank'
+            rel='noopener noreferrer'
+            className='underline'
+          >
+            github.com/skadut
+          </a>
+        </>
+      }
     />
   )
 }
