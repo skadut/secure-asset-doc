@@ -28,7 +28,7 @@ import { StatStrip } from '@/components/stat-strip'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { PurgeDialog } from './purge-dialog'
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 8
 const PAGER_WINDOW = 3
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000
 const selectClass =
