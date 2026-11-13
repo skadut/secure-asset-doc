@@ -14,9 +14,8 @@ import {
 } from '@/lib/access-api'
 import { getMe, type Me } from '@/lib/session'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardPanel } from '@/components/card-panel'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -29,6 +28,8 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { ConfirmDialog } from '@/components/confirm-dialog'
+import { StatusDot } from '@/components/status-dot'
+import { ArrowRight } from 'lucide-react'
 
 type Decision = 'approve' | 'deny'
 
@@ -40,6 +41,13 @@ const STATUS: Record<string, string> = {
 }
 const LEVELS = [1, 2, 3, 4, 5]
 const FIPS: Fips199[] = ['LOW', 'MODERATE', 'HIGH']
+const STATUS_TONE: Record<string, 'pass' | 'warn' | 'fail' | 'ink'> = {
+  pending: 'warn',
+  approved: 'pass',
+  denied: 'fail',
+  cancelled: 'ink',
+}
+const LABEL = 'font-mono text-[8px] uppercase tracking-[.1em] text-ink-3'
 
 const len = (s: string) => [...s.trim()].length
 const yesNo = (v: boolean) => (v ? 'Ya' : 'Tidak')
@@ -65,8 +73,8 @@ function maxReviewDue(iso: string) {
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <>
-      <dt className='text-muted-foreground'>{label}</dt>
-      <dd className='min-w-0 break-words'>{children}</dd>
+      <dt className={LABEL}>{label}</dt>
+      <dd className='min-w-0 break-words text-[11px] text-ink'>{children}</dd>
     </>
   )
 }
@@ -110,13 +118,13 @@ function RequestItem({ r, me }: { r: LevelRequest; me: Me }) {
   })
 
   return (
-    <li className='flex flex-col gap-3 rounded-md border p-4'>
+    <li className='flex flex-col gap-3 border border-line bg-surface p-3.5'>
       <div className='flex flex-wrap items-center justify-between gap-2'>
-        <p className='min-w-0 font-medium break-all'>{r.targetUser}</p>
-        <Badge variant='outline'>{STATUS[r.status] ?? r.status}</Badge>
+        <p className='min-w-0 text-[13px] font-medium break-all text-ink'>{r.targetUser}</p>
+        <StatusDot tone={STATUS_TONE[r.status] ?? 'ink'}>{STATUS[r.status] ?? r.status}</StatusDot>
       </div>
 
-      <dl className='grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm'>
+      <dl className='grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5'>
         <Field label='Perubahan level'>{`${r.currentLevel} → ${r.newLevel}`}</Field>
         <Field label='Justifikasi'>{r.justification}</Field>
         <Field label='Screening diverifikasi (PS-3)'>
@@ -147,13 +155,13 @@ function RequestItem({ r, me }: { r: LevelRequest; me: Me }) {
       {pending && (canApprove || canDeny) && (
         <div className='flex flex-col gap-3'>
           {blocked && (
-            <p className='text-sm text-muted-foreground'>
+            <p className='text-[11px] text-ink-3'>
               {isGrantee
                 ? 'Penerima perubahan level tidak dapat memutuskan permintaan ini'
                 : 'Anda tidak dapat memutuskan permintaan ini'}
             </p>
           )}
-          <Label htmlFor={reasonId}>Alasan keputusan (opsional)</Label>
+          <Label className={LABEL} htmlFor={reasonId}>Alasan keputusan (opsional)</Label>
           <Textarea
             id={reasonId}
             value={reason}
@@ -340,11 +348,8 @@ function CreateForm({ me }: { me: Me }) {
   const describe = (k: string) => (errors[k] ? `${k}-err` : undefined)
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Ajukan perubahan level</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <CardPanel title='Ajukan perubahan level' className='min-w-0'>
+      <div className='p-3.5'>
         <form onSubmit={onSubmit} noValidate className='flex flex-col gap-4'>
           {users.isError && (
             <Alert variant='destructive'>
@@ -353,7 +358,7 @@ function CreateForm({ me }: { me: Me }) {
           )}
 
           <div className='flex flex-col gap-2'>
-            <Label htmlFor='lvl-target'>Pengguna</Label>
+            <Label className={LABEL} htmlFor='lvl-target'>Pengguna</Label>
             <Select value={target} onValueChange={setTarget}>
               <SelectTrigger
                 id='lvl-target'
@@ -374,15 +379,15 @@ function CreateForm({ me }: { me: Me }) {
             {err('target')}
           </div>
 
-          <p className='text-sm text-muted-foreground'>
+          <p className='text-[11px] text-ink-3'>
             Level sekarang:{' '}
-            <span className='font-medium text-foreground'>
+            <span className='font-medium text-ink'>
               {current ?? '—'}
             </span>
           </p>
 
           <div className='flex flex-col gap-2'>
-            <Label htmlFor='lvl-new'>Level baru</Label>
+            <Label className={LABEL} htmlFor='lvl-new'>Level baru</Label>
             <Select
               value={newLevel}
               onValueChange={(v) => {
@@ -406,22 +411,22 @@ function CreateForm({ me }: { me: Me }) {
                 ))}
               </SelectContent>
             </Select>
-            <p className='text-sm text-muted-foreground'>
+            <p className='text-[11px] text-ink-3'>
               Berikan level minimum yang dibutuhkan (AC-6).
             </p>
             {err('newLevel')}
           </div>
 
           {isLower && (
-            <p className='text-sm font-medium'>
+            <p className='text-[11px] font-medium text-ink'>
               Penurunan level langsung berlaku. Sesi pengguna akan diakhiri.
             </p>
           )}
 
           <div className='flex flex-col gap-2'>
             <div className='flex items-center justify-between gap-2'>
-              <Label htmlFor='lvl-justification'>Justifikasi</Label>
-              <span className='text-xs text-muted-foreground'>
+              <Label className={LABEL} htmlFor='lvl-justification'>Justifikasi</Label>
+              <span className='text-[10px] text-ink-3'>
                 {len(justification)}/500
               </span>
             </div>
@@ -436,8 +441,8 @@ function CreateForm({ me }: { me: Me }) {
           </div>
 
           {isRaise && (
-            <fieldset className='flex flex-col gap-4 rounded-md border p-4'>
-              <legend className='px-1 text-sm font-medium'>
+            <fieldset className='flex flex-col gap-4 border border-line bg-surface-2 p-3.5'>
+              <legend className={`px-1 ${LABEL}`}>
                 Syarat kenaikan level
               </legend>
 
@@ -450,7 +455,7 @@ function CreateForm({ me }: { me: Me }) {
                     aria-invalid={invalid('screeningVerified')}
                     aria-describedby={describe('screeningVerified')}
                   />
-                  <Label htmlFor='lvl-screening'>
+                  <Label className={LABEL} htmlFor='lvl-screening'>
                     Screening sudah diverifikasi (PS-3)
                   </Label>
                 </div>
@@ -458,7 +463,7 @@ function CreateForm({ me }: { me: Me }) {
               </div>
 
               <div className='flex flex-col gap-2'>
-                <Label htmlFor='lvl-screening-ref'>
+                <Label className={LABEL} htmlFor='lvl-screening-ref'>
                   Referensi screening (PS-3)
                 </Label>
                 <Input
@@ -481,7 +486,7 @@ function CreateForm({ me }: { me: Me }) {
                     aria-invalid={invalid('agreementSigned')}
                     aria-describedby={describe('agreementSigned')}
                   />
-                  <Label htmlFor='lvl-agreement'>
+                  <Label className={LABEL} htmlFor='lvl-agreement'>
                     Perjanjian akses sudah ditandatangani (PS-6)
                   </Label>
                 </div>
@@ -489,7 +494,7 @@ function CreateForm({ me }: { me: Me }) {
               </div>
 
               <div className='flex flex-col gap-2'>
-                <Label htmlFor='lvl-agreement-date'>
+                <Label className={LABEL} htmlFor='lvl-agreement-date'>
                   Tanggal perjanjian akses (PS-6)
                 </Label>
                 <Input
@@ -506,7 +511,7 @@ function CreateForm({ me }: { me: Me }) {
               </div>
 
               <div className='flex flex-col gap-2'>
-                <Label htmlFor='lvl-review-due'>
+                <Label className={LABEL} htmlFor='lvl-review-due'>
                   Tinjau ulang sebelum (AC-2)
                 </Label>
                 <Input
@@ -520,14 +525,14 @@ function CreateForm({ me }: { me: Me }) {
                   aria-invalid={invalid('reviewDue')}
                   aria-describedby={describe('reviewDue')}
                 />
-                <p className='text-sm text-muted-foreground'>
+                <p className='text-[11px] text-ink-3'>
                   Antara besok dan 12 bulan dari hari ini (AC-2).
                 </p>
                 {err('reviewDue')}
               </div>
 
               <div className='flex flex-col gap-2'>
-                <Label htmlFor='lvl-fips'>Basis FIPS 199</Label>
+                <Label className={LABEL} htmlFor='lvl-fips'>Basis FIPS 199</Label>
                 <Select
                   value={fips}
                   onValueChange={(v) => setFips(v as Fips199)}
@@ -553,8 +558,13 @@ function CreateForm({ me }: { me: Me }) {
             </fieldset>
           )}
 
-          <Button type='submit' className='h-11' disabled={submit.isPending}>
+          <Button
+            type='submit'
+            className='h-11 w-full justify-between rounded-none'
+            disabled={submit.isPending}
+          >
             {isLower ? 'Turunkan level' : 'Ajukan perubahan'}
+            <ArrowRight aria-hidden='true' />
           </Button>
 
           <ConfirmDialog
@@ -576,8 +586,8 @@ function CreateForm({ me }: { me: Me }) {
             }
           />
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </CardPanel>
   )
 }
 
@@ -595,36 +605,35 @@ export function LevelSection() {
   if (!me) return null
 
   return (
-    <section className='flex min-w-0 flex-col gap-4'>
-      <h2 className='text-lg font-semibold'>Perubahan level akses</h2>
-
-      {me.can.access?.request && <CreateForm me={me} />}
-
+    <section className='grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]'>
       {canManage && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Daftar permintaan</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {list.isError ? (
+        <CardPanel title='Daftar permintaan' className='min-w-0'>
+          {list.isError ? (
+            <div className='p-3.5'>
               <Alert variant='destructive'>
                 <AlertDescription>{errMsg(list.error)}</AlertDescription>
               </Alert>
-            ) : list.data ? (
-              list.data.length === 0 ? (
-                <p className='text-muted-foreground'>Belum ada permintaan.</p>
-              ) : (
-                <ul className='flex flex-col gap-3'>
-                  {list.data.map((r) => (
-                    <RequestItem key={r.id} r={r} me={me} />
-                  ))}
-                </ul>
-              )
+            </div>
+          ) : list.data ? (
+            list.data.length === 0 ? (
+              <p className='p-3.5 text-[11px] text-ink-3'>Belum ada permintaan.</p>
             ) : (
-              <p className='text-muted-foreground'>Memuat...</p>
-            )}
-          </CardContent>
-        </Card>
+              <ul className='flex flex-col gap-3 p-3.5'>
+                {list.data.map((r) => (
+                  <RequestItem key={r.id} r={r} me={me} />
+                ))}
+              </ul>
+            )
+          ) : (
+            <p className='p-3.5 text-[11px] text-ink-3'>Memuat...</p>
+          )}
+        </CardPanel>
+      )}
+
+      {me.can.access?.request && (
+        <aside className='flex min-w-0 flex-col gap-3'>
+          <CreateForm me={me} />
+        </aside>
       )}
     </section>
   )

@@ -22,6 +22,8 @@
   --rail-dim: #98a49a;
   --rail-line: #2b342e;
   --rail-active: #1c241f;
+  --rail-active-from: #2b352e;
+  --rail-active-to: #222a25;
   --tlp-clear: #737373;
   --tlp-green: #1e7b45;
   --tlp-amber: #f0b429;
@@ -121,7 +123,8 @@
   --rail-ink: #e8eae4;
   --rail-dim: #8a968c;
   --rail-line: #232b25;
-  --rail-active: #19201b;
+  --rail-active-from: #2b352e;
+  --rail-active-to: #222a25;
 
   --background: var(--bg);
   --foreground: var(--ink);

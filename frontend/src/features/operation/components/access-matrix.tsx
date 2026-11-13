@@ -9,6 +9,8 @@ import {
   revokeGrant,
   type DirectoryUser,
 } from '@/lib/access-api'
+import { CardPanel } from '@/components/card-panel'
+import { TlpMark } from '@/components/tlp-mark'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -21,11 +23,11 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { ConfirmDialog } from '@/components/confirm-dialog'
-import { TlpBadge } from '@/components/tlp-badge'
 import {
   cellState,
   filterUsers,
   groupUsers,
+  switchFor,
   type CellState,
   type UserDimension,
 } from '../access'
@@ -34,15 +36,20 @@ import { LevelBadge } from './level-badge'
 
 type Target = { username: string; docId: string }
 
-export function switchFor(state: CellState): {
-  checked: boolean
-  disabled: boolean
-} {
-  return {
-    checked: state === 'grant' || state === 'level',
-    disabled: state === 'level',
-  }
-}
+const TLP_ORDER: Tlp[] = [
+  'CLEAR',
+  'GREEN',
+  'AMBER',
+  'AMBER+STRICT',
+  'RED',
+  'RED+STRICT',
+]
+
+const DIM_LABEL = {
+  level: 'Level',
+  rank: 'Pangkat',
+  unit: 'Organisasi',
+} as const
 
 const reasonFor = (state: CellState) => {
   if (state === 'grant') return 'Akses lewat grant aktif'
@@ -52,6 +59,16 @@ const reasonFor = (state: CellState) => {
   return 'Tidak ada akses'
 }
 
+const initials = (user: DirectoryUser) =>
+  (user.name ?? user.username)
+    .split(/[\s.-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+
+// Renders two siblings (document list, matrix). The parent provides the grid.
 export function AccessPanel({
   users,
   docs,
@@ -78,11 +95,6 @@ export function AccessPanel({
     dim: dimValue === 'all' ? 'all' : dim,
     value: dimValue,
   })
-  const dimLabel = {
-    level: 'Level',
-    rank: 'Pangkat',
-    unit: 'Organisasi',
-  } as const
   const dimOptions = dim === 'all' ? [] : groupUsers(users, dim)
   const grants = useQuery({
     queryKey: grantsKey(activeDocId),
@@ -121,82 +133,94 @@ export function AccessPanel({
       ),
   })
 
-  return (
-    <section className='flex min-w-0 flex-col gap-4'>
-      <div className='flex min-w-0 flex-col gap-3'>
-        <div className='flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center'>
-          <Select
-            value={tlpFilter}
-            onValueChange={(value) => {
-              setTlpFilter(value as Tlp | 'ALL')
-              const first = (
-                value === 'ALL' ? docs : docs.filter((d) => d.tlp === value)
-              )[0]
-              if (first) setSelectedDocId(first.id)
-            }}
-          >
-            <SelectTrigger
-              aria-label='Filter TLP'
-              className='min-h-11 w-full sm:w-52'
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='ALL'>Semua TLP</SelectItem>
-              {(
-                [
-                  'CLEAR',
-                  'GREEN',
-                  'AMBER',
-                  'AMBER+STRICT',
-                  'RED',
-                  'RED+STRICT',
-                ] as const
-              ).map((tlp) => (
-                <SelectItem key={tlp} value={tlp}>
-                  <TlpBadge tlp={tlp} />
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={activeDocId} onValueChange={setSelectedDocId}>
-            <SelectTrigger
-              aria-label='Pilih dokumen'
-              className='min-h-11 w-full min-w-0 overflow-hidden *:data-[slot=select-value]:min-w-0 sm:w-72'
-              disabled={tlpDocs.length === 0}
-            >
-              {tlpDocs.length === 0 ? (
-                <SelectValue placeholder='Tidak ada dokumen' />
-              ) : (
-                <SelectValue />
-              )}
-            </SelectTrigger>
-            {tlpDocs.length > 0 && (
-              <SelectContent>
-                {tlpDocs.map((item) => (
-                  <SelectItem key={item.id} value={item.id}>
-                    <span className='flex w-full min-w-0 items-center justify-between gap-3'>
-                      <span className='min-w-0 truncate font-mono'>
-                        {item.id}
-                      </span>
-                      <span className='shrink-0'>
-                        <TlpBadge tlp={item.tlp} />
-                      </span>
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            )}
-          </Select>
-          <div className='flex min-w-0 flex-wrap gap-2'>
+  const docColumn = (
+    <CardPanel
+      title='Dokumen'
+      meta={String(tlpDocs.length)}
+      className='min-w-0 xl:self-stretch'
+    >
+      <div className='flex flex-col gap-3 p-3'>
+        <Select
+          value={tlpFilter}
+          onValueChange={(value) => {
+            setTlpFilter(value as Tlp | 'ALL')
+            const first = (
+              value === 'ALL' ? docs : docs.filter((d) => d.tlp === value)
+            )[0]
+            if (first) setSelectedDocId(first.id)
+          }}
+        >
+          <SelectTrigger aria-label='Filter TLP' className='h-9 w-full rounded-none'>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value='ALL'>Semua TLP</SelectItem>
+            {TLP_ORDER.map((tlp) => (
+              <SelectItem key={tlp} value={tlp}>
+                <TlpMark tlp={tlp} />
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      {tlpDocs.length === 0 ? (
+        <p className='px-3 pb-3 text-sm text-ink-3'>
+          Tidak ada dokumen untuk filter ini.
+        </p>
+      ) : (
+        <ul aria-label='Daftar dokumen' className='divide-y divide-line border-t border-line'>
+          {tlpDocs.map((item) => {
+            const active = item.id === activeDocId
+            return (
+              <li key={item.id}>
+                <button
+                  type='button'
+                  aria-pressed={active}
+                  onClick={() => setSelectedDocId(item.id)}
+                  className={`flex w-full min-w-0 flex-col gap-1 px-3 py-2.5 text-left outline-none focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring ${
+                    active ? 'bg-surface-2 shadow-[inset_2px_0_0_var(--ink)]' : 'hover:bg-surface-2'
+                  }`}
+                >
+                  <span className='flex min-w-0 items-center gap-2'>
+                    <TlpMark tlp={item.tlp} compact />
+                    <span className='font-mono text-[10px] text-ink-2'>{item.id}</span>
+                  </span>
+                  {item.title && (
+                    <span className='break-words text-[11px] text-ink'>{item.title}</span>
+                  )}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </CardPanel>
+  )
+
+  const matrixColumn = (
+    <CardPanel
+      title='Matriks akses'
+      meta={doc.id}
+      className='min-w-0'
+    >
+      <div className='flex flex-col gap-3 p-3'>
+        {doc.title && (
+          <h2 className='min-w-0 break-words text-base font-semibold text-ink'>
+            {doc.title}
+          </h2>
+        )}
+        <div className='flex min-w-0 flex-col gap-2 sm:flex-row'>
+          <div className='min-w-0 flex-1'>
             <Input
               aria-label='Cari nama atau username'
               placeholder='Cari nama atau username'
               type='search'
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              className='min-h-11 w-full min-w-0 sm:flex-1'
+              className='h-9 w-full rounded-none'
             />
+          </div>
+          <div className='flex min-w-0 gap-2'>
             <Select
               value={dim}
               onValueChange={(value) => {
@@ -204,14 +228,11 @@ export function AccessPanel({
                 setDimValue('all')
               }}
             >
-              <SelectTrigger
-                aria-label='Tampilkan per'
-                className='min-h-11 w-full sm:w-44'
-              >
+              <SelectTrigger aria-label='Tampilkan per' className='h-9 w-full rounded-none sm:w-36'>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value='all'>Semua</SelectItem>
+                <SelectItem value='all'>Group: semua</SelectItem>
                 <SelectItem value='level'>Level</SelectItem>
                 <SelectItem value='rank'>Pangkat</SelectItem>
                 <SelectItem value='unit'>Organisasi</SelectItem>
@@ -219,15 +240,12 @@ export function AccessPanel({
             </Select>
             {dim !== 'all' && (
               <Select value={dimValue} onValueChange={setDimValue}>
-                <SelectTrigger
-                  aria-label={dimLabel[dim]}
-                  className='min-h-11 w-full sm:w-52'
-                >
+                <SelectTrigger aria-label={DIM_LABEL[dim]} className='h-9 w-full rounded-none sm:w-44'>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value='all'>
-                    Semua {dimLabel[dim].toLowerCase()}
+                    Semua {DIM_LABEL[dim].toLowerCase()}
                   </SelectItem>
                   {dimOptions.map(({ key, label }) => (
                     <SelectItem key={key} value={key}>
@@ -239,48 +257,51 @@ export function AccessPanel({
             )}
           </div>
         </div>
-        {doc.title && (
-          <h2 className='min-w-0 text-base font-semibold break-words text-foreground'>
-            {doc.title}
-          </h2>
-        )}
         {grants.data && (
-          <p role='status' className='text-sm'>
-            <span className='font-medium tabular-nums'>{grantCount}</span>{' '}
-            pengguna diberi grant aktif ·{' '}
-            <span className='tabular-nums'>{levelCount}</span>{' '}
-            <span className='text-muted-foreground'>lewat level akses</span>
+          <p role='status' className='font-mono text-[10px] text-ink-2'>
+            <span className='tabular-nums text-ink'>{grantCount}</span> grant aktif ·{' '}
+            <span className='tabular-nums text-ink'>{levelCount}</span>{' '}
+            <span className='text-ink-3'>lewat level akses</span>
           </p>
         )}
       </div>
 
       {grants.isError ? (
-        <p role='alert' className='text-sm text-destructive'>
+        <p role='alert' className='px-3 pb-3 text-sm text-destructive'>
           Gagal memuat hak akses
         </p>
       ) : grants.isPending ? (
-        <p role='status' className='text-sm text-muted-foreground'>
+        <p role='status' className='px-3 pb-3 text-sm text-ink-3'>
           Memuat hak akses...
         </p>
       ) : users.length === 0 ? (
-        <p className='text-sm text-muted-foreground'>Belum ada pengguna</p>
+        <p className='px-3 pb-3 text-sm text-ink-3'>Belum ada pengguna</p>
       ) : filteredUsers.length === 0 ? (
-        <p className='text-sm text-muted-foreground'>
+        <p className='px-3 pb-3 text-sm text-ink-3'>
           Tidak ada pengguna yang cocok.
         </p>
       ) : (
-        <div className='min-w-0 space-y-3'>
+        <div className='min-w-0'>
+          <div
+            aria-hidden='true'
+            className='hidden grid-cols-[28px_minmax(0,1fr)_96px_minmax(0,1fr)] gap-3 border-y border-line bg-surface-2 px-3 py-1.5 font-mono text-[8px] uppercase tracking-[.1em] text-ink-3 sm:grid'
+          >
+            <span className='col-span-2'>Pengguna</span>
+            <span>Akses</span>
+            <span>Keterangan</span>
+          </div>
           {(dim === 'all' || dimValue !== 'all'
             ? [{ key: 'filtered', label: '', users: filteredUsers }]
             : groupUsers(filteredUsers, dim)
           ).map((group) => (
             <div key={group.key}>
               {group.label && (
-                <h3 className='mb-2 text-sm font-semibold'>
-                  {group.label} · {group.users.length} pengguna
+                <h3 className='border-b border-line bg-surface-2 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[.08em] text-ink-2'>
+                  {DIM_LABEL[dim as keyof typeof DIM_LABEL]}: {group.label} ·{' '}
+                  {group.users.length} pengguna
                 </h3>
               )}
-              <ul className='min-w-0 divide-y rounded-md border bg-card'>
+              <ul className='divide-y divide-line'>
                 {group.users.map((user) => {
                   const state = stateFor(user)
                   const control = switchFor(state)
@@ -291,39 +312,48 @@ export function AccessPanel({
                   return (
                     <li
                       key={user.username}
-                      className='flex min-w-0 items-center justify-between gap-4 px-4 py-3'
+                      className='grid min-w-0 grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 px-3 py-2.5 sm:grid-cols-[28px_minmax(0,1fr)_96px_minmax(0,1fr)] sm:min-h-[54px]'
                     >
-                      <div className='min-w-0 flex-1'>
-                        <p className='text-sm font-medium break-words'>
+                      <span
+                        aria-hidden='true'
+                        className='grid size-7 place-items-center border border-line bg-surface-2 font-mono text-[9px] text-ink-2'
+                      >
+                        {initials(user)}
+                      </span>
+                      <div className='min-w-0'>
+                        <p className='break-words text-sm font-medium text-ink'>
                           {user.name ?? user.username}
                           {user.name !== null && (
-                            <span className='ms-2 font-mono text-xs font-normal text-muted-foreground'>
+                            <span className='ms-2 font-mono text-[10px] font-normal text-ink-3'>
                               {user.username}
                             </span>
                           )}
                         </p>
-                        <p className='mt-1 flex flex-wrap items-center gap-1 text-xs break-words text-muted-foreground'>
-                          {user.rankName && <>{user.rankName} · </>}
+                        <p className='mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] break-words text-ink-3'>
                           <LevelBadge level={user.accessLevel} />
-                          {user.unit && <> · {user.unit}</>}
-                        </p>
-                        <p className='mt-1 text-xs text-muted-foreground'>
-                          {reasonFor(state)}
+                          {user.rankName && <span>{user.rankName}</span>}
+                          {user.unit && <span>· {user.unit}</span>}
                         </p>
                       </div>
-                      <Switch
-                        checked={control.checked}
-                        disabled={control.disabled || revokeAccess.isPending}
-                        aria-label={label}
-                        onCheckedChange={(checked) => {
-                          const next = {
-                            username: user.username,
-                            docId: doc.id,
-                          }
-                          if (checked) setRequestTarget(next)
-                          else setRevokeTarget(next)
-                        }}
-                      />
+                      <div className='flex justify-end sm:justify-start'>
+                        <Switch
+                          className='op-switch'
+                          checked={control.checked}
+                          disabled={control.disabled || revokeAccess.isPending}
+                          aria-label={label}
+                          onCheckedChange={(checked) => {
+                            const next = {
+                              username: user.username,
+                              docId: doc.id,
+                            }
+                            if (checked) setRequestTarget(next)
+                            else setRevokeTarget(next)
+                          }}
+                        />
+                      </div>
+                      <p className='col-span-2 text-[11px] break-words text-ink-3 sm:col-span-1 sm:col-start-auto'>
+                        {reasonFor(state)}
+                      </p>
                     </li>
                   )
                 })}
@@ -333,10 +363,17 @@ export function AccessPanel({
         </div>
       )}
 
-      <p className='text-xs text-muted-foreground'>
+      <p className='border-t border-line px-3 py-2.5 text-[11px] text-ink-3'>
         Switch ON mengajukan permintaan akses yang harus disetujui dua pihak.
         Switch OFF mencabut grant aktif.
       </p>
+    </CardPanel>
+  )
+
+  return (
+    <>
+      {docColumn}
+      {matrixColumn}
 
       <ConfirmDialog
         open={revokeTarget !== null}
@@ -364,7 +401,7 @@ export function AccessPanel({
           onClose={() => setRequestTarget(null)}
         />
       )}
-    </section>
+    </>
   )
 }
 

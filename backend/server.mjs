@@ -10,7 +10,7 @@ import { lookupSession } from './session.mjs';
 import { filterGrc } from './grc-filter.mjs';
 import { isToken, maskedPart, maskPattern } from './tokens.mjs';
 import { reveal, conceal } from './reveal.mjs';
-import { truncate, quoteIdent, clampLimit, clampOffset, resolveTable, buildSelectSql } from './dbview.mjs';
+import { truncate, maskCell, quoteIdent, clampLimit, clampOffset, resolveTable, buildSelectSql } from './dbview.mjs';
 import { makeAuthRoutes } from './auth-routes.mjs';
 import { makeAuditPurgeRoutes } from './audit-purge.mjs';
 import { makeGrantRoutes } from './grants.mjs';
@@ -569,6 +569,7 @@ const ROUTES = [
   } },
   { re: /^\/api\/traffic\/history$/, methods: ['GET'], run: (req, res) => trafficRoutes.history(req, res) },
   { re: /^\/api\/dashboard\/summary$/, methods: ['GET'], run: (req, res) => dashboardRoutes.summary(req, res) },
+  { re: /^\/api\/grants\/expiring$/, methods: ['GET'], run: (req, res) => dashboardRoutes.expiringGrants(req, res) },
   { re: /^\/api\/controls$/, methods: ['GET'], run: (req, res) => controlRoutes.list(req, res) },
   { re: /^\/api\/grc$/, methods: ['GET'], run: async (req, res) => {
     const so = req.me.securityOfficer === true;
@@ -651,7 +652,7 @@ const ROUTES = [
       )).rows[0]?.column_name ?? null;
       const total = (await client.query(`SELECT count(*)::int AS n FROM public.${quoteIdent(table)}`)).rows[0].n;
       const sel = await client.query(buildSelectSql(table, columns, pk, limit, offset), [limit, offset]);
-      const rows = sel.rows.map((r) => columns.map((c) => truncate(dbviewCell(r[c.name]))));
+      const rows = sel.rows.map((r) => columns.map((c) => truncate(maskCell(c.name, dbviewCell(r[c.name])))));
       return { status: 200, body: { table, columns: columns.map(dbviewCol), rows, total, limit, offset } };
     });
   } },

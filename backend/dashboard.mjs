@@ -12,6 +12,25 @@ export function dashboardQueries(days) {
   };
 }
 
+// Active grants that expire within `days` (future only). Pure: no DB access here.
+export function clampGrantDays(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.min(90, Math.max(1, Math.trunc(n))) : 30;
+}
+
+export function expiringGrantsQuery(days) {
+  return ["SELECT u.username AS user, g.document_id, g.expires_at FROM document_access_grants g JOIN users u ON u.id = g.user_id WHERE g.revoked_at IS NULL AND g.expires_at > now() AND g.expires_at <= now() + make_interval(days => $1::int) ORDER BY g.expires_at, u.username LIMIT 200", [days]];
+}
+
+// Active grants with no expiry (same scope: not revoked). Count only, no per-row data.
+export function noExpiryQuery() {
+  return ["SELECT count(*)::int AS n FROM document_access_grants g WHERE g.revoked_at IS NULL AND g.expires_at IS NULL", []];
+}
+
+export function mapExpiringGrants(rows) {
+  return rows.map((r) => ({ user: r.user, documentId: r.document_id, expiresAt: new Date(r.expires_at).toISOString() }));
+}
+
 export function makeDashboardRoutes({ q, send, forbid }) {
   async function summary(req, res) {
     if (req.me.accessLevel !== 5 && req.me.securityOfficer !== true) return forbid(res, req.me, 'dashboard', 'summary', 'dashboard view denied');
@@ -34,5 +53,14 @@ export function makeDashboardRoutes({ q, send, forbid }) {
       series: series.rows.map((r) => ({ date: r.date, audit: r.audit, documents: r.documents })),
     });
   }
-  return { summary };
+  async function expiringGrants(req, res) {
+    if (req.me.accessLevel !== 5 && req.me.securityOfficer !== true) return forbid(res, req.me, 'dashboard', 'grants-expiring', 'expiring grants view denied');
+    const sp = new URL(req.url, 'http://localhost').searchParams;
+    const [grants, none] = await Promise.all([
+      q(...expiringGrantsQuery(clampGrantDays(sp.get('days') ?? 30))),
+      q(...noExpiryQuery()),
+    ]);
+    return send(res, 200, { grants: mapExpiringGrants(grants.rows), noExpiry: none.rows[0]?.n ?? 0 });
+  }
+  return { summary, expiringGrants };
 }

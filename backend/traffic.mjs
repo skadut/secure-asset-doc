@@ -114,7 +114,7 @@ export async function writeTrafficSample(q, sample, bucketStart, windowSec = 10)
     ? sample.errorCount
     : Math.max(0, Math.min(requestCount, Math.round((sample.errorRate ?? 0) * requestCount)));
   const totalMs = Number.isFinite(sample.totalMs) && sample.totalMs >= 0
-    ? sample.totalMs
+    ? Math.round(sample.totalMs)
     : Math.max(0, Math.round((sample.avgMs ?? 0) * requestCount));
   await q(BUCKET_SQL, [at, source, target, windowSec, requestCount, errorCount, totalMs]);
   return true;

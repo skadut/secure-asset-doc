@@ -1,15 +1,9 @@
 import { useState } from 'react'
 import { LockKeyhole, RefreshCw, TriangleAlert } from 'lucide-react'
+import { toast } from 'sonner'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -24,20 +18,18 @@ import { SkeletonRows } from '@/components/skeleton-rows'
 import { DbError, useDbTable, useDbTables } from './use-database'
 
 const LIMIT = 50
+const CELL_LIMIT = 300 // must match MAX_CELL in backend/dbview.mjs
 const touchClass = 'min-h-11 min-w-11 max-sm:min-h-11'
 const formatCount = (value: number) => value.toLocaleString('id-ID')
 
-// Non-null values as text. Objects go through JSON.stringify.
-const cellText = (v: unknown) =>
-  typeof v === 'object' ? JSON.stringify(v) : String(v)
+// Credential material only. Ciphertext, hashes and integrity tags stay visible: the view shows data at rest.
+const SENSITIVE = /password|totp|secret/i
+const isSensitive = (name: string) => SENSITIVE.test(name)
 
-function ErrorAlert({
-  error,
-  onRetry,
-}: {
-  error: unknown
-  onRetry: () => void
-}) {
+// Non-null values as text. Objects go through JSON.stringify.
+const cellText = (v: unknown) => (typeof v === 'object' ? JSON.stringify(v) : String(v))
+
+function ErrorAlert({ error, onRetry }: { error: unknown; onRetry: () => void }) {
   if (error instanceof DbError && error.status === 403) {
     return (
       <Alert variant='destructive' role='alert'>
@@ -76,9 +68,13 @@ export function DatabaseView() {
     setOffset(0)
   }
 
-  const refresh = () => {
-    void tables.refetch()
-    void detail.refetch()
+  const refresh = async () => {
+    try {
+      await Promise.all([tables.refetch(), detail.refetch()])
+      toast.success('Tabel dimuat ulang (READ ONLY)')
+    } catch {
+      toast.error('Gagal memuat ulang')
+    }
   }
 
   return (
@@ -94,17 +90,22 @@ export function DatabaseView() {
         <PageHead
           title='Database view'
           eyebrow='SUPER ADMIN · TRANSAKSI READ ONLY'
-          note='SCHEMA PUBLIC · SEL DIPOTONG 300 KARAKTER'
+          note={`SCHEMA PUBLIC · SEL DIPOTONG ${CELL_LIMIT} KARAKTER`}
           actions={
-            <Button variant='outline' className='h-9 gap-1.5 px-3 font-mono text-[9px] uppercase tracking-[.04em] max-sm:min-h-11' onClick={refresh} disabled={tables.isFetching || detail.isFetching}>
+            <Button
+              variant='outline'
+              className='h-9 gap-1.5 bg-surface px-3.5 font-mono text-[10px] tracking-[.04em] text-ink max-sm:min-h-11'
+              onClick={() => void refresh()}
+              disabled={tables.isFetching || detail.isFetching}
+            >
               <RefreshCw aria-hidden='true' className='size-3.5' />
               Muat ulang
             </Button>
           }
         />
 
-        <div className='grid min-w-0 flex-1 items-stretch gap-3 lg:grid-cols-[288px_minmax(0,1fr)]'>
-          <CardPanel title='TABEL' meta={tables.data ? String(list.length) : undefined} className='flex min-w-0 flex-col'>
+        <div className='grid min-w-0 flex-1 items-stretch gap-3.5 lg:grid-cols-[288px_minmax(0,1fr)]'>
+          <CardPanel title='TABEL' meta={tables.data ? formatCount(list.length) : undefined} className='flex min-w-0 flex-col'>
             <div className='max-h-[60vh] overflow-auto lg:max-h-none lg:flex-1'>
               {tables.isPending && <SkeletonRows rows={6} cols={2} />}
               {tables.isError && (
@@ -123,7 +124,7 @@ export function DatabaseView() {
                     type='button'
                     onClick={() => choose(t.name)}
                     aria-current={selected ? 'true' : undefined}
-                    className={`flex h-11 w-full items-center justify-between gap-2 border-b border-line px-3 text-left last:border-b-0 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink-3 ${selected ? 'bg-surface-2' : 'bg-transparent hover:bg-surface-2'}`}
+                    className={`flex min-h-9 w-full items-center justify-between gap-2 border-b border-line px-3 text-left transition-colors last:border-b-0 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink-3 ${selected ? 'bg-surface-2 shadow-[inset_2px_0_0_var(--ink)]' : 'bg-surface hover:bg-surface-2'}`}
                   >
                     <span className={`min-w-0 truncate font-mono text-[9px] ${selected ? 'text-ink' : 'text-ink-2'}`}>{t.name}</span>
                     <span className='shrink-0 font-mono text-[8px] tabular-nums text-ink-3'>{formatCount(t.rowCount)}</span>
@@ -157,23 +158,25 @@ export function DatabaseView() {
                 <div className='min-w-0 flex-1 overflow-x-auto'>
                   <Table className='w-full'>
                     <TableHeader>
-                      <TableRow>
+                      <TableRow className='hover:bg-transparent'>
                         {data.columns.map((c) => (
-                          <TableHead key={c.name} className='h-9 px-2 whitespace-nowrap'>
-                            <span className='font-mono text-[8px] tracking-[.04em] text-ink'>{c.name}</span>
-                            <span className='block font-mono text-[7.5px] font-normal text-ink-3'>{c.type}</span>
+                          <TableHead key={c.name} className='h-auto px-2.5 py-2 whitespace-nowrap'>
+                            <span className='block font-mono text-[8px] font-medium tracking-[.02em] text-ink'>{c.name}</span>
+                            <span className='block font-mono text-[7px] font-normal text-ink-3'>{c.type}</span>
                           </TableHead>
                         ))}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {data.rows.map((row, i) => (
-                        <TableRow key={offset + i} className='h-9'>
+                        <TableRow key={`${offset}-${i}`} className='h-9'>
                           {data.columns.map((c, j) => {
                             const v = row[j]
                             return (
-                              <TableCell key={c.name} className='max-w-[300px] truncate px-2 font-mono text-[9.5px]'>
-                                {v === null || v === undefined ? (
+                              <TableCell key={c.name} className='max-w-[300px] truncate px-2.5 font-mono text-[9px] text-ink-2'>
+                                {isSensitive(c.name) ? (
+                                  <span className='text-ink-3'>DISEMBUNYIKAN</span>
+                                ) : v === null || v === undefined ? (
                                   <span className='text-ink-3'>NULL</span>
                                 ) : (
                                   cellText(v)
@@ -187,17 +190,17 @@ export function DatabaseView() {
                   </Table>
                 </div>
 
-                <p className='flex items-center gap-1.5 border-t border-line bg-surface-2 px-3 py-1.5 font-mono text-[8.5px] text-ink-3'>
-                  <LockKeyhole aria-hidden='true' className='size-3' />
-                  Sel panjang dipotong: “ … (312 chars)”. NULL tampil sebagai NULL.
+                <p className='flex items-center gap-1.5 border-t border-line bg-surface-2 px-3 py-2 font-mono text-[8.5px] text-ink-3'>
+                  <LockKeyhole aria-hidden='true' className='size-3 shrink-0' />
+                  Sel panjang dipotong: “… ({CELL_LIMIT} chars)”. Nilai NULL tampil sebagai NULL, bukan string kosong. Kolom password, TOTP, dan secret disembunyikan.
                 </p>
 
-                <footer className='flex flex-wrap items-center justify-between gap-2 border-t border-line bg-surface-2 px-3.5 py-2'>
+                <footer className='flex flex-wrap items-center justify-between gap-2 border-t border-line bg-surface-2 px-3 py-2'>
                   <span className='font-mono text-[9px] tabular-nums text-ink-3'>baris {formatCount(from)}–{formatCount(to)} dari {formatCount(total)}</span>
                   <div className='flex items-center gap-2'>
                     <span className='font-mono text-[9px] text-ink-3'>{LIMIT} / halaman</span>
-                    <Button variant='outline' size='sm' className='h-8 min-w-8 px-2 font-mono text-[9px] max-sm:min-h-11' disabled={offset === 0} onClick={() => setOffset(Math.max(0, offset - LIMIT))} aria-label='Halaman sebelumnya'>‹</Button>
-                    <Button variant='outline' size='sm' className='h-8 min-w-8 px-2 font-mono text-[9px] max-sm:min-h-11' disabled={offset + LIMIT >= total} onClick={() => setOffset(offset + LIMIT)} aria-label='Halaman berikutnya'>›</Button>
+                    <Button variant='outline' size='sm' className='h-8 min-w-8 bg-surface px-2 font-mono text-[9px] max-sm:min-h-11' disabled={offset === 0} onClick={() => setOffset(Math.max(0, offset - LIMIT))} aria-label='Halaman sebelumnya'>‹</Button>
+                    <Button variant='outline' size='sm' className='h-8 min-w-8 bg-surface px-2 font-mono text-[9px] max-sm:min-h-11' disabled={offset + LIMIT >= total} onClick={() => setOffset(offset + LIMIT)} aria-label='Halaman berikutnya'>›</Button>
                   </div>
                 </footer>
               </>

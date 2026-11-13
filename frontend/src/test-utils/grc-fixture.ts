@@ -1045,7 +1045,7 @@ export const documents: Document[] = [
     id: 'DOC-0017',
     title: 'Operation Order: Exercise Glasswing (fictional training document)',
     type: 'Procedure',
-    tlp: 'RED',
+    tlp: 'AMBER+STRICT',
     status: 'approved',
     owner: 'Tim Respons Insiden Simulasi',
     approver: 'Dewan Pengarah Simulasi',

@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { ErrorState } from '@/components/error-state'
+import { Button } from '@/components/ui/button'
 
 type GeneralErrorProps = React.HTMLAttributes<HTMLDivElement> & {
   minimal?: boolean
@@ -13,9 +14,9 @@ export function GeneralError({ minimal = false }: GeneralErrorProps) {
       desc='Permintaan tidak dapat diproses. Coba lagi.'
       action={
         !minimal && (
-          <Link to='/' className='inline-flex items-center underline underline-offset-4'>
-            Kembali ke Beranda
-          </Link>
+          <Button asChild size='sm' className='rounded-none bg-primary text-primary-foreground hover:bg-primary/90'>
+            <Link to='/'>Kembali ke Beranda</Link>
+          </Button>
         )
       }
     />

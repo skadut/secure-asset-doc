@@ -26,7 +26,7 @@ const { assets, csfSubcategories, documents, evidenceLinks } = fixture
 const tlp = tlpRows(documents)
 assert.deepEqual(
   tlp.map((r) => r.value),
-  [1, 4, 5, 4, 3, 0]
+  [1, 4, 5, 5, 2, 0]
 )
 assert.deepEqual(
   tlp.map((r) => r.label),

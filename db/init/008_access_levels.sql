@@ -1,7 +1,7 @@
 -- Access levels (users.access_level 1-5) + per-document grants.
 -- Apply manually on live DB as admin (POSTGRES_USER). Idempotent: ADD COLUMN IF NOT EXISTS, CREATE TABLE IF NOT EXISTS,
 -- DROP CONSTRAINT IF EXISTS + re-ADD, CREATE OR REPLACE FUNCTION, REVOKE/GRANT.
--- Schema only. Levels per rank and DOC-0017 grants are seeded by db/scripts/seed-users.mjs; DOC-0017 TLP RED comes from db/seed/002_seed.sql.
+-- Schema only. Levels per rank and DOC-0017 grants are seeded by db/scripts/seed-users.mjs; DOC-0017 TLP AMBER+STRICT comes from db/seed/002_seed.sql.
 -- Additive only: no DELETE/TRUNCATE/DROP of data. Revoke is soft (revoked_at). Grant rows are never deleted.
 BEGIN;
 

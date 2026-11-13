@@ -2,7 +2,6 @@ import { Link } from '@tanstack/react-router'
 import { type ColumnDef, type FilterFn } from '@tanstack/react-table'
 import { assets, TODAY, type Asset, type Criticality } from '@/data/grc'
 import { DataTableColumnHeader } from '@/components/data-table'
-import { Chip } from '@/components/chip'
 import { StatusDot } from '@/components/status-dot'
 
 const DAY_MS = 86_400_000
@@ -12,8 +11,8 @@ export const isReviewOverdue = (lastReviewed: string) =>
   (Date.parse(TODAY) - Date.parse(lastReviewed)) / DAY_MS > 365
 
 export const statusLabel: Record<Asset['status'], string> = {
-  active: 'Aktif',
-  maintenance: 'Pemeliharaan',
+  active: 'Active',
+  maintenance: 'Maintenance',
   retired: 'Retired',
 }
 
@@ -41,6 +40,12 @@ const criticalityTone: Record<Criticality, 'fail' | 'warn' | 'ink'> = {
   high: 'fail',
   medium: 'warn',
   low: 'ink',
+}
+
+export const criticalityLabel: Record<Criticality, string> = {
+  high: 'High',
+  medium: 'Medium',
+  low: 'Low',
 }
 
 export const assetColumns: ColumnDef<Asset>[] = [
@@ -82,7 +87,7 @@ export const assetColumns: ColumnDef<Asset>[] = [
     accessorKey: 'criticality',
     size: 126,
     header: ({ column }) => <DataTableColumnHeader column={column} title='KRITIKALITAS' />,
-    cell: ({ row }) => <StatusDot tone={criticalityTone[row.original.criticality]}>{row.original.criticality}</StatusDot>,
+    cell: ({ row }) => <StatusDot tone={criticalityTone[row.original.criticality]}>{criticalityLabel[row.original.criticality]}</StatusDot>,
     sortingFn: (rowA, rowB, columnId) => criticalityRank[rowA.getValue<Criticality>(columnId)] - criticalityRank[rowB.getValue<Criticality>(columnId)],
     filterFn: includesAny,
   },
@@ -97,11 +102,14 @@ export const assetColumns: ColumnDef<Asset>[] = [
     accessorKey: 'lastReviewed',
     size: 166,
     header: ({ column }) => <DataTableColumnHeader column={column} title='TINJAUAN' />,
-    cell: ({ row }) => (
-      <div className='flex flex-wrap items-center gap-1.5'>
-        <time className='font-mono text-[9px] tabular-nums' dateTime={row.original.lastReviewed}>{row.original.lastReviewed}</time>
-        <Chip tone={isReviewOverdue(row.original.lastReviewed) ? 'fail' : 'pass'}>{isReviewOverdue(row.original.lastReviewed) ? 'Telat' : 'Aman'}</Chip>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const overdue = isReviewOverdue(row.original.lastReviewed)
+      return (
+        <div className='flex flex-col gap-0.5'>
+          <time className='font-mono text-[9.5px] tabular-nums text-ink-2' dateTime={row.original.lastReviewed}>{row.original.lastReviewed}</time>
+          <span className={`font-mono text-[7.5px] ${overdue ? 'text-fail' : 'text-ink-3'}`}>{overdue ? 'Terlambat' : 'Dalam 365 hari'}</span>
+        </div>
+      )
+    },
   },
 ]

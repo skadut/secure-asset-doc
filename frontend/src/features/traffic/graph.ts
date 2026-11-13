@@ -63,25 +63,32 @@ export type Selection =
   | { kind: 'edge'; source: string; target: string }
   | { kind: 'node'; id: string }
 
-export type GraphNode = { id: string; label: string; x: number; y: number }
+export type GraphNode = { id: string; label: string; x: number; y: number } // x, y: top-left of the card
 
-// Static layout. Service IDs must match the backend recorder.
+export const NODE_W = 152
+export const NODE_H = 50
+// Static layout on a 940x260 canvas. Service IDs must match the backend recorder.
 export const NODES: GraphNode[] = [
-  { id: 'client', label: 'Client', x: 80, y: 190 },
-  { id: 'frontend', label: 'Frontend', x: 240, y: 190 },
-  { id: 'backend', label: 'Backend', x: 390, y: 190 },
-  { id: 'crypto-service', label: 'crypto-api', x: 560, y: 190 },
-  { id: 'db', label: 'db', x: 560, y: 320 },
+  { id: 'client', label: 'client', x: 0, y: 40 },
+  { id: 'frontend', label: 'frontend', x: 224, y: 40 },
+  { id: 'backend', label: 'backend', x: 448, y: 40 },
+  { id: 'crypto-service', label: 'crypto-service', x: 768, y: 40 },
+  { id: 'db', label: 'db', x: 768, y: 198 },
 ]
-export const ZONES = [
-  { label: 'Edge', x0: 0, x1: 180 },
-  { label: 'App', x0: 180, x1: 428 },
-  { label: 'Internal', x0: 428, x1: 900 },
-]
-export const VIEW_W = 900
-export const VIEW_H = 400
-export const NODE_R = 30
+export const VIEW_W = 940
+export const VIEW_H = 260
 export const HISTORY_MAX = 120 // 120 samples: 60 prefill + 60 live
+
+// Orthogonal route per known link. x, y: baseline of the first of two label lines.
+// ponytail: hand-placed for the known links; an unknown link stays in the table but is not drawn.
+export type Route = { d: string; x: number; y: number; anchor: 'start' | 'middle' }
+export const ROUTES: Record<string, Route> = {
+  'client>frontend': { d: 'M152 65 H224', x: 188, y: 47, anchor: 'middle' },
+  'frontend>backend': { d: 'M376 65 H448', x: 412, y: 47, anchor: 'middle' },
+  'backend>crypto-service': { d: 'M600 65 H768', x: 636, y: 47, anchor: 'middle' },
+  'backend>db': { d: 'M600 65 H672 V223 H768', x: 682, y: 150, anchor: 'start' },
+  'client>crypto-service': { d: 'M76 40 V30 H844 V40', x: 460, y: 12, anchor: 'middle' },
+}
 
 export const LEVEL_LABEL: Record<Level, string> = {
   idle: 'Idle',
@@ -129,24 +136,6 @@ export function seriesFor(history: HistoryPoint[], sel: Selection) {
     const fails = list.reduce((s, e) => s + e.rps * e.errorRate, 0)
     return { ts: h.ts, rps, errorRate: rps > 0 ? fails / rps : 0 }
   })
-}
-
-// Edge trimmed to node circles so arrows stay outside the nodes. bend 0 = straight; bend != 0 = quadratic arc, control point offset sideways by bend.
-export function edgePath(a: GraphNode, b: GraphNode, bend = 0) {
-  const dx = b.x - a.x
-  const dy = b.y - a.y
-  const len = Math.hypot(dx, dy) || 1
-  const ux = dx / len
-  const uy = dy / len
-  const x1 = a.x + ux * NODE_R
-  const y1 = a.y + uy * NODE_R
-  const x2 = b.x - ux * NODE_R
-  const y2 = b.y - uy * NODE_R
-  const start = `M ${x1.toFixed(1)} ${y1.toFixed(1)}`
-  if (!bend) return `${start} L ${x2.toFixed(1)} ${y2.toFixed(1)}`
-  const cx = (x1 + x2) / 2 - uy * bend
-  const cy = (y1 + y2) / 2 + ux * bend
-  return `${start} Q ${cx.toFixed(1)} ${cy.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`
 }
 
 const isNum = (v: unknown): v is number =>

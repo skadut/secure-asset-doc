@@ -1,3 +1,4 @@
+// Pen skeleton: grey bars sized like real rows so nothing shifts on load. Props unchanged.
 export function SkeletonRows({ rows = 4, cols = 4 }: { rows?: number; cols?: number }) {
   const rowCount = Math.max(0, Math.min(20, Math.trunc(rows)))
   const colCount = Math.max(1, Math.min(12, Math.trunc(cols)))

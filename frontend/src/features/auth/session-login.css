@@ -1,6 +1,7 @@
 /* Hallmark · macrostructure: Split Workbench · tone: austere technical · anchor hue: moss green */
 .lg-root {
   --lg-input-bg: var(--surface-2);
+  position: relative;
   min-height: 100vh;
   overflow-x: clip;
   background: var(--bg);
@@ -50,7 +51,7 @@
 @keyframes lgStepIn {
   from {
     opacity: 0;
-    transform: translateX(18px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -78,48 +79,6 @@
     stroke-dashoffset: 100.5;
   }
 }
-@keyframes lgShakeA {
-  0%,
-  100% {
-    transform: none;
-  }
-  20% {
-    transform: translateX(-8px);
-  }
-  40% {
-    transform: translateX(8px);
-  }
-  60% {
-    transform: translateX(-5px);
-  }
-  80% {
-    transform: translateX(5px);
-  }
-}
-@keyframes lgShakeB {
-  0%,
-  100% {
-    transform: none;
-  }
-  20% {
-    transform: translateX(-8px);
-  }
-  40% {
-    transform: translateX(8px);
-  }
-  60% {
-    transform: translateX(-5px);
-  }
-  80% {
-    transform: translateX(5px);
-  }
-}
-@keyframes lgOut {
-  to {
-    opacity: 0;
-    transform: scale(1.02);
-  }
-}
 .lg-in {
   animation: lgIn 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
@@ -130,7 +89,10 @@
   animation: lgIn 0.5s 0.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 .lg-step {
-  animation: lgStepIn 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: lgStepIn 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.lg-step-out {
+  animation: lgStageOut 0.18s ease forwards;
 }
 .lg-row {
   animation: lgIn 0.3s ease-out both;
@@ -154,13 +116,7 @@
   animation: lgTotp 30s linear infinite;
 }
 .lg-shake-a {
-  animation: lgShakeA 0.4s;
-}
-.lg-shake-b {
-  animation: lgShakeB 0.4s;
-}
-.lg-leave {
-  animation: lgOut 0.6s 0.1s ease-in both;
+  animation: lgShake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 .lg-glyph {
   width: 18px;
@@ -178,26 +134,20 @@
   grid-template-columns: minmax(0, 0.92fr) minmax(540px, 1.08fr);
 }
 .lg-about {
-  --lg-hero-bg: var(--ink);
-  --lg-hero-fg: var(--bg);
-  --lg-hero-dim: color-mix(in srgb, var(--bg) 68%, transparent);
-  --lg-hero-line: color-mix(in srgb, var(--bg) 26%, transparent);
+  --lg-hero-bg: var(--bg);
+  --lg-hero-fg: var(--ink);
+  --lg-hero-dim: var(--ink-2);
+  --lg-hero-line: var(--line);
   position: relative;
   overflow: hidden;
   min-width: 0;
-  padding: 48px 40px;
-  border-right: 1px solid var(--line-strong);
+  padding: 44px 56px 40px;
+  border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 26px;
   background: var(--lg-hero-bg);
   color: var(--lg-hero-fg);
-}
-.dark .lg-about {
-  --lg-hero-bg: var(--bg);
-  --lg-hero-fg: var(--ink);
-  --lg-hero-dim: color-mix(in srgb, var(--ink) 64%, transparent);
-  --lg-hero-line: color-mix(in srgb, var(--ink) 20%, transparent);
 }
 .lg-brand,
 .lg-intro,
@@ -238,7 +188,8 @@
 }
 .lg-intro h1 {
   margin: 0;
-  font: 600 44px/1.05 var(--font-heading);
+  font: 600 56px/57px var(--font-heading);
+  letter-spacing: -0.8px;
 }
 .lg-intro p {
   margin: 14px 0 0;
@@ -333,37 +284,21 @@
   display: flex;
   justify-content: flex-end;
 }
-.lg-progress {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  list-style: none;
-  margin: 0;
+.lg-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
   padding: 0;
-  gap: 6px;
-}
-.lg-progress li {
-  border-top: 1px solid var(--line);
-  padding-top: 8px;
-  color: var(--ink-3);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  overflow-wrap: anywhere;
-}
-.lg-progress li.done {
-  border-color: var(--pass);
-  color: var(--ink);
-}
-.lg-progress li.current {
-  border-color: var(--ink);
-  color: var(--ink);
-}
-.lg-progress li.locked {
-  border-color: var(--fail);
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  list-style: none;
 }
 .lg-card {
   background: var(--surface);
-  padding: 28px;
+  padding: 32px;
   border: 1px solid var(--line);
   min-width: 0;
 }
@@ -375,7 +310,8 @@
 .lg-eyebrow {
   color: var(--ink-3);
   font: 10px/1.2 var(--font-mono);
-  letter-spacing: 0.08em;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
 }
 .lg-card h2 {
   margin: 2px 0 0;
@@ -501,13 +437,13 @@
 }
 .lg-account svg {
   flex: none;
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   transform: rotate(-90deg);
   fill: none;
 }
 .lg-account circle {
-  stroke-width: 3;
+  stroke-width: 2;
 }
 .lg-account .track {
   stroke: var(--line-strong);
@@ -681,10 +617,108 @@
     padding: 22px;
   }
 }
+.lg-scanline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.6;
+  background: var(--line-strong);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--line-2) 30%, transparent);
+}
+.lg-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  background: var(--ink);
+  color: var(--bg);
+  font: 600 13px var(--font-mono);
+}
+.lg-bars,
+.lg-nums {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+.lg-bars i {
+  height: 3px;
+  background: var(--sunken);
+  transition: background-color 0.3s ease;
+}
+.lg-bars i.done,
+.lg-bars i.now {
+  background: var(--ink);
+}
+.lg-nums b {
+  font: 400 9px var(--font-mono);
+  color: var(--line-2);
+  transition: color 0.3s ease;
+}
+.lg-nums b.now {
+  color: var(--ink);
+  font-weight: 600;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lg-scanline {
+    animation: lgScan 6.4s linear infinite;
+  }
+  @keyframes lgScan {
+    0% {
+      transform: translateY(0);
+      opacity: 0;
+    }
+    2% {
+      opacity: 0.6;
+    }
+    92% {
+      transform: translateY(100vh);
+      opacity: 0.6;
+    }
+    92.1%,
+    100% {
+      transform: translateY(100vh);
+      opacity: 0;
+    }
+  }
+  @keyframes lgShake {
+    10%,
+    90% {
+      transform: translateX(-1px);
+    }
+    20%,
+    80% {
+      transform: translateX(2px);
+    }
+    30%,
+    50%,
+    70% {
+      transform: translateX(-4px);
+    }
+    40%,
+    60% {
+      transform: translateX(4px);
+    }
+  }
+  @keyframes lgStageOut {
+    to {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .lg-root *,
   .lg-root {
     animation: none !important;
     transition: none !important;
+  }
+  .lg-scanline {
+    display: none;
   }
 }

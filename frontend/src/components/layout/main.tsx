@@ -6,19 +6,19 @@ type MainProps = React.HTMLAttributes<HTMLElement> & {
   ref?: React.Ref<HTMLElement>
 }
 
-export function Main({ fixed, className, fluid, ...props }: MainProps) {
+// Content is full width (pen: starts right after the rail, 24px padding).
+// `fluid` is kept for API compatibility and exposed as data-fluid.
+export function Main({ fixed, fluid, className, ...props }: MainProps) {
   return (
     <main
       data-layout={fixed ? 'fixed' : 'auto'}
+      data-fluid={fluid ? '' : undefined}
       className={cn(
-        'min-w-0 p-4 sm:p-6',
+        'min-w-0 w-full p-4 sm:p-6',
 
         // If layout is fixed, make the main container flex and grow
         fixed && 'flex grow flex-col overflow-hidden',
 
-        // If layout is not fluid, set the max-width
-        !fluid &&
-          '@7xl/content:mx-auto @7xl/content:w-full @7xl/content:max-w-7xl',
         className
       )}
       {...props}

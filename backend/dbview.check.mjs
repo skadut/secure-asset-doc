@@ -1,11 +1,24 @@
 import assert from 'node:assert/strict';
-import { truncate, quoteIdent, clampLimit, clampOffset, resolveTable, buildSelectSql } from './dbview.mjs';
+import { truncate, isCredentialColumn, maskCell, quoteIdent, clampLimit, clampOffset, resolveTable, buildSelectSql } from './dbview.mjs';
 
 function main() {
   // truncation
   assert.equal(truncate('a'.repeat(500)), 'a'.repeat(300) + '… (500 chars)');
   assert.equal(truncate('abc'), 'abc');
   assert.equal(truncate(42), 42);
+
+  // credential masking
+  assert.equal(isCredentialColumn('password_hash'), true);
+  assert.equal(isCredentialColumn('totp_secret'), true);
+  assert.equal(isCredentialColumn('Password'), true);
+  assert.equal(isCredentialColumn('token_hash'), false);
+  assert.equal(isCredentialColumn('username'), false);
+  assert.equal(maskCell('password_hash', '$2b$hash'), '[DISEMBUNYIKAN]');
+  assert.equal(maskCell('totp_secret', 'JBSWY3DP'), '[DISEMBUNYIKAN]');
+  assert.equal(maskCell('password_hash', null), null);
+  assert.equal(maskCell('token_hash', 'abc'), 'abc');
+  assert.equal(maskCell('username', 'alice'), 'alice');
+  assert.equal(maskCell('id', 42), 42);
 
   // quoting
   assert.equal(quoteIdent('a"b'), '"a""b"');

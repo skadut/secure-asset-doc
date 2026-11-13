@@ -204,7 +204,13 @@ header.header-fixed > div::after {
   }
 }
 
-/* Motion. Keyframes copied from the helmet in ref/claude-design-ui/source/Prototype.dc.html (screenIn, panelA, rowIn, toastIn). */
+/* Motion utilities, all gated by prefers-reduced-motion: no-preference (see block below the legacy keyframes).
+ * .anim-rise   rise 260ms on any element (translateY 6px to 0)
+ * .view-enter  on a wrapper: direct children rise with a 40ms stagger, capped at child 6
+ * .bar-fill    progress fill; set width inline, it eases over .5s
+ * Body colour/background ease .25s; table row hover .15s; theme knob in theme-switch.css.
+ * Focus outlines are never animated.
+ * Legacy keyframes copied from the helmet in ref/claude-design-ui/source/Prototype.dc.html (screenIn, panelA, rowIn, toastIn). */
 @keyframes screenIn {
   from {
     opacity: 0;
@@ -285,7 +291,53 @@ header.header-fixed > div::after {
 }
 
 [data-sonner-toast] {
-  animation: toastIn 240ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+  animation: toastIn 250ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes rise {
+    from {
+      transform: translateY(6px);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  body {
+    transition:
+      background-color 0.25s ease,
+      color 0.25s ease;
+  }
+
+  .anim-rise,
+  .view-enter > * {
+    animation: rise 0.26s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .view-enter > *:nth-child(2) {
+    animation-delay: 40ms;
+  }
+  .view-enter > *:nth-child(3) {
+    animation-delay: 80ms;
+  }
+  .view-enter > *:nth-child(4) {
+    animation-delay: 120ms;
+  }
+  .view-enter > *:nth-child(5) {
+    animation-delay: 160ms;
+  }
+  .view-enter > *:nth-child(n + 6) {
+    animation-delay: 200ms;
+  }
+
+  .bar-fill {
+    transition: width 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  [data-slot='table-row'] {
+    transition: background-color 0.15s ease;
+  }
 }
 
 /* Unlayered so Tailwind utilities cannot beat the reset. */

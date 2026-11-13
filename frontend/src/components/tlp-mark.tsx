@@ -7,10 +7,11 @@ const swatch: Record<string, string> = {
   'RED+STRICT': 'bg-tlp-red-strict',
 }
 
+// Pen: square swatch (no radius), mono 9px label. Props unchanged.
 export function TlpMark({ tlp, compact = false }: { tlp: string; compact?: boolean }) {
   const label = tlp.toUpperCase()
   return (
-    <span className='inline-flex items-center gap-[5px] whitespace-nowrap font-mono text-[9px] font-medium leading-none text-ink-2' aria-label={`TLP:${label}`}>
+    <span className='inline-flex items-center gap-1.5 whitespace-nowrap font-mono text-[9px] font-medium leading-none text-ink-2' aria-label={`TLP:${label}`}>
       <i aria-hidden='true' className={`size-2 shrink-0 ${swatch[label] ?? 'bg-ink-3'}`} />
       {!compact && <span aria-hidden='true'>TLP:{label}</span>}
     </span>

@@ -41,7 +41,7 @@ INSERT INTO documents (id, title, type, tlp, status, owner, approver, next_revie
 ('DOC-0014', 'Laporan Pemeriksaan Sistem OT Simulasi Triwulan III 2026', 'Audit report', 'AMBER', 'in review', 'Pemeriksa Internal Simulasi', 'Dewan Pengarah Simulasi', '2027-01-15'),
 ('DOC-0015', 'Panduan Penanganan Insiden Pertukaran Sinyal Simulasi', 'Incident response plan', 'AMBER', 'draft', 'Tim Respons Insiden Simulasi', 'Kantor Keamanan Simulasi', '2026-11-05'),
 ('DOC-0016', 'Panduan Pemulihan SCADA Instalasi Simulasi', 'Procedure', 'AMBER+STRICT', 'approved', 'Teknik OT Simulasi', 'Tim Respons Insiden Simulasi', '2026-10-25'),
-('DOC-0017', 'Operation Order: Exercise Glasswing (fictional training document)', 'Procedure', 'RED', 'approved', 'Tim Respons Insiden Simulasi', 'Dewan Pengarah Simulasi', '2027-04-28')
+('DOC-0017', 'Operation Order: Exercise Glasswing (fictional training document)', 'Procedure', 'AMBER+STRICT', 'approved', 'Tim Respons Insiden Simulasi', 'Dewan Pengarah Simulasi', '2027-04-28')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO document_versions (document_id, version, date, author, summary, approved_by, file_name, mime_type, size_bytes, content_base64) VALUES

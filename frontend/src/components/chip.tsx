@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 
+// Pen chip: 1px tone border, mono 9px uppercase, tinted text. Props unchanged.
 export function Chip({
   children,
   tone = 'line',
@@ -14,5 +15,5 @@ export function Chip({
     fail: 'border-fail text-fail',
     erase: 'border-erase text-erase',
   }[tone]
-  return <span className={`inline-flex items-center border px-1.5 py-0.5 font-mono text-[9px] uppercase leading-[1.4] tracking-[.04em] ${colors}`}>{children}</span>
+  return <span className={`inline-flex items-center border px-2 py-[3px] font-mono text-[9px] uppercase leading-[1.3] tracking-[.06em] ${colors}`}>{children}</span>
 }

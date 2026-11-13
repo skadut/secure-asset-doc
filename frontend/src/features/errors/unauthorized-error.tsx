@@ -1,13 +1,18 @@
 import { Link } from '@tanstack/react-router'
 import { ErrorState } from '@/components/error-state'
+import { Button } from '@/components/ui/button'
 
 export function UnauthorisedError() {
   return (
     <ErrorState
-      code='401 · BELUM MASUK'
-      title='Sesi tidak valid'
+      code='401 · SESI BERAKHIR'
+      title='Sesi berakhir'
       desc='Silakan masuk kembali untuk melanjutkan.'
-      action={<Link to='/sign-in' className='inline-flex items-center underline underline-offset-4'>Masuk</Link>}
+      action={
+        <Button asChild size='sm' className='rounded-none bg-primary text-primary-foreground hover:bg-primary/90'>
+          <Link to='/sign-in'>Masuk</Link>
+        </Button>
+      }
     />
   )
 }

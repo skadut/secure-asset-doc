@@ -1,0 +1,7 @@
+/* Prototype motion for Akses operasi. Gated like the global motion utilities. */
+@media (prefers-reduced-motion: no-preference) {
+  /* Prototype .sw i: knob slides .18s on the matrix toggles only. */
+  .op-switch [data-slot='switch-thumb'] {
+    transition: transform 0.18s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+}

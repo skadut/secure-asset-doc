@@ -113,3 +113,13 @@ export function groupUsers(
     return { key, label, users: group }
   })
 }
+
+export function switchFor(state: CellState): {
+  checked: boolean
+  disabled: boolean
+} {
+  return {
+    checked: state === 'grant' || state === 'level',
+    disabled: state === 'level',
+  }
+}

@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { Search as SearchIcon } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { Columns3, ScrollText, Search as SearchIcon } from 'lucide-react'
 import {
   type ColumnFiltersState,
   type PaginationState,
   type SortingState,
+  type VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -11,7 +13,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { assets, evidenceLinks } from '@/data/grc'
+import { assets, evidenceLinks, type Asset, type Criticality } from '@/data/grc'
+import { getMe } from '@/lib/session'
 import {
   Table,
   TableBody,
@@ -21,6 +24,13 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -31,7 +41,9 @@ import { CardPanel } from '@/components/card-panel'
 import { EmptyState } from '@/components/empty-state'
 import { PageHead } from '@/components/page-head'
 import { StatStrip } from '@/components/stat-strip'
-import { assetColumns, assetFilterOptions, isReviewOverdue } from './columns'
+import { assetColumns, assetFilterOptions, criticalityLabel, isReviewOverdue, statusLabel } from './columns'
+
+const PAGE_SIZE = 9
 
 const controlClass =
   'h-9 min-w-0 border border-line bg-surface px-2 font-mono text-[9px] uppercase tracking-[.04em] text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ink-3 max-sm:min-h-11'
@@ -44,20 +56,33 @@ const FILTERS: { id: string; label: string; width: string; options: readonly str
   { id: 'purdueLevel', label: 'Purdue', width: 'w-[136px]', options: assetFilterOptions.purdueLevel },
 ]
 
+const COLUMN_LABELS: Record<string, string> = {
+  id: 'ID',
+  name: 'Nama',
+  type: 'Tipe',
+  site: 'Site',
+  purdueLevel: 'Purdue',
+  criticality: 'Kritikalitas',
+  status: 'Status',
+  lastReviewed: 'Tinjauan',
+}
+
 export function Assets() {
   // ponytail: local table state; move to URL search params when filters need sharing.
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [globalFilter, setGlobalFilter] = useState('')
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
+  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: PAGE_SIZE })
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: assets,
     columns: assetColumns,
-    state: { sorting, columnFilters, globalFilter, pagination },
+    state: { sorting, columnFilters, columnVisibility, globalFilter, pagination },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
     onGlobalFilterChange: setGlobalFilter,
     onPaginationChange: setPagination,
     globalFilterFn: (row, _columnId, value: string) => row.original.name.toLowerCase().includes(value.toLowerCase()),
@@ -70,7 +95,12 @@ export function Assets() {
   const rows = table.getRowModel().rows
   const filtered = table.getFilteredRowModel().rows.length
   const pageCount = table.getPageCount()
+  const pageIndex = table.getState().pagination.pageIndex
   const evidenceAssets = new Set(evidenceLinks.map((link) => link.assetId))
+  const canOpenAudit = (() => {
+    const me = getMe()
+    return me?.securityOfficer === true || me?.superAdmin === true
+  })()
 
   const filterValue = (id: string) => String(table.getColumn(id)?.getFilterValue() ?? '')
 
@@ -87,7 +117,18 @@ export function Assets() {
         <PageHead
           title='Aset'
           eyebrow={`INVENTARIS OT · ${assets.length} ASET · IEC 62443 ZONE`}
-          note='DATA DARI /api/grc'
+          note='DATA /api/grc · TANPA ENDPOINT TULIS'
+          actions={
+            canOpenAudit ? (
+              <Link
+                to='/audit-log'
+                className='inline-flex h-9 items-center gap-1.5 border border-line bg-surface px-3 font-mono text-[10px] text-ink-2 hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+              >
+                <ScrollText aria-hidden='true' className='size-3.5' />
+                Buka audit log
+              </Link>
+            ) : undefined
+          }
         />
 
         <StatStrip
@@ -114,22 +155,44 @@ export function Assets() {
             />
           </div>
           {FILTERS.map((filter) => (
-            <label key={filter.id} className={`flex flex-col gap-0.5 ${filter.width} max-sm:w-full`}>
-              <span className='font-mono text-[7px] uppercase tracking-[.08em] text-ink-3'>{filter.label}</span>
+            <label key={filter.id} className={`flex flex-col ${filter.width} max-sm:w-full`}>
+              <span className='sr-only'>{filter.label}</span>
               <select
                 className={controlClass}
                 value={filterValue(filter.id)}
                 onChange={(event) => table.getColumn(filter.id)?.setFilterValue(event.target.value)}
                 aria-label={filter.label}
               >
-                <option value=''>Semua</option>
+                <option value=''>{filter.label}: semua</option>
                 {filter.options.map((option) => (
-                  <option key={option} value={option}>{option}</option>
+                  <option key={option} value={option}>{filter.id === 'criticality' ? criticalityLabel[option as Criticality] : filter.id === 'status' ? statusLabel[option as Asset['status']] : option}</option>
                 ))}
               </select>
             </label>
           ))}
-          <span className='ml-auto font-mono text-[9px] text-ink-3' aria-live='polite'>{filtered} aset</span>
+          <div className='flex flex-1 items-center justify-end gap-2 max-sm:w-full'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant='outline' size='icon' className='size-[34px] max-sm:size-11' aria-label='Atur kolom tampil'>
+                  <Columns3 aria-hidden='true' className='size-3.5' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='end' className='w-44'>
+                <DropdownMenuLabel className='font-mono text-[9px] uppercase tracking-[.08em]'>Kolom</DropdownMenuLabel>
+                {table.getAllLeafColumns().filter((column) => column.getCanHide()).map((column) => (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className='font-mono text-[10px]'
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                    onSelect={(event) => event.preventDefault()}
+                  >
+                    {COLUMN_LABELS[column.id] ?? column.id}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
         <CardPanel>
@@ -137,9 +200,9 @@ export function Assets() {
             <Table className='w-full min-w-[1416px] table-fixed'>
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
+                  <TableRow key={headerGroup.id} className='hover:bg-transparent'>
                     {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id} style={{ width: header.getSize() }} className='h-8 px-3 font-mono text-[8px] uppercase tracking-[.08em]'>
+                      <TableHead key={header.id} style={{ width: header.getSize() }} className='h-8 bg-surface-2 px-3.5 font-mono text-[7.5px] uppercase tracking-[.09em] text-ink-3'>
                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
                     ))}
@@ -149,9 +212,9 @@ export function Assets() {
               <TableBody>
                 {rows.length ? (
                   rows.map((row) => (
-                    <TableRow key={row.id} className='h-[52px]'>
+                    <TableRow key={row.id} className='h-[52px] transition-colors duration-150 hover:bg-surface-2'>
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className='px-3 text-[11px]'>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                        <TableCell key={cell.id} className='px-3.5 text-[11px]'>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                       ))}
                     </TableRow>
                   ))
@@ -171,13 +234,25 @@ export function Assets() {
 
           <footer className='flex flex-wrap items-center justify-between gap-2 border-t border-line bg-surface-2 px-3.5 py-2'>
             <span className='font-mono text-[9px] text-ink-3'>
-              {filtered ? `Menampilkan ${rows.length} dari ${filtered} aset` : 'Menampilkan 0 aset'}
+              {filtered ? `Menampilkan ${pageIndex * PAGE_SIZE + 1}–${pageIndex * PAGE_SIZE + rows.length} dari ${filtered} aset` : 'Menampilkan 0 aset'}
             </span>
-            <div className='flex items-center gap-1'>
-              <Button variant='outline' size='sm' className='h-8 min-w-8 px-2 font-mono text-[9px] max-sm:min-h-11' disabled={!table.getCanPreviousPage()} onClick={() => table.previousPage()} aria-label='Halaman sebelumnya'>‹</Button>
-              <span className='px-2 font-mono text-[9px] tabular-nums text-ink-2'>{pageCount ? pagination.pageIndex + 1 : 0} / {pageCount}</span>
-              <Button variant='outline' size='sm' className='h-8 min-w-8 px-2 font-mono text-[9px] max-sm:min-h-11' disabled={!table.getCanNextPage()} onClick={() => table.nextPage()} aria-label='Halaman berikutnya'>›</Button>
-            </div>
+            <nav aria-label='Halaman aset' className='flex items-center gap-1'>
+              <Button variant='outline' size='icon' className='size-6 font-mono text-[10px]' disabled={!table.getCanPreviousPage()} onClick={() => table.previousPage()} aria-label='Halaman sebelumnya'>‹</Button>
+              {Array.from({ length: pageCount }, (_, index) => (
+                <Button
+                  key={index}
+                  variant='outline'
+                  size='icon'
+                  className={`size-6 font-mono text-[10px] tabular-nums ${index === pageIndex ? 'border-ink bg-ink text-surface hover:bg-ink' : ''}`}
+                  aria-label={`Halaman ${index + 1}`}
+                  aria-current={index === pageIndex ? 'page' : undefined}
+                  onClick={() => table.setPageIndex(index)}
+                >
+                  {index + 1}
+                </Button>
+              ))}
+              <Button variant='outline' size='icon' className='size-6 font-mono text-[10px]' disabled={!table.getCanNextPage()} onClick={() => table.nextPage()} aria-label='Halaman berikutnya'>›</Button>
+            </nav>
           </footer>
         </CardPanel>
       </Main>

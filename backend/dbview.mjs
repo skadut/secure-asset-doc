@@ -7,7 +7,14 @@ export function truncate(v) {
   return `${v.slice(0, MAX_CELL)}… (${v.length} chars)`;
 }
 
-export const quoteIdent = (name) => '"' + String(name).replace(/"/g, '""') + '"';
+const CREDENTIAL_COL = /password|totp|secret/i;
+export const isCredentialColumn = (name) => CREDENTIAL_COL.test(String(name));
+export function maskCell(colName, value) {
+  if (value === null) return null;
+  return isCredentialColumn(colName) ? '[DISEMBUNYIKAN]' : value;
+}
+
+export const quoteIdent =(name) => '"' + String(name).replace(/"/g, '""') + '"';
 
 export function clampLimit(v) {
   const n = parseInt(v, 10);

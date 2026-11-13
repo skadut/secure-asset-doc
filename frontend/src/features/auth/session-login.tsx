@@ -101,6 +101,7 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
   const [failedSinceLast, setFailedSinceLast] = useState(0)
   const [leaving, setLeaving] = useState(false)
   const [shaking, setShaking] = useState(false)
+  const [outgoing, setOutgoing] = useState(false)
   const refocus = useRef<HTMLInputElement | null>(null)
   const firstRef = useRef<HTMLElement | HTMLInputElement | null>(null)
   const cardRef = useRef<HTMLDivElement | null>(null)
@@ -146,8 +147,16 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
   }
   const failShake = () => setShaking(true)
   const go = (next: Step) => {
-    setStep(next)
     setShaking(false)
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setStep(next)
+      return
+    }
+    setOutgoing(true)
+    later(() => {
+      setOutgoing(false)
+      setStep(next)
+    }, 180)
   }
   const lock = (until: string | null) => {
     setLockedUntil(until)
@@ -357,7 +366,7 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
         window.history.replaceState(null, '', '/documents')
         onSuccess()
       },
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 700
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220
     )
   }
 
@@ -398,14 +407,14 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
   const invalid = Boolean(error) && attemptsLeft !== null
 
   return (
-    <main className={`lg-root${leaving ? 'lg-leave' : ''}`}>
+    <main className='lg-root'>
+      <span className='lg-scanline' aria-hidden='true' />
       <div className='lg-layout'>
         <section className='lg-about' aria-label='Tentang sistem'>
           <div className='lg-brand lg-in'>
-            <svg className='lg-shield' viewBox='0 0 24 24' aria-hidden='true'>
-              <path d='M12 3 20 6v6c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V6z' />
-              <path d='M9 11h6M9 14.5h6' />
-            </svg>
+            <span className='lg-mark' aria-hidden='true'>
+              S
+            </span>
             <div>
               <div className='lg-brand-name'>Secure Asset Doc</div>
               <div className='lg-muted lg-brand-sub'>
@@ -422,10 +431,10 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
           </div>
           <div className='lg-facts lg-in3'>
             {[
-              ['FAKTOR', 'Kata sandi, kode autentikator'],
-              ['JAMINAN', 'AAL2, SP 800-63B'],
+              ['FAKTOR', 'Kata sandi + kode autentikator'],
+              ['JAMINAN', 'AAL2 · SP 800-63B'],
               ['KUNCI', 'MSK tersegel di TPM 2.0'],
-              ['SESI', 'Kunci idle 5 mnt, batas 30 mnt'],
+              ['SESI', 'Idle 5 mnt · batas 30 mnt'],
             ].map(([title, value]) => (
               <div className='lg-fact' key={title}>
                 <div className='lg-fact-label'>{title}</div>
@@ -449,8 +458,9 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
             </div>
           </div>
           <div className='lg-help'>
-            Terkunci atau kehilangan autentikator: petugas keamanan sistem,
-            [EKSTENSI TELEPON]
+            Terkunci atau kehilangan autentikator:
+            <br />
+            petugas keamanan sistem · [EKSTENSI TELEPON]
           </div>
         </section>
         <section className='lg-main' aria-label='Masuk'>
@@ -458,7 +468,24 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
             <div className='lg-toolbar'>
               <ThemeSwitch />
             </div>
-            <ol className='lg-progress' aria-label='Tahapan masuk'>
+            <div className='lg-bars' aria-hidden='true'>
+              {labels.map((_, i) => (
+                <i
+                  key={i}
+                  className={
+                    i < enterStep ? 'done' : i === enterStep ? 'now' : ''
+                  }
+                />
+              ))}
+            </div>
+            <div className='lg-nums' aria-hidden='true'>
+              {labels.map((_, i) => (
+                <b key={i} className={i === enterStep ? 'now' : ''}>
+                  {String(i + 1).padStart(2, '0')}
+                </b>
+              ))}
+            </div>
+            <ol className='lg-sr-only' aria-label='Tahapan masuk'>
               {labels.map((label, i) => (
                 <li
                   key={label}
@@ -478,7 +505,10 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
               }}
               key={step}
             >
-              <div className='lg-step'>
+              <div
+                className={outgoing || leaving ? 'lg-step lg-step-out' : 'lg-step'}
+                inert={outgoing || leaving}
+              >
                 {step === 'notice' && (
                   <div className='lg-stack'>
                     <header>
@@ -531,6 +561,10 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                     <header>
                       <div className='lg-eyebrow'>Tahap 2 dari 5</div>
                       <h2>Masuk</h2>
+                      <p>
+                        Kredensial dinas diverifikasi, lalu kode autentikator
+                        diminta pada tahap berikutnya.
+                      </p>
                     </header>
                     {error && (
                       <div id='lg-alert' role='alert' className='lg-error'>
@@ -671,7 +705,9 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                             setError('')
                           }}
                           placeholder='······'
-                          className={`lg-code-input${invalid ? 'invalid' : ''}`}
+                          className={
+                            invalid ? 'lg-code-input invalid' : 'lg-code-input'
+                          }
                           aria-invalid={invalid || undefined}
                           aria-describedby={invalid ? 'lg-alert' : undefined}
                           required
@@ -753,7 +789,9 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                           : i === 0 && !deviceError
                         return (
                           <div
-                            className={`lg-check-row${shown ? 'lg-row' : ''}`}
+                            className={
+                              shown ? 'lg-check-row lg-row' : 'lg-check-row'
+                            }
                             key={name}
                           >
                             <span

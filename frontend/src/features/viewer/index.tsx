@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useSearch } from '@tanstack/react-router'
-import { ArrowLeft, Clock3, X } from 'lucide-react'
-import { CSF_FUNCTIONS, documents, type Tlp } from '@/data/grc'
+import { ArrowLeft, Clock3, Lock, X } from 'lucide-react'
+import { CSF_FUNCTIONS, documents } from '@/data/grc'
 import { getDocument, subcategoriesForDocument } from '@/lib/grc'
 import { getMe } from '@/lib/session'
 import { explainAccess } from '@/lib/access-api'
@@ -11,24 +11,11 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import { TlpMark } from '@/components/tlp-mark'
 import { Chip } from '@/components/chip'
 import { FilePreview } from '@/features/documents/components/file-preview'
+import { TLP_BAR, isGrantOnly, sessionLimitSeconds } from '@/features/documents/helpers'
 import { DocumentUnavailable } from '@/features/errors/document-unavailable'
 import './viewer.css'
 
 const pad = (n: number) => String(n).padStart(2, '0')
-
-export function sessionLimitSeconds(tlp: Tlp): number | null {
-  switch (tlp) {
-    case 'RED':
-    case 'RED+STRICT':
-      return 600
-    case 'AMBER':
-    case 'AMBER+STRICT':
-      return 900
-    case 'GREEN':
-    case 'CLEAR':
-      return null
-  }
-}
 
 export function Viewer() {
   const { doc } = useSearch({ from: '/_authenticated/viewer/' })
@@ -155,6 +142,11 @@ function ViewerBody({ docId }: { docId: string }) {
   })
 
   const rootRef = useRef<HTMLDivElement>(null)
+  // Watermark per pen: initials + access level; time stamped once on open.
+  const [openedAt] = useState(() => new Date())
+  const initials = (me?.name ?? '').split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('')
+  const watermark = me ? `${initials} · L${me.accessLevel}` : '—'
+  const stamp = `${pad(openedAt.getHours())}:${pad(openedAt.getMinutes())}`
 
   useEffect(() => {
     document.body.classList.add('viewer-active')
@@ -208,7 +200,9 @@ function ViewerBody({ docId }: { docId: string }) {
         </Link>
         <div className='hidden h-5 border-l border-line sm:block' />
         <span className='font-mono text-[10px] text-ink-2'>{doc.id}</span>
-        <TlpMark tlp={doc.tlp} />
+        <span className={`inline-flex items-center whitespace-nowrap px-1.5 py-0.5 font-mono text-[8px] font-medium uppercase tracking-[.06em] ${TLP_BAR[doc.tlp]}`}>
+          TLP:{doc.tlp}
+        </span>
         <span className='min-w-0 flex-1 basis-full truncate text-[11px] text-ink-2 sm:basis-auto'>
           {doc.title} · v{current?.version ?? '-'}
         </span>
@@ -247,8 +241,9 @@ function ViewerBody({ docId }: { docId: string }) {
               </li>
             ))}
           </ol>
-          <p className='hidden border-t border-line px-3 py-3 text-[9px] leading-relaxed text-ink-3 lg:block'>
-            Versi lama tersedia untuk peninjauan. Akses tetap diperiksa oleh server.
+          <p className='mt-auto hidden gap-1.5 border-t border-line px-3 py-3 text-[7.5px] leading-[13px] text-ink-3 lg:flex lg:flex-col'>
+            <Lock aria-hidden='true' className='size-[13px]' />
+            Salin, cetak, dan simpan diblokir di area ini. Watermark mengikuti akun Anda setiap menit.
           </p>
         </aside>
 
@@ -263,7 +258,7 @@ function ViewerBody({ docId }: { docId: string }) {
               <div className='absolute inset-0 grid -rotate-[30deg] place-content-around gap-28 opacity-[.15]'>
                 {[0, 1, 2].map((index) => (
                   <span key={index} className='whitespace-nowrap font-mono text-[10px] tracking-[.08em] text-[#68716a]'>
-                    {me?.username ?? '—'} · {pad(Math.floor(elapsed / 60))}:{pad(elapsed % 60)} · {doc.id}
+                    {watermark} · {stamp} · {doc.id}
                   </span>
                 ))}
               </div>
@@ -316,19 +311,22 @@ function ViewerBody({ docId }: { docId: string }) {
             <MetaField label='PEMILIK'>{doc.owner}</MetaField>
             <MetaField label='PENYETUJU'>{doc.approver}</MetaField>
             <MetaField label='TINJAUAN'>{doc.nextReview}</MetaField>
-            <MetaField label='KLAIM TLP'>TLP:{doc.tlp}{doc.granted ? ' · grant' : ''}</MetaField>
+            <MetaField label='KLAIM TLP'>TLP:{doc.tlp}{isGrantOnly(doc.tlp) ? ' · grant' : ''}</MetaField>
           </dl>
           <section className='border-t border-line px-3 py-3'>
             <h3 className='font-mono text-[8px] uppercase tracking-[.08em] text-ink-3'>Bukti CSF 2.0</h3>
             {evidence.length ? (
-              <ul className='mt-2 flex flex-wrap gap-1.5'>
+              <ul className='mt-2 flex flex-col'>
                 {evidence.map((item) => (
-                  <li key={item.id}>
-                    <Chip>
-                      <span title={`${CSF_FUNCTIONS[item.fn]} · ${item.categoryName}`}>
-                        {item.id}
-                      </span>
-                    </Chip>
+                  <li
+                    key={item.id}
+                    title={`${CSF_FUNCTIONS[item.fn]} · ${item.categoryName}`}
+                    className='flex h-[30px] items-center gap-2 border-b border-line-subtle font-mono text-[9px] text-ink-2'
+                  >
+                    <span className='inline-flex h-4 w-5 items-center justify-center border border-line text-[7px] text-ink-3'>
+                      {item.fn}
+                    </span>
+                    {item.id}
                   </li>
                 ))}
               </ul>
