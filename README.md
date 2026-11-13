@@ -35,6 +35,14 @@ Open [https://skadut-hack.tail9e496c.ts.net/](https://skadut-hack.tail9e496c.ts.
     <td align="center">Secure viewer</td>
   </tr>
   <tr>
+    <td><img src="docs/screenshots/upload-dialog-done.png" width="300" alt="Encrypted document upload"></td>
+    <td><img src="docs/screenshots/uploads-panel.png" width="300" alt="Encrypted uploads with server-side decryption"></td>
+  </tr>
+  <tr>
+    <td align="center">Encrypted upload (<code>/sealfile</code>)</td>
+    <td align="center">Encrypted uploads, decrypted on open (<code>/unsealfile</code>)</td>
+  </tr>
+  <tr>
     <td><img src="docs/screenshots/requests.png" width="300" alt="Dual authorization requests"></td>
     <td><img src="docs/screenshots/operation.png" width="300" alt="Per-document access operations"></td>
     <td><img src="docs/screenshots/audit-log.png" width="300" alt="Audit log"></td>
@@ -89,7 +97,7 @@ Open [https://skadut-hack.tail9e496c.ts.net/](https://skadut-hack.tail9e496c.ts.
 ## What it does
 
 - **Assets:** 20 sample OT assets with type, sector, Purdue level, IEC 62443 zone, criticality, status, and last review.
-- **Document registry:** 18 sample documents with version history, TLP labels (CLEAR to RED+STRICT), linked assets, and CSF evidence. PDF and XLSX preview.
+- **Document registry:** 18 sample documents with version history, TLP labels (CLEAR to RED+STRICT), linked assets, and CSF evidence. PDF and XLSX preview. Uploads are encrypted through crypto-api `/sealfile` before storage and decrypted only on open through `/unsealfile`; they are separate from registry versions.
 - **Secure viewer:** time-limited viewing session bound to the user and document, with a watermark and a countdown. RED and RED+STRICT get the shortest window.
 - **Dual authorization:** a RED+STRICT grant requires one commander (level 5) and one security officer, in any order.
 - **Access operations:** per-document access matrix, request, revoke, and an access-decision tester.
