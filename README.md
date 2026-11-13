@@ -37,10 +37,12 @@ Buka [https://skadut-hack.tail9e496c.ts.net/](https://skadut-hack.tail9e496c.ts.
   <tr>
     <td><img src="docs/screenshots/upload-dialog-done.png" width="300" alt="Unggahan dokumen terenkripsi"></td>
     <td><img src="docs/screenshots/uploads-panel.png" width="300" alt="Unggahan terenkripsi dengan dekripsi sisi server"></td>
+    <td><img src="docs/screenshots/upload-decrypt.png" width="300" alt="Unggahan dibuka dan didekripsi lewat /unsealfile"></td>
   </tr>
   <tr>
     <td align="center">Unggahan terenkripsi (<code>/sealfile</code>)</td>
-    <td align="center">Unggahan terenkripsi, didekripsi saat dibuka (<code>/unsealfile</code>)</td>
+    <td align="center">Daftar unggahan terenkripsi</td>
+    <td align="center">Buka unggahan (<code>/unsealfile</code>)</td>
   </tr>
   <tr>
     <td><img src="docs/screenshots/requests.png" width="300" alt="Permintaan otorisasi ganda"></td>
@@ -75,24 +77,53 @@ Buka [https://skadut-hack.tail9e496c.ts.net/](https://skadut-hack.tail9e496c.ts.
   <tr>
     <td><img src="docs/screenshots/login.png" width="300" alt="Login, langkah 1"></td>
     <td><img src="docs/screenshots/login-device-check.png" width="300" alt="Pemeriksaan perangkat saat login"></td>
-    <td><img src="docs/screenshots/mobile-dashboard.png" width="300" alt="Dashboard pada viewport 390 px"></td>
+    <td><img src="docs/screenshots/login-otp.png" width="300" alt="Login tahap 3, kode autentikator"></td>
   </tr>
   <tr>
     <td align="center">Login</td>
     <td align="center">Pemeriksaan perangkat</td>
-    <td align="center">Dashboard seluler</td>
+    <td align="center">Kode autentikator (TOTP)</td>
   </tr>
   <tr>
     <td><img src="docs/screenshots/error-404.png" width="300" alt="Halaman tidak ditemukan"></td>
     <td><img src="docs/screenshots/error-503.png" width="300" alt="Halaman layanan tidak tersedia"></td>
-    <td></td>
+    <td><img src="docs/screenshots/error-403.png" width="300" alt="Halaman 403 di luar peran"></td>
   </tr>
   <tr>
     <td align="center">404</td>
     <td align="center">503</td>
+    <td align="center">403</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/viewer-403-inline.png" width="300" alt="Viewer menampilkan 403 Dokumen tidak tersedia di bagian Berkas terkontrol, judul token tertutup"></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td align="center">Super admin tanpa grant: judul ber-mask, 403 inline</td>
+    <td></td>
     <td></td>
   </tr>
 </table>
+
+## Demo TPM 2.0 native
+
+Di laptop Windows, `tpm-msk serve` berjalan di host dan memakai TPM 2.0 perangkat keras lewat TBS, tanpa emulator. Aplikasi berjalan di Docker; keyd meminta KEK lewat mTLS. Operator menyetujui fingerprint delivery key keyd. VPS memakai vTPM (`swtpm`) sebagai gantinya. Nilai Shamir share pada tangkapan layar sudah dihitamkan.
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/tpm-native-start.png" width="300" alt="tpm-msk serve dimulai, share disensor"></td>
+    <td><img src="docs/screenshots/tpm-native-fingerprint.png" width="300" alt="Fingerprint delivery key keyd"></td>
+    <td><img src="docs/screenshots/tpm-native-audit-verify.png" width="300" alt="Verifikasi audit berantai hash"></td>
+  </tr>
+  <tr>
+    <td align="center">Start <code>tpm-msk serve</code> (share disensor)</td>
+    <td align="center">Persetujuan fingerprint keyd</td>
+    <td align="center">Verifikasi audit berantai hash: keyd, crypto-api, TPM OK</td>
+  </tr>
+</table>
+
+Langkah lengkap: [docs/operasi/tpm-native-demo.md](docs/operasi/tpm-native-demo.md).
 
 ## Fitur
 
@@ -134,6 +165,7 @@ Komponen, zona, port, diagram, dan urutan baca dokumen lengkap: [docs/arsitektur
 | [docs/services/](docs/services/) | Satu dokumen per container atau proses |
 | [docs/keamanan/](docs/keamanan/) | Model akses, desain kriptografi, batas keamanan |
 | [docs/operasi/](docs/operasi/) | Panduan menjalankan, tutorial operator, PowerShell, retensi |
+| [docs/operasi/tpm-native-demo.md](docs/operasi/tpm-native-demo.md) | Demo TPM 2.0 native di laptop Windows |
 | [docs/referensi/](docs/referensi/) | Blueprint TPM, peta traffic, referensi lain |
 | [docs/demo/](docs/demo/) | Skenario demo |
 | [docs/versi-lama/](docs/versi-lama/) | Arsip README dan modul lama |

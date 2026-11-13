@@ -34,6 +34,8 @@ Membuktikan super admin hanya melihat baris token tersamar untuk RED+STRICT tanp
 
 ![Dashboard super admin menampilkan judul DOC-0013 tersamar](../../screenshots/dashboard-light.png)
 
+![Viewer: judul ber-mask dan 403 inline di Berkas terkontrol](../../screenshots/viewer-403-inline.png)
+
 Tangkapan layar untuk keadaan ikon mata terbuka belum ada; perlu tangkapan baru tanpa menyalin token ke dokumen.
 
 ## Catatan
