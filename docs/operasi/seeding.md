@@ -58,6 +58,8 @@ docker compose run --rm --no-deps -v "./db/scripts/seed-totp.mjs:/app/seed-totp.
 docker compose run --rm --no-deps -v "./db/scripts/seed-totp.mjs:/app/seed-totp.mjs:ro" -e DEMO_TOTP_SECRET backend node /app/seed-totp.mjs --print-uri
 ```
 
+QR code untuk enrollment dapat dibuat dengan `python tools/make-totp-qr.py <out.png>`. Skrip membaca `DEMO_TOTP_SECRET` dari environment atau `.env` dan hanya menulis file gambar. QR berisi secret, jadi perlakukan sebagai rahasia: kirim lewat kanal submission, jangan di-commit dan jangan ditampilkan publik. QR harus dibuat dengan `DEMO_TOTP_SECRET` yang sama dengan target deploy. Untuk VPS, nilainya berasal dari environment deploy, belum tentu sama dengan `.env` lokal.
+
 ## 4. Perlindungan dokumen (`protect-documents`)
 
 `protect-documents.mjs` men-seal setiap versi file, termasuk dokumen CLEAR, lewat crypto-api `/sealfile` dan menyimpannya di `content_ciphertext`. Skrip ini juga memigrasikan baris lama dengan `protection='integrity'` menjadi `encrypted`. Crypto-api harus aktif.
