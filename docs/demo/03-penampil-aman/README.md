@@ -15,8 +15,8 @@ Membuktikan isi dokumen hanya bisa dibuka lewat sesi viewer berbatas waktu, deng
 1. Masuk sebagai `bagus.hartanto`, buka `Registri dokumen`, pilih `DOC-0008` (GREEN), klik `Buka penampil aman`.
 2. Perhatikan header viewer: `DOC-0008`, `TLP:GREEN`, judul, dan batas sesi. Dokumen GREEN mendapat 30 menit. Watermark berisi username dan jam buka.
 3. Coba `Ctrl+P`, `Ctrl+S`, dan klik kanan. Viewer menahan tindakan itu di antarmuka. Ini penghalang tampilan, bukan kontrol keamanan; server tetap memeriksa setiap permintaan.
-4. Buka `/viewer?doc=DOC-0011` sebagai `bagus.hartanto`. Viewer menampilkan `Dokumen tidak tersedia` tanpa ID, judul, atau TLP.
-5. Masuk sebagai `hendra.wiratama`, coba `DOC-0011` lagi. Hasilnya sama: 404 karena tidak ada grant, walau level 5.
+4. Buka `/viewer?doc=DOC-0011` sebagai `bagus.hartanto`. Viewer kembali ke pemilih dengan teks `Pilih dokumen yang tersedia untuk akun Anda.`. DOC-0011 tidak ada dalam daftar, jadi ID, judul, dan TLP tidak bocor.
+5. Masuk sebagai `hendra.wiratama`, buka `/viewer?doc=DOC-0011` lagi. Hasilnya sama: pemilih tanpa DOC-0011. Lewat alat HTTP, rute berkas membalas 404 karena tidak ada grant, walau level 5.
 6. Masuk sebagai `ratna.sekarsari`, buka `DOC-0011`. Viewer terbuka dengan batas 10 menit.
 7. Uji sesi viewer lewat alat HTTP: `POST /api/documents/DOC-0011/viewer-sessions` sebagai `bagus.hartanto` membalas 404. Sebagai `ratna.sekarsari` membalas 201 dengan `sessionId`, `expiresAt`, dan `ttlSeconds`.
 

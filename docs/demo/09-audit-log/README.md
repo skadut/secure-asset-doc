@@ -23,11 +23,12 @@ Membuktikan jejak audit hanya bisa ditambah, bisa difilter, dan purge hanya ters
 
 ## Hasil yang diharapkan
 
-- Tabel audit menampilkan 8 baris per halaman. Filter dan pencarian berjalan di tampilan.
+- Tabel audit menampilkan 8 baris per halaman. Filter berjalan di tampilan. Pencarian mencocokkan ringkasan, ID dokumen/objek, aktor, dan aksi.
 - `audit_events` menolak `UPDATE`, `DELETE`, dan `TRUNCATE` lewat trigger. Aplikasi hanya menambah baris lewat fungsi audit.
 - Setiap keputusan penting tercatat: login, permintaan akses, persetujuan, penolakan, grant, pencabutan, perubahan level, dan derive.
 - Purge menghapus baris lebih lama dari tanggal potong, tetapi kejadian purge itu sendiri tetap dicatat.
 - Tombol purge hanya muncul untuk akun dengan izin `audit.purge`, yaitu PATI dan super admin. Perwira keamanan bisa melihat log tanpa tombol purge.
+- Kejadian audit tentang dokumen yang tidak dapat dibaca pengguna difilter oleh `backend/grc-filter.mjs`. Super admin tanpa grant tidak melihat baris apa pun untuk DOC-0011.
 
 ## Bukti
 

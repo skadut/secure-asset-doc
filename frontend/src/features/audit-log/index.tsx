@@ -153,12 +153,18 @@ export function AuditLog() {
     return Number.isFinite(at) && at >= now - WEEK_MS
   }
 
+  const q = search.toLowerCase()
   const filteredEvents = useMemo(
     () =>
       auditEvents
         .filter(
           (event) =>
-            event.summary.toLowerCase().includes(search.toLowerCase()) &&
+            [event.summary, event.objectId, event.actor, event.action].some(
+              (v) =>
+                String(v ?? '')
+                  .toLowerCase()
+                  .includes(q)
+            ) &&
             (action === 'all' || event.action === action) &&
             (objectType === 'all' || event.objectType === objectType) &&
             (actor === 'all' || event.actor === actor) &&
