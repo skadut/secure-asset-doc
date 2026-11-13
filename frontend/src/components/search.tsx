@@ -5,7 +5,7 @@ import { Button } from './ui/button'
 
 export function Search({
   className = '',
-  placeholder = 'Cari',
+  placeholder = 'Cari dokumen, aset, kontrol',
   ...props
 }: React.ComponentProps<'button'> & { placeholder?: string }) {
   const { setOpen } = useSearch()

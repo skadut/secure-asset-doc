@@ -324,7 +324,7 @@ function LineChart({ rows }: { rows: { date: string; count: number }[] }) {
     <svg viewBox={`0 0 ${width} ${height}`} role='img' aria-label={`Event audit per hari, ${rows.length} hari. Titik terakhir ${last ? `${dateLabel(last.date)}: ${last.count}` : 'tidak ada'}.`} className='block h-auto max-h-[220px] w-full'>
       {[0, 0.5, 1].map((fraction) => { const yy = y(max * fraction); return <g key={fraction}><line x1={padLeft} x2={width - padRight} y1={yy} y2={yy} stroke='var(--line)' strokeWidth='1' /><text x='0' y={yy + 3} fill='var(--ink-3)' fontSize='9' className='font-mono'>{Math.round(max * fraction)}</text></g> })}
       <polygon points={area} fill='var(--chart-1)' opacity='0.12' />
-      <polyline points={points} fill='none' stroke='var(--chart-1)' strokeWidth='1.6' strokeLinejoin='round' />
+      <polyline points={points} fill='none' stroke='var(--ink)' strokeWidth='1.6' strokeLinejoin='round' />
       {rows.map((row, index) => <g key={row.date}><title>{`${row.date}: ${row.count} event audit`}</title><circle cx={x(index)} cy={y(row.count)} r='2.5' fill='var(--chart-1)' /></g>)}
       {rows.map((row, index) => index % 2 === 0 || index === rows.length - 1 ? <text key={`l${row.date}`} x={x(index)} y={height - 6} textAnchor='middle' fill='var(--ink-3)' fontSize='9' className='font-mono'>{dateLabel(row.date)}</text> : null)}
       {last && <text x={x(rows.length - 1)} y={y(last.count) - 7} textAnchor='end' fill='var(--ink)' fontSize='10' className='font-mono'>{last.count}</text>}

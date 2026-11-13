@@ -25,7 +25,7 @@ export function StatStrip({
   items: { label: string; value: string | number; sub?: string; tone?: 'pass' | 'warn' | 'fail' | 'ink'; spark?: number[] }[]
 }) {
   return (
-    <div className='grid min-w-0 grid-cols-2 gap-px border border-line bg-line sm:grid-cols-3 lg:grid-cols-5' role='group' aria-label='Statistics'>
+    <div className={`grid min-w-0 grid-cols-2 gap-px border border-line bg-line sm:grid-cols-3 ${items.length === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-5'}`} role='group' aria-label='Statistics'>
       {items.map(({ label, value, sub, tone = 'ink', spark }) => (
         <div key={label} className='flex min-w-0 flex-col gap-1.5 bg-surface px-4 py-3'>
           <span className='truncate font-mono text-[7.5px] uppercase leading-[1.2] tracking-[.12em] text-ink-3'>{label}</span>
