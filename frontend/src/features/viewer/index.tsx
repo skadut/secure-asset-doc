@@ -7,6 +7,7 @@ import { createPortal } from 'react-dom'
 import { explainAccess } from '@/lib/access-api'
 import { getDocument, subcategoriesForDocument } from '@/lib/grc'
 import { getMe } from '@/lib/session'
+import { SealedTitle } from '@/components/sealed-title'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { TlpMark } from '@/components/tlp-mark'
 import { FilePreview } from '@/features/documents/components/file-preview'
@@ -286,7 +287,8 @@ function ViewerBody({ docId }: { docId: string }) {
             TLP:{doc.tlp}
           </span>
           <span className='min-w-0 flex-1 basis-full truncate text-[12.5px] text-rail-dim sm:basis-auto'>
-            {doc.title} · {versionLabel(current?.version ?? '-')}
+            <SealedTitle title={doc.title} showToggle={false} /> ·{' '}
+            {versionLabel(current?.version ?? '-')}
           </span>
         </div>
         <div className='ml-auto flex shrink-0 items-center gap-3'>
@@ -378,9 +380,11 @@ function ViewerBody({ docId }: { docId: string }) {
                 <p className='font-mono text-[9px] tracking-[.16em] text-[color:var(--paper-mute)] uppercase'>
                   {doc.type} · {doc.id}
                 </p>
-                <h1 className='font-heading text-[27px] leading-[30px] font-semibold'>
-                  {doc.title}
-                </h1>
+                <SealedTitle
+                  as='h1'
+                  title={doc.title}
+                  className='font-heading text-[27px] leading-[30px] font-semibold'
+                />
                 <div className='h-px w-full bg-[var(--paper-ink)]' />
                 <dl className='flex flex-wrap items-center gap-4'>
                   <PaperMeta label='VERSI' value={current?.version ?? '-'} />

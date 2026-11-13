@@ -2,6 +2,8 @@ import { Link } from '@tanstack/react-router'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DetailPanel } from '@/components/detail-panel'
+import { SealedTitle } from '@/components/sealed-title'
+import { maskTitle } from '@/components/sealed-title-helpers'
 import {
   DOC_STATUS_LABEL,
   TLP_BAR,
@@ -66,9 +68,11 @@ export function DocumentsDetailPanel({
 
         <div className='flex min-w-0 flex-col gap-3.5 p-3.5'>
           <header className='flex min-w-0 flex-col gap-2.5'>
-            <h3 className='font-heading text-[22px] leading-[25px] font-semibold break-words text-ink'>
-              {doc.title}
-            </h3>
+            <SealedTitle
+              as='h3'
+              title={doc.title}
+              className='font-heading text-[22px] leading-[25px] font-semibold break-words text-ink'
+            />
             <p className='font-mono text-[11.5px] text-ink-3'>
               {doc.id} · versi {current?.version ?? '-'}
               {fileType ? ` · ${fileType}` : ''}
@@ -163,7 +167,7 @@ export function DocumentsDetailPanel({
             <Link
               to='/viewer'
               search={{ doc: doc.id }}
-              aria-label={`Buka ${doc.title} di penampil aman`}
+              aria-label={`Buka ${maskTitle(doc.title)} di penampil aman`}
             >
               <span>Buka penampil aman</span>
               {limit !== null && (

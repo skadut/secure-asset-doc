@@ -27,7 +27,7 @@ export function AccountLocked({
           ? `Terlalu banyak percobaan gagal. Akun aktif kembali pukul ${time}. Percobaan telah dicatat.`
           : 'Terlalu banyak percobaan gagal. Akun ini dikunci selama 15 menit. Percobaan telah dicatat.'
       }
-      footer='PETUGAS KEAMANAN · [EKSTENSI TELEPON]'
+      footer='PETUGAS KEAMANAN · 0812-3456-7890'
     />
   )
 }

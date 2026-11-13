@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { SealedTitle } from '@/components/sealed-title'
 import { TlpBadge } from '@/components/tlp-badge'
 import { TLP_LEVELS } from '../helpers'
 
@@ -256,7 +257,10 @@ export function DeriveBriefing({
                 >
                   {child.id}
                 </Link>
-                <span className='min-w-0 break-words'>{child.title}</span>
+                <SealedTitle
+                  title={child.title}
+                  className='min-w-0 break-words'
+                />
                 <TlpBadge tlp={child.tlp} />
               </li>
             ))}

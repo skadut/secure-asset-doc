@@ -490,7 +490,7 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
             <div className='lg-help'>
               Terkunci atau kehilangan autentikator:
               <br />
-              petugas keamanan sistem · [EKSTENSI TELEPON]
+              petugas keamanan sistem · 0812-3456-7890
             </div>
             <div className='lg-stamp'>SP 800-53 REV.5 / FIPS 199</div>
           </div>
@@ -1000,7 +1000,7 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                       </p>
                     )}
                     <p className='lg-lock-call'>
-                      Petugas keamanan sistem: [EKSTENSI TELEPON]
+                      Petugas keamanan sistem: 0812-3456-7890
                     </p>
                     <div className='lg-lock-noaction'>
                       TIDAK ADA AKSI PEMULIHAN DI UI

@@ -23,6 +23,7 @@ import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
+import { SealedTitle } from '@/components/sealed-title'
 import { Search } from '@/components/search'
 import {
   CriticalityBadge,
@@ -91,7 +92,7 @@ function DocumentBody({ doc }: { doc: Document }) {
     <>
       <header className='flex min-w-0 flex-col gap-3'>
         <h1 className='flex min-w-0 flex-wrap items-center gap-3 text-2xl font-bold tracking-tight break-words'>
-          {doc.title}
+          <SealedTitle title={doc.title} />
           {doc.granted && <Badge variant='outline'>Diberikan</Badge>}
         </h1>
         <p className='break-words text-muted-foreground'>
