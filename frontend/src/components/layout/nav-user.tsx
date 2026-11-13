@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { BadgeCheck, Bell, ChevronsUpDown, LogOut } from 'lucide-react'
+import { BadgeCheck, Bell, LogOut } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import {
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
@@ -42,7 +41,8 @@ function formatRemaining(expSeconds: number, nowMs: number) {
 }
 
 export function NavUser({ user }: NavUserProps) {
-  const { isMobile } = useSidebar()
+  const { isMobile, state } = useSidebar()
+  const collapsed = state === 'collapsed'
   const [signOutOpen, setSignOutOpen] = useState(false)
   const level = user.level
   const initials =
@@ -58,39 +58,63 @@ export function NavUser({ user }: NavUserProps) {
     <>
       <SidebarMenu>
         <SidebarMenuItem>
-          <div className='flex flex-col gap-1.5 rounded-[10px] bg-black/25 p-2.5 shadow-[inset_0_1px_2px_rgb(0_0_0/.45),0_1px_0_rgb(255_255_255/.04)]'>
+          <div
+            className={`flex items-center gap-2.5 rounded-[10px] bg-[#00000047] shadow-[inset_0_1px_2px_#00000073,0_1px_0_#ffffff0a] ${collapsed ? 'p-0' : 'p-2.5'}`}
+          >
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size='lg'
-                  className='h-auto p-0 hover:bg-transparent data-[state=open]:bg-transparent'
+                <button
+                  type='button'
+                  className='flex min-w-0 flex-1 items-center gap-2.5 rounded-[10px] bg-transparent text-start focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a8d8bc] data-[state=open]:bg-transparent'
                 >
-                  <Avatar className='size-8 shrink-0 rounded-full border border-rail-line'>
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className='rounded-full bg-rail-active font-mono text-[9px] font-semibold text-rail-ink'>
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className='grid min-w-0 flex-1 text-start leading-tight'>
-                    <span className='truncate text-[11.5px] font-semibold text-rail-ink'>
-                      {user.name}
-                    </span>
-                    {user.role && (
-                      <span className='truncate font-mono text-[7.5px] leading-[1.5] tracking-[.02em] text-rail-dim'>
-                        {user.role}
+                  <span className='flex size-[34px] shrink-0 items-center justify-center rounded-full bg-[#a8d8bc] p-[3px]'>
+                    <Avatar className='size-full rounded-full'>
+                      <AvatarImage src={user.avatar} alt={user.name} />
+                      <AvatarFallback className='rounded-full bg-[#1e2521] font-mono text-[11px] font-semibold text-[#d7ded6]'>
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </span>
+                  {!collapsed && (
+                    <span className='flex min-w-0 flex-1 flex-col gap-[3px]'>
+                      <span className='truncate text-[13px] leading-[14px] font-semibold text-[#d7ded6]'>
+                        {user.name}
                       </span>
-                    )}
-                  </div>
-                  {level != null && (
-                    <span className='inline-flex shrink-0 items-center border border-[#3a4a8f] px-1 font-mono text-[7px] leading-[14px] font-semibold text-[#8fa6e6]'>
-                      L{level}
+                      {(level != null || user.role) && (
+                        <span className='flex min-w-0 items-center gap-1.5'>
+                          {level != null && (
+                            <span
+                              role='img'
+                              aria-label={`Level akses ${level} dari ${LEVEL_MAX}`}
+                              className='flex shrink-0 items-center gap-[5px] rounded-[4px] border-[0.67px] border-[#3a4a8f] py-[0.67px] pr-[6.67px] pl-[0.67px]'
+                            >
+                              <span className='flex h-3.5 items-center rounded-[3px_0_0_3px] bg-[#3a4a8f] px-1 font-mono text-[10.5px] leading-[9px] font-semibold tracking-[.18px] text-white'>
+                                L{level}
+                              </span>
+                              <span
+                                aria-hidden='true'
+                                className='flex items-center gap-[1.5px]'
+                              >
+                                {Array.from({ length: LEVEL_MAX }, (_, i) => (
+                                  <i
+                                    key={i}
+                                    className={`h-2 w-[3px] rounded-[1px] ${i < level ? 'bg-[#8fa6e6]' : 'bg-[#3a4a8f]'}`}
+                                  />
+                                ))}
+                              </span>
+                            </span>
+                          )}
+                          {user.role && (
+                            <span className='truncate font-mono text-[8.5px] leading-[11px] tracking-[.15px] text-[#98a49a]'>
+                              {user.role.toUpperCase()}
+                            </span>
+                          )}
+                        </span>
+                      )}
+                      {user.exp != null && <SessionCountdown exp={user.exp} />}
                     </span>
                   )}
-                  <ChevronsUpDown
-                    className='size-3.5 shrink-0 text-rail-dim'
-                    aria-hidden='true'
-                  />
-                </SidebarMenuButton>
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 className='w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-none'
@@ -102,7 +126,7 @@ export function NavUser({ user }: NavUserProps) {
                   <div className='flex items-center gap-2 px-1 py-1.5 text-start text-sm'>
                     <Avatar className='size-8 rounded-full'>
                       <AvatarImage src={user.avatar} alt={user.name} />
-                      <AvatarFallback className='rounded-full font-mono text-[9px]'>
+                      <AvatarFallback className='rounded-full font-mono text-[10.5px]'>
                         {initials}
                       </AvatarFallback>
                     </Avatar>
@@ -110,7 +134,7 @@ export function NavUser({ user }: NavUserProps) {
                       <span className='truncate font-semibold'>
                         {user.name}
                       </span>
-                      <span className='truncate font-mono text-[8px] text-muted-foreground'>
+                      <span className='truncate font-mono text-[9px] text-muted-foreground'>
                         {user.email}
                       </span>
                     </div>
@@ -134,28 +158,7 @@ export function NavUser({ user }: NavUserProps) {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {level != null && (
-              <div
-                className='flex items-center gap-[3px] px-0.5'
-                role='img'
-                aria-label={`Level akses ${level} dari ${LEVEL_MAX}`}
-              >
-                {Array.from({ length: LEVEL_MAX }, (_, i) => (
-                  <i
-                    key={i}
-                    aria-hidden='true'
-                    className={`h-[3px] flex-1 ${i < level ? 'bg-[#8fa6e6]' : 'bg-rail-line'}`}
-                  />
-                ))}
-              </div>
-            )}
-
-            <div className='flex items-center justify-between gap-2 px-0.5'>
-              {user.exp != null ? (
-                <SessionCountdown exp={user.exp} />
-              ) : (
-                <span />
-              )}
+            {!collapsed && (
               <Button
                 type='button'
                 variant='ghost'
@@ -163,11 +166,11 @@ export function NavUser({ user }: NavUserProps) {
                 aria-label='Keluar'
                 title='Keluar'
                 onClick={() => setSignOutOpen(true)}
-                className='size-6 rounded-[6px] text-rail-dim hover:bg-white/5 hover:text-rail-ink'
+                className='size-[30px] shrink-0 rounded-[8px] bg-[#ffffff0d] text-[#98a49a] hover:bg-[#ffffff1a] hover:text-[#d7ded6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a8d8bc]'
               >
                 <LogOut className='size-3.5' aria-hidden='true' />
               </Button>
-            </div>
+            )}
           </div>
         </SidebarMenuItem>
       </SidebarMenu>
@@ -183,7 +186,10 @@ function SessionCountdown({ exp }: { exp: number }) {
     return () => window.clearInterval(id)
   }, [])
   return (
-    <span className='font-mono text-[8.5px] text-pass' role='timer'>
+    <span
+      className='font-mono text-[10px] leading-[12px] text-[#a8d8bc]'
+      role='timer'
+    >
       Sesi {formatRemaining(exp, now)}
     </span>
   )

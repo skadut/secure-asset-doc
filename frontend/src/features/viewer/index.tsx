@@ -46,15 +46,15 @@ function Picker() {
       <header className='flex min-h-[52px] items-center border-b border-rail-line px-4'>
         <Link
           to='/documents'
-          className='inline-flex min-h-11 items-center gap-2 font-mono text-[10px] tracking-[.06em] text-rail-dim uppercase underline-offset-2 hover:text-rail-ink hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]'
+          className='inline-flex min-h-11 items-center gap-2 font-mono text-[11.5px] tracking-[.06em] text-rail-dim uppercase underline-offset-2 hover:text-rail-ink hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]'
         >
           <ArrowLeft aria-hidden='true' className='size-3.5' /> Registri
         </Link>
         <div className='mx-3 h-5 border-l border-rail-line' />
-        <h1 className='text-[13px] font-semibold'>Penampil aman</h1>
+        <h1 className='text-[15px] font-semibold'>Penampil aman</h1>
       </header>
       <main className='mx-auto flex w-full max-w-4xl flex-1 flex-col gap-4 overflow-y-auto p-4 sm:p-6'>
-        <p className='text-[11px] text-rail-dim'>
+        <p className='text-[12.5px] text-rail-dim'>
           Pilih dokumen yang tersedia untuk akun Anda.
         </p>
         {documents.length ? (
@@ -64,7 +64,7 @@ function Picker() {
                 <Link
                   to='/viewer'
                   search={{ doc: document.id }}
-                  className='flex min-h-12 min-w-0 flex-wrap items-center gap-2 py-2 text-[11px] hover:bg-rail-active focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]'
+                  className='flex min-h-12 min-w-0 flex-wrap items-center gap-2 py-2 text-[12.5px] hover:bg-rail-active focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]'
                 >
                   <span className='w-24 shrink-0 font-mono text-rail-dim'>
                     {document.id}
@@ -78,7 +78,7 @@ function Picker() {
             ))}
           </ul>
         ) : (
-          <p className='text-[11px] text-rail-dim'>
+          <p className='text-[12.5px] text-rail-dim'>
             Belum ada dokumen yang tersedia untuk dibuka.
           </p>
         )}
@@ -236,11 +236,11 @@ function ViewerBody({ docId }: { docId: string }) {
         <header className='flex min-h-[52px] items-center gap-3 border-b border-rail-line px-4'>
           <Link
             to='/documents'
-            className='inline-flex min-h-11 items-center gap-2 border border-rail-line px-2 font-mono text-[9px] tracking-[.06em] text-rail-dim uppercase hover:bg-rail-active hover:text-rail-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]'
+            className='inline-flex min-h-11 items-center gap-2 border border-rail-line px-2 font-mono text-[10.5px] tracking-[.06em] text-rail-dim uppercase hover:bg-rail-active hover:text-rail-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]'
           >
             <ArrowLeft aria-hidden='true' className='size-3.5' /> Registri
           </Link>
-          <span className='font-mono text-[10px] text-rail-dim'>
+          <span className='font-mono text-[11.5px] text-rail-dim'>
             {doc?.id ?? 'Dokumen tidak tersedia'}
           </span>
         </header>
@@ -265,26 +265,26 @@ function ViewerBody({ docId }: { docId: string }) {
             className='inline-flex h-7 shrink-0 items-center gap-1.5 border border-rail-line px-2 text-rail-ink hover:bg-rail-active focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]'
           >
             <ArrowLeft aria-hidden='true' className='size-[11px]' />
-            <span className='font-mono text-[8px] tracking-[.11em] uppercase'>
+            <span className='font-mono text-[9px] tracking-[.11em] uppercase'>
               Registri
             </span>
           </Link>
           <div className='hidden h-[18px] border-l border-rail-line sm:block' />
-          <span className='font-mono text-[10px] font-medium text-rail-ink'>
+          <span className='font-mono text-[11.5px] font-medium text-rail-ink'>
             {doc.id}
           </span>
           <span
-            className={`inline-flex h-[18px] shrink-0 items-center px-[5px] font-mono text-[7px] font-medium tracking-[.09em] whitespace-nowrap uppercase ${TLP_BAR[doc.tlp]}`}
+            className={`inline-flex h-[18px] shrink-0 items-center px-[5px] font-mono text-[8px] font-medium tracking-[.09em] whitespace-nowrap uppercase ${TLP_BAR[doc.tlp]}`}
           >
             TLP:{doc.tlp}
           </span>
-          <span className='min-w-0 flex-1 basis-full truncate text-[11px] text-rail-dim sm:basis-auto'>
+          <span className='min-w-0 flex-1 basis-full truncate text-[12.5px] text-rail-dim sm:basis-auto'>
             {doc.title} · {versionLabel(current?.version ?? '-')}
           </span>
         </div>
         <div className='ml-auto flex shrink-0 items-center gap-3'>
           <SessionTimer remaining={remaining} elapsed={elapsed} />
-          <span className='hidden font-mono text-[8px] whitespace-nowrap text-rail-dim md:inline'>
+          <span className='hidden font-mono text-[9px] whitespace-nowrap text-rail-dim md:inline'>
             {watermark} · {stamp}
           </span>
           <ThemeSwitch />
@@ -305,7 +305,7 @@ function ViewerBody({ docId }: { docId: string }) {
         >
           <h2
             id='viewer-versions'
-            className='flex h-[38px] shrink-0 items-center border-b border-rail-line px-3.5 font-mono text-[8px] tracking-[.15em] text-rail-dim uppercase'
+            className='flex h-[38px] shrink-0 items-center border-b border-rail-line px-3.5 font-mono text-[9px] tracking-[.15em] text-rail-dim uppercase'
           >
             Versi
           </h2>
@@ -320,24 +320,24 @@ function ViewerBody({ docId }: { docId: string }) {
                 >
                   <span className='flex items-center gap-1.5'>
                     <span
-                      className={`font-mono text-[10.5px] text-rail-ink ${index === 0 ? 'font-semibold' : 'font-normal'}`}
+                      className={`font-mono text-[12px] text-rail-ink ${index === 0 ? 'font-semibold' : 'font-normal'}`}
                     >
                       {versionLabel(version.version)}
                     </span>
                     {index === 0 && (
-                      <span className='font-mono text-[6.5px] tracking-[.08em] text-rail-dim'>
+                      <span className='font-mono text-[7.5px] tracking-[.08em] text-rail-dim'>
                         SAAT INI
                       </span>
                     )}
                   </span>
-                  <span className='font-mono text-[7.5px] text-rail-dim'>
+                  <span className='font-mono text-[8.5px] text-rail-dim'>
                     {version.date} · {version.author}
                   </span>
                 </button>
               </li>
             ))}
           </ol>
-          <p className='mt-auto hidden gap-1.5 border-t border-rail-line px-3.5 py-3 text-[7.5px] leading-[13px] text-rail-dim lg:flex lg:flex-col'>
+          <p className='mt-auto hidden gap-1.5 border-t border-rail-line px-3.5 py-3 text-[8.5px] leading-[13px] text-rail-dim lg:flex lg:flex-col'>
             <Lock aria-hidden='true' className='size-[13px]' />
             Salin, cetak, dan simpan diblokir di area ini. Watermark mengikuti
             akun Anda setiap menit.
@@ -359,7 +359,7 @@ function ViewerBody({ docId }: { docId: string }) {
                 {[0, 1, 2].map((index) => (
                   <span
                     key={index}
-                    className='font-mono text-[13px] tracking-[1px] whitespace-nowrap text-[color:var(--paper-ink)]'
+                    className='font-mono text-[15px] tracking-[1px] whitespace-nowrap text-[color:var(--paper-ink)]'
                   >
                     {watermark} · {stamp} · {doc.id}
                   </span>
@@ -368,7 +368,7 @@ function ViewerBody({ docId }: { docId: string }) {
             </div>
             <article className='relative flex min-h-[560px] flex-col gap-4 px-6 py-8 sm:min-h-[888px] sm:px-12 sm:py-[52px]'>
               <div className='flex flex-col gap-2'>
-                <p className='font-mono text-[8px] tracking-[.16em] text-[color:var(--paper-mute)] uppercase'>
+                <p className='font-mono text-[9px] tracking-[.16em] text-[color:var(--paper-mute)] uppercase'>
                   {doc.type} · {doc.id}
                 </p>
                 <h1 className='font-heading text-[27px] leading-[30px] font-semibold'>
@@ -382,7 +382,7 @@ function ViewerBody({ docId }: { docId: string }) {
                   <PaperMeta label='STATUS' value={doc.status} />
                 </dl>
               </div>
-              <p className='text-[11.5px] leading-5 text-[color:var(--paper-body)]'>
+              <p className='text-[13px] leading-5 text-[color:var(--paper-body)]'>
                 {current?.summary ?? 'Belum ada ringkasan untuk versi ini.'}
               </p>
               <h2 className='font-heading text-[14px] font-semibold'>
@@ -414,7 +414,7 @@ function ViewerBody({ docId }: { docId: string }) {
                 {expired ? (
                   <p
                     role='alert'
-                    className='text-[11.5px] leading-5 text-[color:var(--paper-body)]'
+                    className='text-[13px] leading-5 text-[color:var(--paper-body)]'
                   >
                     Sesi berakhir. Buka kembali dokumen dari registri untuk
                     memulai sesi baru.
@@ -423,7 +423,7 @@ function ViewerBody({ docId }: { docId: string }) {
                   <FilePreview file={previewFile} secure />
                 )}
               </div>
-              <footer className='mt-auto flex flex-wrap items-end justify-between gap-2 font-mono text-[8px] text-[color:var(--paper-mute)]'>
+              <footer className='mt-auto flex flex-wrap items-end justify-between gap-2 font-mono text-[9px] text-[color:var(--paper-mute)]'>
                 <span>
                   {doc.id} · {versionLabel(current?.version ?? '-')} · Halaman 1
                   dari 1
@@ -438,7 +438,7 @@ function ViewerBody({ docId }: { docId: string }) {
           aria-label='Metadata dokumen dan akses'
           className='flex min-w-0 flex-col border-t border-rail-line bg-rail lg:overflow-y-auto lg:border-t-0 lg:border-l'
         >
-          <h2 className='flex h-[38px] shrink-0 items-center border-b border-rail-line px-4 font-mono text-[8px] tracking-[.15em] text-rail-dim uppercase'>
+          <h2 className='flex h-[38px] shrink-0 items-center border-b border-rail-line px-4 font-mono text-[9px] tracking-[.15em] text-rail-dim uppercase'>
             Dokumen
           </h2>
           <dl className='px-4 pt-1 pb-3.5'>
@@ -455,7 +455,7 @@ function ViewerBody({ docId }: { docId: string }) {
             </MetaField>
           </dl>
           <section className='border-b border-rail-line'>
-            <h3 className='px-4 pt-2.5 pb-1.5 font-mono text-[7.5px] tracking-[.14em] text-rail-dim uppercase'>
+            <h3 className='px-4 pt-2.5 pb-1.5 font-mono text-[8.5px] tracking-[.14em] text-rail-dim uppercase'>
               Bukti CSF 2.0
             </h3>
             {evidence.length ? (
@@ -465,9 +465,9 @@ function ViewerBody({ docId }: { docId: string }) {
                     <Link
                       to='/evidence'
                       title={`${CSF_FUNCTIONS[item.fn]} · ${item.categoryName}`}
-                      className='focus-visible:outline-inset flex items-center gap-2 px-4 py-[7px] font-mono text-[9px] text-rail-ink hover:bg-rail-active focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]'
+                      className='focus-visible:outline-inset flex items-center gap-2 px-4 py-[7px] font-mono text-[10.5px] text-rail-ink hover:bg-rail-active focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]'
                     >
-                      <span className='inline-flex h-4 w-[22px] shrink-0 items-center justify-center border border-rail-line text-[7px]'>
+                      <span className='inline-flex h-4 w-[22px] shrink-0 items-center justify-center border border-rail-line text-[8px]'>
                         {item.fn}
                       </span>
                       {item.id}
@@ -480,17 +480,17 @@ function ViewerBody({ docId }: { docId: string }) {
                 ))}
               </ul>
             ) : (
-              <p className='px-4 pb-2 text-[10px] text-rail-dim'>
+              <p className='px-4 pb-2 text-[11.5px] text-rail-dim'>
                 Tidak ada bukti CSF tertaut.
               </p>
             )}
           </section>
           <section className='border-b border-rail-line px-4 py-3.5'>
             <div className='flex items-center justify-between gap-2'>
-              <h3 className='font-mono text-[7.5px] tracking-[.14em] text-rail-dim uppercase'>
+              <h3 className='font-mono text-[8.5px] tracking-[.14em] text-rail-dim uppercase'>
                 Batas sesi
               </h3>
-              <span className='font-mono text-[9px] text-rail-ink tabular-nums'>
+              <span className='font-mono text-[10.5px] text-rail-ink tabular-nums'>
                 {sessionEndLabel}
               </span>
             </div>
@@ -528,17 +528,17 @@ function ViewerBody({ docId }: { docId: string }) {
                 )
               )}
             </div>
-            <p className='mt-2 text-[7.5px] leading-[13px] text-rail-dim'>
+            <p className='mt-2 text-[8.5px] leading-[13px] text-rail-dim'>
               {serverSession
                 ? 'Server menutup sesi otomatis saat batas tercapai; angka di atas hanya pengingat.'
                 : 'Batas waktu lokal — server tidak mengembalikan sesi penampil.'}
             </p>
           </section>
           <section className='border-b border-rail-line px-4 py-3.5'>
-            <h3 className='font-mono text-[7.5px] tracking-[.14em] text-rail-dim uppercase'>
+            <h3 className='font-mono text-[8.5px] tracking-[.14em] text-rail-dim uppercase'>
               Akses Anda
             </h3>
-            <p className='mt-1.5 flex items-center gap-1.5 text-[10px] text-rail-ink'>
+            <p className='mt-1.5 flex items-center gap-1.5 text-[11.5px] text-rail-ink'>
               <span
                 className={`size-[5px] shrink-0 rounded-full ${access?.permit ? 'bg-tlp-green' : 'bg-fail'}`}
                 aria-hidden='true'
@@ -563,10 +563,10 @@ function MetaField({
 }) {
   return (
     <div className='flex flex-col gap-px border-b border-rail-line py-[7px]'>
-      <dt className='font-mono text-[6.5px] tracking-[.15em] text-rail-dim uppercase'>
+      <dt className='font-mono text-[7.5px] tracking-[.15em] text-rail-dim uppercase'>
         {label}
       </dt>
-      <dd className='text-[10.5px] leading-[1.4] break-words text-rail-ink'>
+      <dd className='text-[12px] leading-[1.4] break-words text-rail-ink'>
         {children}
       </dd>
     </div>
@@ -576,10 +576,10 @@ function MetaField({
 function PaperMeta({ label, value }: { label: string; value: string }) {
   return (
     <div className='flex flex-col gap-px'>
-      <dt className='font-mono text-[6.5px] tracking-[.15em] text-[color:var(--paper-mute)] uppercase'>
+      <dt className='font-mono text-[7.5px] tracking-[.15em] text-[color:var(--paper-mute)] uppercase'>
         {label}
       </dt>
-      <dd className='font-mono text-[9.5px] text-[color:var(--paper-ink)]'>
+      <dd className='font-mono text-[11px] text-[color:var(--paper-ink)]'>
         {value}
       </dd>
     </div>
@@ -589,8 +589,8 @@ function PaperMeta({ label, value }: { label: string; value: string }) {
 function PaperRow({ label, value }: { label: string; value: string }) {
   return (
     <div className='flex flex-wrap items-center gap-2.5 border-b border-[var(--paper-line)] py-[7px]'>
-      <dt className='text-[10px] text-[color:var(--paper-mute)]'>{label}</dt>
-      <dd className='font-mono text-[9.5px] text-[color:var(--paper-ink)]'>
+      <dt className='text-[11.5px] text-[color:var(--paper-mute)]'>{label}</dt>
+      <dd className='font-mono text-[11px] text-[color:var(--paper-ink)]'>
         {value}
       </dd>
     </div>
@@ -618,10 +618,10 @@ function SessionTimer({
       className='flex h-7 shrink-0 items-center gap-[7px] border border-rail-line px-[9px]'
     >
       <Clock3 aria-hidden='true' className='size-[11px] text-rail-dim' />
-      <span className='font-mono text-[7px] tracking-[.11em] text-rail-dim uppercase'>
+      <span className='font-mono text-[8px] tracking-[.11em] text-rail-dim uppercase'>
         Sisa sesi
       </span>
-      <span className='font-mono text-[10px] text-rail-ink tabular-nums'>
+      <span className='font-mono text-[11.5px] text-rail-ink tabular-nums'>
         {remaining === null
           ? '—'
           : `${pad(Math.floor(value / 60))}:${pad(value % 60)}`}

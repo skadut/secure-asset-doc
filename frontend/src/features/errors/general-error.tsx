@@ -9,6 +9,7 @@ type GeneralErrorProps = React.HTMLAttributes<HTMLDivElement> & {
 export function GeneralError({ minimal = false }: GeneralErrorProps) {
   return (
     <ErrorState
+      page
       code='500 · KESALAHAN SERVER'
       title='Terjadi kesalahan'
       desc='Permintaan tidak dapat diproses. Coba lagi.'

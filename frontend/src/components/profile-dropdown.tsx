@@ -42,12 +42,12 @@ export function ProfileDropdown() {
           >
             <Avatar className='size-7 border-2 border-pass'>
               {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
-              <AvatarFallback className='rounded-full bg-surface-2 font-mono text-[9px] font-semibold text-ink'>
+              <AvatarFallback className='rounded-full bg-surface-2 font-mono text-[10.5px] font-semibold text-ink'>
                 {initials}
               </AvatarFallback>
             </Avatar>
             {me?.accessLevel != null && (
-              <span className='absolute -right-0.5 -bottom-0.5 bg-pass px-1 font-mono text-[7px] leading-[13px] font-semibold text-background'>
+              <span className='absolute -right-0.5 -bottom-0.5 bg-pass px-1 font-mono text-[8px] leading-[13px] font-semibold text-background'>
                 L{me.accessLevel}
               </span>
             )}

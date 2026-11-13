@@ -5,6 +5,7 @@ import { ErrorState } from '@/components/error-state'
 export function NotFoundError() {
   return (
     <ErrorState
+      page
       code='404'
       headerLabel='HALAMAN · 404'
       headerValue='404'
@@ -14,7 +15,7 @@ export function NotFoundError() {
         <Button
           asChild
           size='sm'
-          className='h-8 rounded-none bg-primary px-3 text-[10.5px] font-semibold text-primary-foreground hover:bg-primary/90'
+          className='relative h-8 rounded-none bg-ink px-3 text-[12px] font-semibold text-white after:absolute after:inset-x-0 after:-inset-y-1.5 hover:bg-ink/90 dark:text-bg'
         >
           <Link to='/'>Kembali ke dashboard</Link>
         </Button>

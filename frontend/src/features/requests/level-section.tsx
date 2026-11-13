@@ -47,7 +47,7 @@ const STATUS_TONE: Record<string, 'pass' | 'warn' | 'fail' | 'ink'> = {
   denied: 'fail',
   cancelled: 'ink',
 }
-const LABEL = 'font-mono text-[8px] uppercase tracking-[.1em] text-ink-3'
+const LABEL = 'font-mono text-[9px] uppercase tracking-[.1em] text-ink-3'
 
 const len = (s: string) => [...s.trim()].length
 const yesNo = (v: boolean) => (v ? 'Ya' : 'Tidak')
@@ -74,7 +74,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <>
       <dt className={LABEL}>{label}</dt>
-      <dd className='min-w-0 text-[11px] break-words text-ink'>{children}</dd>
+      <dd className='min-w-0 text-[12.5px] break-words text-ink'>{children}</dd>
     </>
   )
 }
@@ -120,7 +120,7 @@ function RequestItem({ r, me }: { r: LevelRequest; me: Me }) {
   return (
     <li className='flex flex-col gap-3 border border-line bg-surface p-3.5'>
       <div className='flex flex-wrap items-center justify-between gap-2'>
-        <p className='min-w-0 text-[13px] font-medium break-all text-ink'>
+        <p className='min-w-0 text-[15px] font-medium break-all text-ink'>
           {r.targetUser}
         </p>
         <StatusDot tone={STATUS_TONE[r.status] ?? 'ink'}>
@@ -159,7 +159,7 @@ function RequestItem({ r, me }: { r: LevelRequest; me: Me }) {
       {pending && (canApprove || canDeny) && (
         <div className='flex flex-col gap-3'>
           {blocked && (
-            <p className='text-[11px] text-ink-3'>
+            <p className='text-[12.5px] text-ink-3'>
               {isGrantee
                 ? 'Penerima perubahan level tidak dapat memutuskan permintaan ini'
                 : 'Anda tidak dapat memutuskan permintaan ini'}
@@ -387,7 +387,7 @@ function CreateForm({ me }: { me: Me }) {
             {err('target')}
           </div>
 
-          <p className='text-[11px] text-ink-3'>
+          <p className='text-[12.5px] text-ink-3'>
             Level sekarang:{' '}
             <span className='font-medium text-ink'>{current ?? '—'}</span>
           </p>
@@ -419,14 +419,14 @@ function CreateForm({ me }: { me: Me }) {
                 ))}
               </SelectContent>
             </Select>
-            <p className='text-[11px] text-ink-3'>
+            <p className='text-[12.5px] text-ink-3'>
               Berikan level minimum yang dibutuhkan (AC-6).
             </p>
             {err('newLevel')}
           </div>
 
           {isLower && (
-            <p className='text-[11px] font-medium text-ink'>
+            <p className='text-[12.5px] font-medium text-ink'>
               Penurunan level langsung berlaku. Sesi pengguna akan diakhiri.
             </p>
           )}
@@ -436,7 +436,7 @@ function CreateForm({ me }: { me: Me }) {
               <Label className={LABEL} htmlFor='lvl-justification'>
                 Justifikasi
               </Label>
-              <span className='text-[10px] text-ink-3'>
+              <span className='text-[11.5px] text-ink-3'>
                 {len(justification)}/500
               </span>
             </div>
@@ -533,7 +533,7 @@ function CreateForm({ me }: { me: Me }) {
                   aria-invalid={invalid('reviewDue')}
                   aria-describedby={describe('reviewDue')}
                 />
-                <p className='text-[11px] text-ink-3'>
+                <p className='text-[12.5px] text-ink-3'>
                   Antara besok dan 12 bulan dari hari ini (AC-2).
                 </p>
                 {err('reviewDue')}
@@ -626,7 +626,7 @@ export function LevelSection() {
             </div>
           ) : list.data ? (
             list.data.length === 0 ? (
-              <p className='p-3.5 text-[11px] text-ink-3'>
+              <p className='p-3.5 text-[12.5px] text-ink-3'>
                 Belum ada permintaan.
               </p>
             ) : (
@@ -637,7 +637,7 @@ export function LevelSection() {
               </ul>
             )
           ) : (
-            <p className='p-3.5 text-[11px] text-ink-3'>Memuat...</p>
+            <p className='p-3.5 text-[12.5px] text-ink-3'>Memuat...</p>
           )}
         </CardPanel>
       )}

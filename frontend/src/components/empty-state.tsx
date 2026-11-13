@@ -1,6 +1,6 @@
 import { useId, type ReactNode } from 'react'
 
-// Pen: icon in a 30px 1px-bordered square, Saira 18px title. Header bar is opt-in.
+// Pen kU9Kv state 6: icon in a 30px 1px-bordered square, Saira 18px title. Header bar is opt-in.
 export function EmptyState({
   title,
   desc,
@@ -27,18 +27,22 @@ export function EmptyState({
     : desc
   return (
     <section
+      role='status'
+      aria-live='polite'
       className='mx-auto flex min-h-[240px] w-full max-w-[408px] flex-col border border-line bg-surface'
       aria-labelledby={titleId}
     >
       {(filterVariant || headerLabel) && (
-        <div className='flex h-[29.5px] items-center justify-between border-b border-line bg-surface-2 px-3 font-mono text-[7.5px] tracking-[1px] text-ink-3 uppercase'>
-          <span className='truncate'>
+        <div className='flex h-[30px] shrink-0 items-center justify-between gap-3 border-b border-line px-3 font-mono'>
+          <span className='truncate text-[8.5px] tracking-[1px] text-ink-3'>
             {filterVariant ? 'KOSONG · FILTER' : headerLabel}
           </span>
-          <span>{filterVariant ? 'EMPTY' : headerValue}</span>
+          <span className='text-[9px] font-medium text-ink-2'>
+            {filterVariant ? 'EMPTY' : headerValue}
+          </span>
         </div>
       )}
-      <div className='flex flex-1 flex-col items-center justify-center gap-[10px] px-[22px] py-8 text-center'>
+      <div className='flex flex-1 flex-col items-center justify-center gap-[10px] p-[22px] text-center whitespace-normal'>
         {icon && (
           <div
             aria-hidden='true'
@@ -54,12 +58,12 @@ export function EmptyState({
           {stateTitle}
         </h2>
         {stateDesc && (
-          <p className='w-full max-w-[250px] text-[10.5px] leading-4 text-ink-3'>
+          <p className='w-full max-w-[250px] text-[12px] leading-4 text-ink-3'>
             {stateDesc}
           </p>
         )}
         {action && (
-          <div className='mt-2 flex flex-wrap items-center justify-center gap-2'>
+          <div className='flex flex-wrap items-center justify-center gap-2'>
             {action}
           </div>
         )}

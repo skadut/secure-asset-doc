@@ -21,7 +21,7 @@ export const documentColumns: ColumnDef<DocRow>[] = [
       <Link
         to='/documents/$documentId'
         params={{ documentId: row.original.id }}
-        className='font-mono text-[10px] text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-[var(--focus)]'
+        className='font-mono text-[11.5px] text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-[var(--focus)]'
       >
         {row.original.id}
       </Link>
@@ -62,7 +62,7 @@ export const documentColumns: ColumnDef<DocRow>[] = [
                 : 'Draft'}
         </StatusDot>
         {row.original.tokenOnly && (
-          <span className='font-mono text-[8px] tracking-[.06em] text-ink-3 uppercase'>
+          <span className='font-mono text-[9px] tracking-[.06em] text-ink-3 uppercase'>
             Terkunci
           </span>
         )}
@@ -75,7 +75,7 @@ export const documentColumns: ColumnDef<DocRow>[] = [
     accessorFn: (doc) => doc.versions[0]?.version ?? '',
     header: 'Versi',
     cell: ({ getValue }) => (
-      <span className='font-mono text-[10px] text-ink tabular-nums'>
+      <span className='font-mono text-[11.5px] text-ink tabular-nums'>
         {String(getValue()) || DASH}
       </span>
     ),
@@ -89,11 +89,11 @@ export const documentColumns: ColumnDef<DocRow>[] = [
     ),
     cell: ({ row }) => (
       <span className='flex min-w-0 flex-col items-start gap-0.5 whitespace-nowrap'>
-        <span className='font-mono text-[9.5px] text-ink tabular-nums'>
+        <span className='font-mono text-[11px] text-ink tabular-nums'>
           {row.original.nextReview}
         </span>
         <span
-          className={`font-mono text-[8.5px] tabular-nums ${daysUntil(row.original.nextReview) < 0 ? 'text-fail' : daysUntil(row.original.nextReview) <= 30 ? 'text-warn' : 'text-ink-3'}`}
+          className={`font-mono text-[10px] tabular-nums ${daysUntil(row.original.nextReview) < 0 ? 'text-fail' : daysUntil(row.original.nextReview) <= 30 ? 'text-warn' : 'text-ink-3'}`}
         >
           {reviewLabel(row.original.nextReview)}
         </span>
@@ -111,17 +111,19 @@ export const documentColumns: ColumnDef<DocRow>[] = [
     cell: ({ row }) => {
       const access = accessFor(row.original)
       if (!access)
-        return <span className='font-mono text-[10px] text-ink-3'>{DASH}</span>
+        return (
+          <span className='font-mono text-[11.5px] text-ink-3'>{DASH}</span>
+        )
       if (!access.permit)
         return (
-          <span className='inline-flex border border-fail px-1.5 py-0.5 font-mono text-[7.5px] tracking-[.03em] text-fail uppercase'>
+          <span className='inline-flex border border-fail px-1.5 py-0.5 font-mono text-[8.5px] tracking-[.03em] text-fail uppercase'>
             Tolak
           </span>
         )
       const grantOnly = isGrantOnly(row.original.tlp)
       return (
         <span
-          className={`inline-flex border px-1.5 py-0.5 font-mono text-[7.5px] tracking-[.03em] uppercase ${grantOnly ? 'border-pass text-pass' : 'border-ink-3 text-ink-3'}`}
+          className={`inline-flex border px-1.5 py-0.5 font-mono text-[8.5px] tracking-[.03em] uppercase ${grantOnly ? 'border-pass text-pass' : 'border-ink-3 text-ink-3'}`}
         >
           {grantOnly ? 'Grant' : 'Level'}
         </span>

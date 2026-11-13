@@ -66,7 +66,7 @@ export function DocumentsToolbar({
             >
               <span
                 className={cn(
-                  'flex items-center gap-1.5 font-mono text-[7.5px] tracking-[.05em] uppercase',
+                  'flex items-center gap-1.5 font-mono text-[8.5px] tracking-[.05em] uppercase',
                   isAll ? 'text-ink-3' : 'text-ink-2'
                 )}
               >
@@ -90,7 +90,7 @@ export function DocumentsToolbar({
                 </span>
                 <span
                   className={cn(
-                    'font-mono text-[7.5px]',
+                    'font-mono text-[8.5px]',
                     isAll ? 'text-ink-3' : 'text-ink-3'
                   )}
                 >
@@ -117,7 +117,7 @@ export function DocumentsToolbar({
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
             placeholder='Cari ID atau judul'
-            className='h-[34px] min-w-0 rounded-none border-[.67px] border-line bg-surface pr-2.5 pl-8 font-mono text-[10px] placeholder:text-ink-3'
+            className='h-[34px] min-w-0 rounded-none border-[.67px] border-line bg-surface pr-2.5 pl-8 font-mono text-[11.5px] placeholder:text-ink-3'
           />
         </div>
         <Select
@@ -126,7 +126,7 @@ export function DocumentsToolbar({
         >
           <SelectTrigger
             id='document-level'
-            className='h-[34px] w-[218px] rounded-none border-[.67px] border-line bg-surface px-[10.67px] font-mono text-[10px] text-ink-2 [&_svg]:size-3'
+            className='h-[34px] w-[218px] rounded-none border-[.67px] border-line bg-surface px-[10.67px] font-mono text-[11.5px] text-ink-2 [&_svg]:size-3'
             aria-label='Filter tingkat TLP'
           >
             <SelectValue />

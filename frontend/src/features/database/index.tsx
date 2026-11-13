@@ -110,7 +110,7 @@ export function DatabaseView() {
               <Chip tone='line'>SUPER ADMIN</Chip>
               <Button
                 variant='outline'
-                className='h-9 gap-1.5 bg-surface px-3.5 font-mono text-[10px] tracking-[.04em] text-ink max-sm:min-h-11'
+                className='h-9 gap-1.5 bg-surface px-3.5 font-mono text-[11.5px] tracking-[.04em] text-ink max-sm:min-h-11'
                 onClick={() => void refresh()}
                 disabled={tables.isFetching || detail.isFetching}
               >
@@ -126,7 +126,7 @@ export function DatabaseView() {
             title='TABEL'
             actions={
               tables.data ? (
-                <span className='font-mono text-[8.5px] text-ink-3 tabular-nums'>
+                <span className='font-mono text-[10px] text-ink-3 tabular-nums'>
                   {formatCount(list.length)}
                 </span>
               ) : undefined
@@ -144,7 +144,7 @@ export function DatabaseView() {
                 </div>
               )}
               {tables.data && list.length === 0 && (
-                <p className='px-3 py-4 text-[11px] text-ink-2'>
+                <p className='px-3 py-4 text-[12.5px] text-ink-2'>
                   Tidak ada tabel.
                 </p>
               )}
@@ -159,11 +159,11 @@ export function DatabaseView() {
                     className={`flex min-h-9 w-full items-center justify-between gap-2 border-b border-line px-3 text-left transition-colors last:border-b-0 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink-3 ${selected ? 'bg-surface-2 font-semibold' : 'bg-surface hover:bg-surface-2'}`}
                   >
                     <span
-                      className={`min-w-0 truncate font-mono text-[9px] ${selected ? 'text-ink' : 'text-ink-2'}`}
+                      className={`min-w-0 truncate font-mono text-[10.5px] ${selected ? 'text-ink' : 'text-ink-2'}`}
                     >
                       {t.name}
                     </span>
-                    <span className='shrink-0 font-mono text-[8px] text-ink-3 tabular-nums'>
+                    <span className='shrink-0 font-mono text-[9px] text-ink-3 tabular-nums'>
                       {formatCount(t.rowCount)}
                     </span>
                   </button>
@@ -176,7 +176,7 @@ export function DatabaseView() {
             title={
               name ? (
                 <span className='inline-flex items-center gap-2'>
-                  <span className='font-mono text-[9.5px] font-semibold tracking-normal text-ink normal-case'>
+                  <span className='font-mono text-[11px] font-semibold tracking-normal text-ink normal-case'>
                     public.{name}
                   </span>
                   <Chip tone='pass'>READ ONLY</Chip>
@@ -201,7 +201,11 @@ export function DatabaseView() {
               </div>
             )}
             {detail.isPending && !detail.isError && (
-              <SkeletonRows rows={6} cols={5} />
+              <SkeletonRows
+                headerLabel='MEMUAT · TABEL'
+                headerValue='SKELETON'
+                note='Skeleton memakai ukuran baris asli agar tidak ada pergeseran tata letak.'
+              />
             )}
 
             {data && total === 0 && (
@@ -224,10 +228,10 @@ export function DatabaseView() {
                             key={c.name}
                             className='h-auto px-2.5 py-2 whitespace-nowrap'
                           >
-                            <span className='block font-mono text-[8px] font-medium tracking-[.02em] text-ink'>
+                            <span className='block font-mono text-[9px] font-medium tracking-[.02em] text-ink'>
                               {c.name}
                             </span>
-                            <span className='block font-mono text-[7px] font-normal text-ink-3'>
+                            <span className='block font-mono text-[8px] font-normal text-ink-3'>
                               {c.type}
                             </span>
                           </TableHead>
@@ -242,7 +246,7 @@ export function DatabaseView() {
                             return (
                               <TableCell
                                 key={c.name}
-                                className='max-w-[300px] truncate px-2.5 font-mono text-[9px] text-ink-2'
+                                className='max-w-[300px] truncate px-2.5 font-mono text-[10.5px] text-ink-2'
                               >
                                 {isSensitive(c.name) ? (
                                   <span className='text-ink-3'>
@@ -262,7 +266,7 @@ export function DatabaseView() {
                   </Table>
                 </div>
 
-                <p className='flex items-start gap-1.5 border-t border-line bg-surface-2 px-3 py-2 font-mono text-[8.5px] leading-[1.6] text-ink-3'>
+                <p className='flex items-start gap-1.5 border-t border-line bg-surface-2 px-3 py-2 font-mono text-[10px] leading-[1.6] text-ink-3'>
                   <Scissors
                     aria-hidden='true'
                     className='mt-[1px] size-3 shrink-0'
@@ -275,18 +279,18 @@ export function DatabaseView() {
                 </p>
 
                 <footer className='flex flex-wrap items-center justify-between gap-2 border-t border-line bg-surface-2 px-3 py-2'>
-                  <span className='font-mono text-[9px] text-ink-3 tabular-nums'>
+                  <span className='font-mono text-[10.5px] text-ink-3 tabular-nums'>
                     baris {formatCount(from)}–{formatCount(to)} dari{' '}
                     {formatCount(total)}
                   </span>
                   <div className='flex items-center gap-2'>
-                    <span className='font-mono text-[9px] text-ink-3'>
+                    <span className='font-mono text-[10.5px] text-ink-3'>
                       {LIMIT} / halaman
                     </span>
                     <Button
                       variant='outline'
                       size='sm'
-                      className='h-7 min-w-7 bg-surface px-1.5 font-mono text-[10px] max-sm:min-h-11'
+                      className='h-7 min-w-7 bg-surface px-1.5 font-mono text-[11.5px] max-sm:min-h-11'
                       disabled={offset === 0}
                       onClick={() => setOffset(Math.max(0, offset - LIMIT))}
                       aria-label='Halaman sebelumnya'
@@ -295,7 +299,7 @@ export function DatabaseView() {
                     </Button>
                     <Button
                       size='sm'
-                      className='h-7 min-w-7 bg-ink px-1.5 font-mono text-[10px] text-surface disabled:opacity-40 max-sm:min-h-11'
+                      className='h-7 min-w-7 bg-ink px-1.5 font-mono text-[11.5px] text-surface disabled:opacity-40 max-sm:min-h-11'
                       disabled={offset + LIMIT >= total}
                       onClick={() => setOffset(offset + LIMIT)}
                       aria-label='Halaman berikutnya'

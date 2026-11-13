@@ -17,7 +17,7 @@ export function StatusDot({
   children: ReactNode
 }) {
   return (
-    <span className='inline-flex items-center gap-1.5 font-mono text-[9px] leading-none whitespace-nowrap text-ink-2'>
+    <span className='inline-flex items-center gap-1.5 font-mono text-[10.5px] leading-none whitespace-nowrap text-ink-2'>
       <i
         aria-hidden='true'
         className={`size-1.5 shrink-0 rounded-full ${dot[tone]}`}

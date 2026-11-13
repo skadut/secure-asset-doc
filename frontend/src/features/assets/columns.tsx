@@ -59,7 +59,7 @@ export const assetColumns: ColumnDef<Asset>[] = [
       <Link
         to='/assets/$assetId'
         params={{ assetId: row.original.id }}
-        className='font-mono text-[9.5px] text-ink'
+        className='font-mono text-[11px] text-ink'
       >
         {row.original.id}
       </Link>
@@ -73,7 +73,7 @@ export const assetColumns: ColumnDef<Asset>[] = [
       <DataTableColumnHeader column={column} title='NAMA' />
     ),
     cell: ({ row }) => (
-      <span className='text-[11.5px] font-medium text-ink'>
+      <span className='text-[13px] font-medium text-ink'>
         {row.original.name}
       </span>
     ),
@@ -85,7 +85,7 @@ export const assetColumns: ColumnDef<Asset>[] = [
       <DataTableColumnHeader column={column} title='TIPE' />
     ),
     cell: ({ row }) => (
-      <span className='text-[10.5px] text-ink-2'>{row.original.type}</span>
+      <span className='text-[12px] text-ink-2'>{row.original.type}</span>
     ),
     filterFn: includesAny,
   },
@@ -96,7 +96,7 @@ export const assetColumns: ColumnDef<Asset>[] = [
       <DataTableColumnHeader column={column} title='SITE' />
     ),
     cell: ({ row }) => (
-      <span className='text-[10.5px] text-ink-2'>{row.original.site}</span>
+      <span className='text-[12px] text-ink-2'>{row.original.site}</span>
     ),
   },
   {
@@ -107,7 +107,7 @@ export const assetColumns: ColumnDef<Asset>[] = [
       <DataTableColumnHeader column={column} title='PURDUE' />
     ),
     cell: ({ row }) => (
-      <span className='font-mono text-[9.5px] tabular-nums'>
+      <span className='font-mono text-[11px] tabular-nums'>
         {row.original.purdueLevel}
       </span>
     ),
@@ -161,13 +161,13 @@ export const assetColumns: ColumnDef<Asset>[] = [
       return (
         <div className='flex flex-col gap-0.5'>
           <time
-            className='font-mono text-[9.5px] text-ink-2 tabular-nums'
+            className='font-mono text-[11px] text-ink-2 tabular-nums'
             dateTime={row.original.lastReviewed}
           >
             {row.original.lastReviewed}
           </time>
           <span
-            className={`font-mono text-[7.5px] ${overdue ? 'text-fail' : 'text-ink-3'}`}
+            className={`font-mono text-[8.5px] ${overdue ? 'text-fail' : 'text-ink-3'}`}
           >
             {overdue ? 'Terlambat' : 'Dalam 365 hari'}
           </span>

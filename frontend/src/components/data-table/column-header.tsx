@@ -23,9 +23,9 @@ type DataTableColumnHeaderProps<TData, TValue> =
 
 // Pen: mono 7.5px uppercase, .09em tracking, 8px chevrons, no ghost-button chrome.
 const headerText =
-  'font-mono text-[7.5px] uppercase tracking-[.09em] text-ink-3'
+  'font-mono text-[8.5px] uppercase tracking-[.09em] text-ink-3'
 const sortButton =
-  'inline-flex h-auto min-h-0 items-center gap-1 rounded-none bg-transparent p-0 font-mono text-[7.5px] font-normal uppercase tracking-[.09em] text-ink-3 shadow-none hover:bg-transparent hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus)]'
+  'inline-flex h-auto min-h-0 items-center gap-1 rounded-none bg-transparent p-0 font-mono text-[8.5px] font-normal uppercase tracking-[.09em] text-ink-3 shadow-none hover:bg-transparent hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus)]'
 const sortIcon = 'ms-1 size-2 shrink-0'
 
 const sortLabel = (sorted: false | 'asc' | 'desc') =>

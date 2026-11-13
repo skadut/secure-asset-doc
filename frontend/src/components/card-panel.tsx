@@ -34,7 +34,7 @@ export function CardPanel({
                 className={
                   stacked
                     ? 'text-sm leading-snug font-semibold text-ink'
-                    : 'font-mono text-[9px] leading-[1.3] font-medium tracking-[.08em] text-ink uppercase'
+                    : 'font-mono text-[10.5px] leading-[1.3] font-medium tracking-[.08em] text-ink uppercase'
                 }
               >
                 {title}
@@ -44,8 +44,8 @@ export function CardPanel({
               <span
                 className={
                   stacked
-                    ? 'font-mono text-[9px] leading-[1.3] text-ink-3'
-                    : 'font-mono text-[8.5px] leading-[1.3] tracking-[.06em] text-ink-3 uppercase'
+                    ? 'font-mono text-[10.5px] leading-[1.3] text-ink-3'
+                    : 'font-mono text-[10px] leading-[1.3] tracking-[.06em] text-ink-3 uppercase'
                 }
               >
                 {meta}

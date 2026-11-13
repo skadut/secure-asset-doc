@@ -40,7 +40,7 @@ export function DocumentsDetailPanel({
     >
       <div className='flex min-w-0 flex-col'>
         <div className='flex items-center justify-between gap-3 border-b border-line bg-surface-2 px-3.5 py-2.5'>
-          <h2 className='font-mono text-[8.5px] font-normal tracking-[.08em] text-ink-3 uppercase'>
+          <h2 className='font-mono text-[10px] font-normal tracking-[.08em] text-ink-3 uppercase'>
             Dokumen terpilih
           </h2>
           <button
@@ -54,11 +54,11 @@ export function DocumentsDetailPanel({
         </div>
 
         <div
-          className={`flex min-w-0 items-center justify-between gap-2 px-3.5 py-2 font-mono text-[10.5px] font-semibold tracking-[.05em] uppercase ${TLP_BAR[doc.tlp]}`}
+          className={`flex min-w-0 items-center justify-between gap-2 px-3.5 py-2 font-mono text-[12px] font-semibold tracking-[.05em] uppercase ${TLP_BAR[doc.tlp]}`}
         >
           <span>TLP:{doc.tlp}</span>
           {isGrantOnly(doc.tlp) && (
-            <span className='text-[7.5px] font-normal tracking-[.04em] opacity-90'>
+            <span className='text-[8.5px] font-normal tracking-[.04em] opacity-90'>
               Hanya lewat grant
             </span>
           )}
@@ -69,7 +69,7 @@ export function DocumentsDetailPanel({
             <h3 className='font-heading text-[22px] leading-[25px] font-semibold break-words text-ink'>
               {doc.title}
             </h3>
-            <p className='font-mono text-[10px] text-ink-3'>
+            <p className='font-mono text-[11.5px] text-ink-3'>
               {doc.id} · versi {current?.version ?? '-'}
               {fileType ? ` · ${fileType}` : ''}
             </p>
@@ -92,12 +92,12 @@ export function DocumentsDetailPanel({
             <div className='flex items-center justify-between gap-2'>
               <h3
                 id='access-decision'
-                className='font-mono text-[7.5px] font-normal tracking-[.06em] text-ink-3 uppercase'
+                className='font-mono text-[8.5px] font-normal tracking-[.06em] text-ink-3 uppercase'
               >
                 Akses Anda
               </h3>
               {access !== null && (
-                <span className='inline-flex items-center gap-1.5 font-mono text-[9px] text-ink-2'>
+                <span className='inline-flex items-center gap-1.5 font-mono text-[10.5px] text-ink-2'>
                   <i
                     aria-hidden='true'
                     className={`size-[5px] shrink-0 rounded-full ${access.permit ? 'bg-pass' : 'bg-fail'}`}
@@ -111,23 +111,23 @@ export function DocumentsDetailPanel({
               )}
             </div>
             {access !== null ? (
-              <ul className='space-y-0.5 text-[10.5px] leading-[1.45] text-ink-2'>
+              <ul className='space-y-0.5 text-[12px] leading-[1.45] text-ink-2'>
                 {access.reasons.map((reason) => (
                   <li key={reason}>{reason}</li>
                 ))}
               </ul>
             ) : (
-              <p className='text-[10.5px] text-ink-2'>
+              <p className='text-[12px] text-ink-2'>
                 Masuk untuk melihat keputusan akses.
               </p>
             )}
-            <p className='text-[9px] leading-relaxed text-ink-3'>
+            <p className='text-[10.5px] leading-relaxed text-ink-3'>
               Keputusan akses dibuat oleh server. Ringkasan ini bukan otorisasi.
             </p>
           </section>
 
           <section aria-label='Riwayat versi' className='flex flex-col gap-1.5'>
-            <h3 className='font-mono text-[7.5px] font-normal tracking-[.06em] text-ink-3 uppercase'>
+            <h3 className='font-mono text-[8.5px] font-normal tracking-[.06em] text-ink-3 uppercase'>
               Versi
             </h3>
             <ol className='flex flex-col'>
@@ -138,15 +138,15 @@ export function DocumentsDetailPanel({
                 >
                   <span className='flex items-center gap-1.5'>
                     <span
-                      className={`text-[9px] ${index === 0 ? 'text-ink' : 'text-ink-2'}`}
+                      className={`text-[10.5px] ${index === 0 ? 'text-ink' : 'text-ink-2'}`}
                     >
                       {version.version}
                     </span>
-                    <span className='text-[8.5px] text-ink-3'>
+                    <span className='text-[10px] text-ink-3'>
                       {version.date}
                     </span>
                     {index === 0 && (
-                      <span className='border-[.67px] border-pass px-1.5 py-0.5 text-[7.5px] tracking-[.04em] text-pass uppercase'>
+                      <span className='border-[.67px] border-pass px-1.5 py-0.5 text-[8.5px] tracking-[.04em] text-pass uppercase'>
                         Saat ini
                       </span>
                     )}
@@ -158,7 +158,7 @@ export function DocumentsDetailPanel({
 
           <Button
             asChild
-            className='h-10 justify-between rounded-none border-[.67px] border-ink bg-ink px-[14.67px] text-[12.5px] font-semibold text-bg hover:bg-ink'
+            className='h-10 justify-between rounded-none border-[.67px] border-ink bg-ink px-[14.67px] text-[14.5px] font-semibold text-bg hover:bg-ink'
           >
             <Link
               to='/viewer'
@@ -167,7 +167,7 @@ export function DocumentsDetailPanel({
             >
               <span>Buka penampil aman</span>
               {limit !== null && (
-                <span className='font-mono text-[8.5px] font-semibold tracking-[.04em] tabular-nums'>
+                <span className='font-mono text-[10px] font-semibold tracking-[.04em] tabular-nums'>
                   {pad(Math.floor(limit / 60))}:{pad(limit % 60)}
                 </span>
               )}
@@ -188,10 +188,10 @@ function Field({
 }) {
   return (
     <div className='flex min-w-0 items-center gap-2.5 border-b border-line py-1.5'>
-      <dt className='shrink-0 font-mono text-[8px] font-normal tracking-[.04em] text-ink-3 uppercase'>
+      <dt className='shrink-0 font-mono text-[9px] font-normal tracking-[.04em] text-ink-3 uppercase'>
         {label}
       </dt>
-      <dd className='min-w-0 text-left text-[11.5px] leading-[1.45] text-ink'>
+      <dd className='min-w-0 text-left text-[13px] leading-[1.45] text-ink'>
         {children}
       </dd>
     </div>

@@ -66,14 +66,14 @@ export function AccessTester({
         <div className='flex min-w-0 flex-col gap-1'>
           <Label
             htmlFor='tester-user'
-            className='font-mono text-[7.5px] tracking-[0.75px] text-ink-3 uppercase'
+            className='font-mono text-[8.5px] tracking-[0.75px] text-ink-3 uppercase'
           >
             PENGGUNA
           </Label>
           <Select value={username} onValueChange={setUsername}>
             <SelectTrigger
               id='tester-user'
-              className='h-[34px] w-full rounded-none font-mono text-[10px]'
+              className='h-[34px] w-full rounded-none font-mono text-[11.5px]'
             >
               <SelectValue placeholder='Pilih pengguna'>
                 {user && (
@@ -87,7 +87,7 @@ export function AccessTester({
             <SelectContent>
               {users.map((u) => (
                 <SelectItem key={u.username} value={u.username}>
-                  <span className='flex items-center gap-2 font-mono text-[10px]'>
+                  <span className='flex items-center gap-2 font-mono text-[11.5px]'>
                     <span>{u.username}</span>
                     <LevelBadge level={u.accessLevel} />
                   </span>
@@ -100,14 +100,14 @@ export function AccessTester({
         <div className='flex min-w-0 flex-col gap-1'>
           <Label
             htmlFor='tester-doc'
-            className='font-mono text-[7.5px] tracking-[0.75px] text-ink-3 uppercase'
+            className='font-mono text-[8.5px] tracking-[0.75px] text-ink-3 uppercase'
           >
             DOKUMEN
           </Label>
           <Select value={docId} onValueChange={setDocId}>
             <SelectTrigger
               id='tester-doc'
-              className='h-[34px] w-full rounded-none font-mono text-[10px]'
+              className='h-[34px] w-full rounded-none font-mono text-[11.5px]'
             >
               <SelectValue placeholder='Pilih dokumen'>
                 {doc && `${doc.id} · TLP:${doc.tlp}`}
@@ -116,7 +116,7 @@ export function AccessTester({
             <SelectContent>
               {docs.map((d) => (
                 <SelectItem key={d.id} value={d.id}>
-                  <span className='font-mono text-[10px]'>
+                  <span className='font-mono text-[11.5px]'>
                     {d.id} · TLP:{d.tlp}
                     {d.title ? ` — ${d.title}` : ''}
                   </span>
@@ -133,7 +133,7 @@ export function AccessTester({
         >
           {result ? (
             <>
-              <div className='flex items-center gap-1.5 font-mono text-[9px] font-semibold tracking-[0.54px]'>
+              <div className='flex items-center gap-1.5 font-mono text-[10.5px] font-semibold tracking-[0.54px]'>
                 {result.permit ? (
                   <>
                     <Check
@@ -149,12 +149,12 @@ export function AccessTester({
                   </>
                 )}
               </div>
-              <p className='font-sans text-[10px] leading-[15px] text-ink-2'>
+              <p className='font-sans text-[11.5px] leading-[15px] text-ink-2'>
                 {result.reasons.join('. ')}
               </p>
             </>
           ) : (
-            <p className='font-mono text-[10px] text-ink-3'>{message}</p>
+            <p className='font-mono text-[11.5px] text-ink-3'>{message}</p>
           )}
         </div>
 
@@ -163,17 +163,17 @@ export function AccessTester({
             aria-hidden='true'
             className='mt-0.5 size-3 shrink-0 text-ink'
           />
-          <p className='font-mono text-[9px] leading-[14px] tracking-[0.72px] text-ink-3'>
+          <p className='font-mono text-[10.5px] leading-[14px] tracking-[0.72px] text-ink-3'>
             Simulasi hanya penjelasan tampilan. Server tetap memutuskan setiap
             permintaan file (404 bila tidak berhak).
           </p>
         </div>
 
         <div className='mt-1 flex flex-col gap-1.5 border-t border-line pt-2.5'>
-          <p className='font-mono text-[7px] tracking-[0.7px] text-ink-3 uppercase'>
+          <p className='font-mono text-[8px] tracking-[0.7px] text-ink-3 uppercase'>
             LEGENDA
           </p>
-          <div className='flex flex-col gap-1.5 font-mono text-[7.5px] text-ink-3'>
+          <div className='flex flex-col gap-1.5 font-mono text-[8.5px] text-ink-3'>
             <span className='flex items-center gap-1.5'>
               <span
                 aria-hidden='true'
@@ -197,14 +197,14 @@ export function AccessTester({
             </span>
           </div>
 
-          <p className='mt-2 font-mono text-[7px] tracking-[0.7px] text-ink-3 uppercase'>
+          <p className='mt-2 font-mono text-[8px] tracking-[0.7px] text-ink-3 uppercase'>
             SKALA LEVEL AKSES
           </p>
           <ul className='flex flex-col gap-1.5'>
             {SCALE.map((s) => (
               <li key={s.level} className='flex items-center gap-2'>
                 <LevelBadge level={s.level} />
-                <span className='font-mono text-[7.5px] text-ink-3'>
+                <span className='font-mono text-[8.5px] text-ink-3'>
                   {s.text}
                 </span>
               </li>

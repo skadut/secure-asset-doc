@@ -36,7 +36,7 @@ export function StatTile({
         gap: 8,
       }}
     >
-      <div style={{ fontSize: 12, color: 'var(--text-2)' }}>{label}</div>
+      <div style={{ fontSize: 14, color: 'var(--text-2)' }}>{label}</div>
 
       <div
         style={{
@@ -123,14 +123,14 @@ export function StatTile({
             aria-hidden='true'
             style={{ color: toneColor }}
           />
-          <span style={{ fontSize: 12, fontWeight: 600, color: toneColor }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: toneColor }}>
             {state.text}
           </span>
         </div>
       )}
 
       {note && !loading && (
-        <p style={{ fontSize: 12, color: 'var(--text-2)' }}>{note}</p>
+        <p style={{ fontSize: 14, color: 'var(--text-2)' }}>{note}</p>
       )}
     </div>
   )

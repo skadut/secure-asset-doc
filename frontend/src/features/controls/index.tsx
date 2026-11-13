@@ -110,14 +110,14 @@ export function Controls() {
               <li key={step.label} className='contents'>
                 <div className='flex min-w-0 flex-col gap-1'>
                   <div className='flex items-center gap-2'>
-                    <span className='inline-flex h-[18px] items-center bg-ink px-1.5 font-mono text-[7.5px] tracking-[.06em] text-surface'>
+                    <span className='inline-flex h-[18px] items-center bg-ink px-1.5 font-mono text-[8.5px] tracking-[.06em] text-surface'>
                       {step.label.slice(3, 6)}
                     </span>
-                    <strong className='text-[11px] leading-tight font-semibold text-ink'>
+                    <strong className='text-[12.5px] leading-tight font-semibold text-ink'>
                       {flowNames[index]}
                     </strong>
                   </div>
-                  <p className='font-mono text-[8px] leading-[1.6] text-ink-3'>
+                  <p className='font-mono text-[9px] leading-[1.6] text-ink-3'>
                     {step.detail}
                   </p>
                 </div>
@@ -161,7 +161,7 @@ export function Controls() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder='Cari ID, nama, implementasi'
-              className='min-w-0 flex-1 bg-transparent font-mono text-[9px] text-ink outline-none placeholder:text-ink-3'
+              className='min-w-0 flex-1 bg-transparent font-mono text-[10.5px] text-ink outline-none placeholder:text-ink-3'
             />
           </label>
           <div
@@ -176,7 +176,7 @@ export function Controls() {
                 aria-pressed={family === option}
                 onClick={() => setFamily(option)}
                 className={cn(
-                  'inline-flex h-8 min-w-8 items-center justify-center border px-2.5 font-mono text-[8.5px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink',
+                  'inline-flex h-8 min-w-8 items-center justify-center border px-2.5 font-mono text-[10px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink',
                   family === option
                     ? 'border-ink bg-ink text-surface'
                     : 'border-line text-ink-2 hover:bg-surface-2'
@@ -190,7 +190,7 @@ export function Controls() {
               </button>
             ))}
           </div>
-          <span className='ms-auto font-mono text-[8px] tracking-[.06em] text-ink-3'>
+          <span className='ms-auto font-mono text-[9px] tracking-[.06em] text-ink-3'>
             {hasData
               ? `${filteredControls.length} KONTROL TAMPIL`
               : 'DATASET SERVER BELUM TERSEDIA'}
@@ -207,7 +207,7 @@ export function Controls() {
                 Tabel kontrol NIST 800-53, nama kontrol, implementasi, dan
                 lokasi
               </caption>
-              <thead className='bg-surface-2 font-mono text-[7.5px] tracking-[.12em] text-ink-3 uppercase'>
+              <thead className='bg-surface-2 font-mono text-[8.5px] tracking-[.12em] text-ink-3 uppercase'>
                 <tr>
                   <th scope='col' className='w-[84px] px-3 py-2 font-normal'>
                     ID
@@ -228,7 +228,7 @@ export function Controls() {
                   <tr>
                     <td
                       colSpan={4}
-                      className='border-t border-line px-3 py-5 font-mono text-[9px] text-ink-3'
+                      className='border-t border-line px-3 py-5 font-mono text-[10.5px] text-ink-3'
                     >
                       Memuat kontrol…
                     </td>
@@ -250,7 +250,7 @@ export function Controls() {
                     <tr>
                       <td
                         colSpan={4}
-                        className='border-t border-line px-3 py-5 text-[11px] text-ink-2'
+                        className='border-t border-line px-3 py-5 text-[12.5px] text-ink-2'
                       >
                         Tidak ada kontrol yang cocok dengan filter.
                       </td>
@@ -264,17 +264,17 @@ export function Controls() {
                     >
                       <th
                         scope='row'
-                        className='px-3 py-2.5 text-left font-mono text-[9.5px] font-medium text-ink'
+                        className='px-3 py-2.5 text-left font-mono text-[11px] font-medium text-ink'
                       >
                         {control.id}
                       </th>
-                      <td className='px-3 py-2.5 text-[11.5px] font-medium text-ink'>
+                      <td className='px-3 py-2.5 text-[13px] font-medium text-ink'>
                         {control.name}
                       </td>
-                      <td className='px-3 py-2.5 text-[10.5px] leading-[1.5] text-ink-2'>
+                      <td className='px-3 py-2.5 text-[12px] leading-[1.5] text-ink-2'>
                         {control.implementation}
                       </td>
-                      <td className='px-3 py-2.5 font-mono text-[8px] leading-[1.7] text-ink-3'>
+                      <td className='px-3 py-2.5 font-mono text-[9px] leading-[1.7] text-ink-3'>
                         {control.location}
                       </td>
                     </tr>
@@ -282,7 +282,7 @@ export function Controls() {
               </tbody>
             </table>
           </div>
-          <footer className='mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-line px-3 py-2 font-mono text-[8.5px] text-ink-3'>
+          <footer className='mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-line px-3 py-2 font-mono text-[10px] text-ink-3'>
             <span>
               Menampilkan {filteredControls.length} dari {allControls.length}{' '}
               kontrol

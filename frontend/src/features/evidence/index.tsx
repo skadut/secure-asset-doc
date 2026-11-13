@@ -74,13 +74,13 @@ const legend: {
 
 // ponytail: 44px hit area via pseudo-element; visual stays 7.5px plain text
 const linkClass =
-  "relative inline-flex items-center font-mono text-[7.5px] text-ink-3 hover:text-ink before:absolute before:inset-x-0 before:-inset-y-4 before:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  "relative inline-flex items-center font-mono text-[8.5px] text-ink-3 hover:text-ink before:absolute before:inset-x-0 before:-inset-y-4 before:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
 
 function CoverageTag({ coverage }: { coverage: CoverageState }) {
   const { label, text, dot } = coverageTag[coverage]
   return (
     <span
-      className={`inline-flex items-center gap-1 border px-1.5 py-0.5 font-mono text-[7.5px] tracking-[.05em] ${text}`}
+      className={`inline-flex items-center gap-1 border px-1.5 py-0.5 font-mono text-[8.5px] tracking-[.05em] ${text}`}
     >
       <i aria-hidden='true' className={`size-1 rounded-full ${dot}`} />
       {label}
@@ -90,7 +90,7 @@ function CoverageTag({ coverage }: { coverage: CoverageState }) {
 
 function EvidenceLinks({ items }: { items: Item[] }) {
   if (!items.length)
-    return <span className='font-mono text-[9px] text-ink-3'>—</span>
+    return <span className='font-mono text-[10.5px] text-ink-3'>—</span>
   return (
     <div className='flex min-w-0 flex-wrap items-center'>
       {items.map((item, i) => (
@@ -98,7 +98,7 @@ function EvidenceLinks({ items }: { items: Item[] }) {
           {i > 0 && (
             <span
               aria-hidden='true'
-              className='font-mono text-[7.5px] text-ink-3'
+              className='font-mono text-[8.5px] text-ink-3'
             >
               {' '}
               ·{' '}
@@ -146,11 +146,11 @@ function EvidenceRow({ row, hash }: { row: Row; hash: string }) {
       <tr id={rowId} className='h-[46px] border-t border-line align-middle'>
         <th
           scope='row'
-          className='px-3 py-2.5 text-left font-mono text-[9.5px] font-medium text-ink'
+          className='px-3 py-2.5 text-left font-mono text-[11px] font-medium text-ink'
         >
           {row.id}
         </th>
-        <td className='min-w-0 px-3 py-2.5 text-[10px] leading-[1.45] text-ink-2'>
+        <td className='min-w-0 px-3 py-2.5 text-[11.5px] leading-[1.45] text-ink-2'>
           {row.outcome}
         </td>
         <td className='px-3 py-2.5'>
@@ -158,7 +158,7 @@ function EvidenceRow({ row, hash }: { row: Row; hash: string }) {
         </td>
         <td className='px-3 py-2.5'>
           <div className='flex min-w-0 flex-wrap items-center gap-2'>
-            <span className='font-mono text-[9.5px] text-ink tabular-nums'>
+            <span className='font-mono text-[11px] text-ink tabular-nums'>
               {row.items.length}
             </span>
             <EvidenceLinks items={row.items} />
@@ -212,7 +212,7 @@ function EvidenceRow({ row, hash }: { row: Row; hash: string }) {
                   key={i}
                   className='min-w-0 border border-line bg-surface px-3 py-2'
                 >
-                  <div className='flex flex-wrap items-center gap-2 text-[10px] text-ink'>
+                  <div className='flex flex-wrap items-center gap-2 text-[11.5px] text-ink'>
                     <span>{item.doc?.title ?? item.asset?.name}</span>
                     {item.doc && (
                       <>
@@ -221,7 +221,7 @@ function EvidenceRow({ row, hash }: { row: Row; hash: string }) {
                       </>
                     )}
                   </div>
-                  <p className='mt-1 text-[10px] leading-[1.45] text-ink-2'>
+                  <p className='mt-1 text-[11.5px] leading-[1.45] text-ink-2'>
                     {item.note}
                   </p>
                 </li>
@@ -235,11 +235,11 @@ function EvidenceRow({ row, hash }: { row: Row; hash: string }) {
 }
 
 const filterButton =
-  'inline-flex min-h-11 items-center justify-center px-2.5 font-mono text-[8.5px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+  'inline-flex min-h-11 items-center justify-center px-2.5 font-mono text-[10px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
 const filterOn = 'border border-ink bg-ink text-surface'
 const filterOff = 'border border-line bg-surface text-ink-2 hover:bg-surface-2'
 const pageButton =
-  'inline-flex min-h-11 items-center justify-center border border-line px-3 font-mono text-[9px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:opacity-50'
+  'inline-flex min-h-11 items-center justify-center border border-line px-3 font-mono text-[10.5px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:opacity-50'
 
 export function Evidence() {
   const [fn, setFn] = useState<FnFilter>('all')
@@ -316,11 +316,11 @@ export function Evidence() {
                     <strong className='block font-heading text-[20px] leading-none font-semibold text-ink'>
                       {item.fn}
                     </strong>
-                    <span className='mt-1 block font-mono text-[7.5px] tracking-[.06em] text-ink-3'>
+                    <span className='mt-1 block font-mono text-[8.5px] tracking-[.06em] text-ink-3'>
                       {CSF_FUNCTIONS[item.fn]}
                     </span>
                   </span>
-                  <span className='font-mono text-[9px] text-ink-2'>
+                  <span className='font-mono text-[10.5px] text-ink-2'>
                     {item.total}
                   </span>
                 </span>
@@ -352,7 +352,7 @@ export function Evidence() {
                   {legend.map(({ dot, label, key }) => (
                     <span
                       key={key}
-                      className='flex items-center gap-1 font-mono text-[7.5px] text-ink-3'
+                      className='flex items-center gap-1 font-mono text-[8.5px] text-ink-3'
                     >
                       <i aria-hidden='true' className={`size-[5px] ${dot}`} />
                       {label} {item[key]}
@@ -428,7 +428,7 @@ export function Evidence() {
                   <caption className='sr-only'>
                     Subkategori CSF, outcome, coverage, dan bukti tertaut
                   </caption>
-                  <thead className='bg-surface-2 font-mono text-[7.5px] tracking-[.12em] text-ink-3 uppercase'>
+                  <thead className='bg-surface-2 font-mono text-[8.5px] tracking-[.12em] text-ink-3 uppercase'>
                     <tr>
                       <th
                         scope='col'
@@ -463,7 +463,7 @@ export function Evidence() {
                   </tbody>
                 </table>
               </div>
-              <footer className='mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-line px-3 py-2 font-mono text-[8.5px] text-ink-3'>
+              <footer className='mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-line px-3 py-2 font-mono text-[10px] text-ink-3'>
                 <span className='min-w-0 flex-1'>
                   {visible.length} dari {rows.length} subkategori ditampilkan ·
                   halaman {current} dari {totalPages}

@@ -4,7 +4,7 @@ export function ChartTip({ title, body }: { title: string; body: string }) {
       style={{
         background: 'var(--tip-bg)',
         color: 'var(--tip-fg)',
-        fontSize: 12,
+        fontSize: 14,
         padding: '6px 8px',
         borderRadius: 6,
         pointerEvents: 'none',

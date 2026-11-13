@@ -18,7 +18,7 @@ export function LevelBadge({ level }: { level: number }) {
     >
       <span
         aria-hidden='true'
-        className='flex h-4 w-[22px] items-center justify-center rounded-l-[3px] font-mono text-[9px] font-semibold tracking-[0.18px]'
+        className='flex h-4 w-[22px] items-center justify-center rounded-l-[3px] font-mono text-[10.5px] font-semibold tracking-[0.18px]'
         style={{ backgroundColor: meta.bg, color: meta.ink }}
       >
         L{n}

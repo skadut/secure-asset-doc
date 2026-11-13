@@ -35,7 +35,7 @@ function RouteComponent() {
         <ConfigDrawer />
         <ProfileDropdown />
       </Header>
-      <div className='flex-1 [&>div]:h-full'>
+      <div className='flex-1 [&>div]:h-full [&>div]:min-h-0'>
         <ErrorComponent />
       </div>
     </>

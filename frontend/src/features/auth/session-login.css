@@ -228,7 +228,7 @@
   text-transform: uppercase;
 }
 .lg-hero > .lg-eyebrow {
-  font-size: 11px;
+  font-size: 12.5px;
   letter-spacing: 1.6px;
 }
 .lg-hero h1 {
@@ -419,7 +419,7 @@
 }
 .lg-card-head-label b {
   font-weight: 500;
-  font-size: 9px;
+  font-size: 10.5px;
   letter-spacing: 0;
   color: var(--ink);
 }
@@ -639,7 +639,7 @@
   color: var(--fail);
   padding: 10px 12px;
   background: color-mix(in srgb, var(--fail) 8%, transparent);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 /* step 03 */
@@ -656,7 +656,7 @@
 }
 .lg-who .lg-mono {
   color: var(--ink-2);
-  font-size: 13px;
+  font-size: 15px;
   overflow-wrap: anywhere;
 }
 .lg-ring-row {
@@ -818,7 +818,7 @@
 .lg-warning {
   color: var(--warn);
   margin: 0;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 /* locked */

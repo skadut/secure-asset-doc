@@ -42,7 +42,7 @@ Response `201`: `{ "id": "<uuid>", "name": "a.pdf", "mime": "application/pdf", "
 
 Files: `protection.mjs` (`protectionFor` TLP mapping, `INTEGRITY_ERROR`), `protection.check.mjs` (run with `node backend/protection.check.mjs`).
 
-- `protectionFor(tlp)`: `CLEAR` -> `integrity`. `GREEN`, `AMBER`, `AMBER+STRICT`, `RED`, `RED+STRICT` -> `encrypted`. Unknown TLP throws `unknown tlp`.
+- `protectionFor(tlp)`: every TLP (`CLEAR`, `GREEN`, `AMBER`, `AMBER+STRICT`, `RED`, `RED+STRICT`) -> `encrypted`. Unknown TLP throws `unknown tlp`. `integrity` is kept only for old CLEAR rows not yet migrated.
 - `INTEGRITY_ERROR` = `integrity check failed`.
 
 ### Read path: `GET /api/files/:doc/:ver`
@@ -60,7 +60,7 @@ Errors:
 
 ### Startup warning
 
-At startup, the backend logs `WARN: <n> GREEN+ document versions unprotected; run db/scripts/protect-documents.mjs` when versions with TLP above `CLEAR` still have `protection='none'` and stored content. Those versions are served without a check. The check runs once at startup, not per request. If the query fails, it logs `WARN: protection check skipped`.
+At startup, the backend logs `WARN: <n> document versions not sealed; run db/scripts/protect-documents.mjs` when any version with a stored file is not `protection='encrypted'` (any TLP, including old CLEAR `integrity` rows). `none` rows are served without a check; `integrity` rows are HMAC-checked but stored as plaintext. The check runs once at startup, not per request. If the query fails, it logs `WARN: protection check skipped`.
 
 To fix, see db/README.md, section Protecting documents. Use `--dry-run` first. Admin credentials come from `PG*` environment variables only. Do not commit them.
 

@@ -32,9 +32,9 @@ const PAGE_SIZE = 8
 const PAGER_WINDOW = 3
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000
 const selectClass =
-  'h-[34px] rounded-none border-line bg-surface px-2.5 font-mono text-[10px] text-ink-2 shadow-none hover:bg-surface-2 dark:bg-surface dark:hover:bg-surface-2 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink [&_svg]:size-3 [&_svg]:opacity-100'
+  'h-[34px] rounded-none border-line bg-surface px-2.5 font-mono text-[11.5px] text-ink-2 shadow-none hover:bg-surface-2 dark:bg-surface dark:hover:bg-surface-2 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink [&_svg]:size-3 [&_svg]:opacity-100'
 const pagerClass =
-  'grid h-[30px] min-w-[30px] place-items-center border border-line px-2 font-sans text-[11.5px] font-semibold text-ink-2 hover:bg-surface-2 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+  'grid h-[30px] min-w-[30px] place-items-center border border-line px-2 font-sans text-[13px] font-semibold text-ink-2 hover:bg-surface-2 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
 
 // Keys beyond AuditEvent['action'] (deny, login.*) are not in the data type; kept so backend values get the warn tone.
 const CHIP_TONE: Record<string, string> = {
@@ -50,7 +50,7 @@ const CHIP_TONE: Record<string, string> = {
 function ActionChip({ action }: { action: string }) {
   return (
     <span
-      className={`inline-flex h-4 items-center border px-1.5 font-mono text-[7.5px] tracking-[.3px] lowercase ${CHIP_TONE[action] ?? 'border-ink-2 text-ink-2'}`}
+      className={`inline-flex h-4 items-center border px-1.5 font-mono text-[8.5px] tracking-[.3px] lowercase ${CHIP_TONE[action] ?? 'border-ink-2 text-ink-2'}`}
     >
       {action}
     </span>
@@ -59,7 +59,7 @@ function ActionChip({ action }: { action: string }) {
 
 function ObjectLink({ event }: { event: AuditEvent }) {
   const className =
-    'font-mono text-[9px] underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+    'font-mono text-[10.5px] underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
   if (event.objectType === 'asset') {
     return (
       <Link
@@ -84,7 +84,9 @@ function ObjectLink({ event }: { event: AuditEvent }) {
   }
   if (event.objectType !== 'evidence')
     return (
-      <span className='font-mono text-[9px] text-ink-2'>{event.objectId}</span>
+      <span className='font-mono text-[10.5px] text-ink-2'>
+        {event.objectId}
+      </span>
     )
   return (
     <Link
@@ -222,7 +224,7 @@ export function AuditLog() {
             canPurge ? (
               <button
                 type='button'
-                className='inline-flex min-h-9 items-center gap-1.5 border border-fail bg-surface px-2.5 font-sans text-[12.5px] font-semibold text-fail hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+                className='inline-flex min-h-9 items-center gap-1.5 border border-fail bg-surface px-2.5 font-sans text-[14.5px] font-semibold text-fail hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
                 onClick={() => setPurgeOpen(true)}
               >
                 <Eraser aria-hidden='true' className='size-[13px]' />
@@ -274,7 +276,7 @@ export function AuditLog() {
               value={search}
               onChange={(e) => resetPage(setSearch)(e.target.value)}
               placeholder='Cari ringkasan kejadian'
-              className='h-full min-w-0 flex-1 bg-transparent font-mono text-[10px] text-ink outline-none placeholder:text-ink-3'
+              className='h-full min-w-0 flex-1 bg-transparent font-mono text-[11.5px] text-ink outline-none placeholder:text-ink-3'
             />
           </div>
 
@@ -289,14 +291,14 @@ export function AuditLog() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className='rounded-none'>
-              <SelectItem value='all' className='font-mono text-[10px]'>
+              <SelectItem value='all' className='font-mono text-[11.5px]'>
                 Aksi: semua
               </SelectItem>
               {actions.map((value) => (
                 <SelectItem
                   key={value}
                   value={value}
-                  className='font-mono text-[10px]'
+                  className='font-mono text-[11.5px]'
                 >
                   {value}
                 </SelectItem>
@@ -315,14 +317,14 @@ export function AuditLog() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className='rounded-none'>
-              <SelectItem value='all' className='font-mono text-[10px]'>
+              <SelectItem value='all' className='font-mono text-[11.5px]'>
                 Objek: semua
               </SelectItem>
               {objectTypes.map((value) => (
                 <SelectItem
                   key={value}
                   value={value}
-                  className='font-mono text-[10px]'
+                  className='font-mono text-[11.5px]'
                 >
                   {value}
                 </SelectItem>
@@ -341,14 +343,14 @@ export function AuditLog() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className='rounded-none'>
-              <SelectItem value='all' className='font-mono text-[10px]'>
+              <SelectItem value='all' className='font-mono text-[11.5px]'>
                 Aktor: semua
               </SelectItem>
               {actors.map((value) => (
                 <SelectItem
                   key={value}
                   value={value}
-                  className='font-mono text-[10px]'
+                  className='font-mono text-[11.5px]'
                 >
                   {value}
                 </SelectItem>
@@ -367,13 +369,13 @@ export function AuditLog() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className='rounded-none'>
-              <SelectItem value='7d' className='font-mono text-[10px]'>
+              <SelectItem value='7d' className='font-mono text-[11.5px]'>
                 7 hari terakhir
               </SelectItem>
             </SelectContent>
           </Select>
 
-          <span className='ms-auto font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'>
+          <span className='ms-auto font-mono text-[10.5px] tracking-[.08em] text-ink-3 uppercase'>
             {PAGE_SIZE} / halaman
           </span>
         </div>
@@ -382,7 +384,7 @@ export function AuditLog() {
           <div className='scroll-x min-w-0 overflow-x-auto'>
             <table className='w-full min-w-[880px] border-collapse text-left'>
               <thead>
-                <tr className='border-b border-line bg-surface-2 font-mono text-[7.5px] tracking-[.08em] text-ink-3 uppercase'>
+                <tr className='border-b border-line bg-surface-2 font-mono text-[8.5px] tracking-[.08em] text-ink-3 uppercase'>
                   <th className='w-24 px-2.5 py-2 font-normal'>WAKTU</th>
                   <th className='w-[130px] px-2.5 py-2 font-normal'>AKTOR</th>
                   <th className='w-[132px] px-2.5 py-2 font-normal'>AKSI</th>
@@ -407,12 +409,12 @@ export function AuditLog() {
                         <time
                           dateTime={event.at}
                           title={event.at}
-                          className='font-mono text-[8.5px] text-ink-2 tabular-nums'
+                          className='font-mono text-[10px] text-ink-2 tabular-nums'
                         >
                           {timeOf(event.at)}
                         </time>
                       </td>
-                      <td className='px-2.5 py-2 font-mono text-[8.5px] text-ink-2'>
+                      <td className='px-2.5 py-2 font-mono text-[10px] text-ink-2'>
                         {event.actor}
                       </td>
                       <td className='px-2.5 py-2'>
@@ -421,7 +423,7 @@ export function AuditLog() {
                       <td className='px-2.5 py-2'>
                         <ObjectLink event={event} />
                       </td>
-                      <td className='px-2.5 py-2 text-[10px] leading-[1.45] text-ink-2'>
+                      <td className='px-2.5 py-2 text-[11.5px] leading-[1.45] text-ink-2'>
                         {event.summary}
                       </td>
                       <td className='px-2.5 py-2 text-right'>
@@ -436,7 +438,7 @@ export function AuditLog() {
                                 [event.id]: !current[event.id],
                               }))
                             }
-                            className='inline-flex h-[30px] w-[110px] items-center justify-center gap-1.5 border border-line bg-surface font-sans text-[11.5px] font-semibold text-ink hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+                            className='inline-flex h-[30px] w-[110px] items-center justify-center gap-1.5 border border-line bg-surface font-sans text-[13px] font-semibold text-ink hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
                           >
                             {changes.length} field
                             {isExpanded ? (
@@ -452,7 +454,7 @@ export function AuditLog() {
                             )}
                           </button>
                         ) : (
-                          <span className='font-mono text-[10px] text-ink-3'>
+                          <span className='font-mono text-[11.5px] text-ink-3'>
                             —
                           </span>
                         )}
@@ -469,7 +471,7 @@ export function AuditLog() {
                             {changes.map((change, index) => (
                               <li
                                 key={`${change.field}-${index}`}
-                                className='flex flex-wrap items-baseline gap-2 font-mono text-[9px]'
+                                className='flex flex-wrap items-baseline gap-2 font-mono text-[10.5px]'
                               >
                                 <span className='w-28 shrink-0 text-ink-3'>
                                   {change.field}
@@ -502,7 +504,7 @@ export function AuditLog() {
           </div>
 
           <footer className='flex flex-wrap items-center justify-between gap-2 border-t border-line bg-surface-2 px-3 py-2'>
-            <span className='font-mono text-[8.5px] tracking-[.68px] text-ink-3'>
+            <span className='font-mono text-[10px] tracking-[.68px] text-ink-3'>
               Menampilkan {visible.length} dari {filteredEvents.length} kejadian
               · waktu menurun
             </span>

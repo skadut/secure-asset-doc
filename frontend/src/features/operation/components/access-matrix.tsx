@@ -160,7 +160,7 @@ export function AccessPanel({
           placeholder='Cari atau filter TLP'
           value={documentQuery}
           onChange={(event) => setDocumentQuery(event.target.value)}
-          className='h-full border-0 bg-transparent px-0 font-mono text-[10px] shadow-none focus-visible:ring-0'
+          className='h-full border-0 bg-transparent px-0 font-mono text-[11.5px] shadow-none focus-visible:ring-0'
         />
       </label>
       {visibleDocs.length === 0 ? (
@@ -185,15 +185,15 @@ export function AccessPanel({
                   >
                     <span className='flex min-w-0 items-center gap-2'>
                       <TlpMark tlp={item.tlp} compact />
-                      <span className='min-w-0 flex-1 truncate font-mono text-[10px] text-ink-2'>
+                      <span className='min-w-0 flex-1 truncate font-mono text-[11.5px] text-ink-2'>
                         {item.id}
                       </span>
-                      <span className='font-mono text-[8px] whitespace-nowrap text-ink-3'>
+                      <span className='font-mono text-[9px] whitespace-nowrap text-ink-3'>
                         {holderCountFor(item)} pemegang
                       </span>
                     </span>
                     {item.title && (
-                      <span className='truncate ps-[14px] text-[11px] text-ink'>
+                      <span className='truncate ps-[14px] text-[12.5px] text-ink'>
                         {item.title}
                       </span>
                     )}
@@ -221,7 +221,7 @@ export function AccessPanel({
             type='search'
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            className='h-[30px] w-full rounded-none ps-8 font-mono text-[11px]'
+            className='h-[30px] w-full rounded-none ps-8 font-mono text-[12.5px]'
           />
         </div>
         <div className='flex min-w-0 gap-2'>
@@ -234,7 +234,7 @@ export function AccessPanel({
           >
             <SelectTrigger
               aria-label='Tampilkan per'
-              className='h-[30px] w-full rounded-none font-mono text-[11px] sm:w-36'
+              className='h-[30px] w-full rounded-none font-mono text-[12.5px] sm:w-36'
             >
               <SelectValue placeholder='Group: semua' />
             </SelectTrigger>
@@ -249,7 +249,7 @@ export function AccessPanel({
             <Select value={dimValue} onValueChange={setDimValue}>
               <SelectTrigger
                 aria-label={DIM_LABEL[dim]}
-                className='h-[30px] w-full rounded-none font-mono text-[11px] sm:w-44'
+                className='h-[30px] w-full rounded-none font-mono text-[12.5px] sm:w-44'
               >
                 <SelectValue />
               </SelectTrigger>
@@ -286,7 +286,7 @@ export function AccessPanel({
         <div className='op-panel-scroll min-w-0'>
           <div
             aria-hidden='true'
-            className='hidden h-[26px] grid-cols-[24px_minmax(0,1fr)_120px_minmax(0,1fr)] items-center gap-3 border-b border-line bg-surface-2 px-3 font-mono text-[7.5px] tracking-[.075em] text-ink-3 uppercase sm:grid'
+            className='hidden h-[26px] grid-cols-[24px_minmax(0,1fr)_120px_minmax(0,1fr)] items-center gap-3 border-b border-line bg-surface-2 px-3 font-mono text-[8.5px] tracking-[.075em] text-ink-3 uppercase sm:grid'
           >
             <span className='col-span-2'>Pengguna</span>
             <span className='text-center'>Akses</span>
@@ -303,7 +303,7 @@ export function AccessPanel({
           ).map((group) => (
             <div key={group.key}>
               {group.label && (
-                <h3 className='flex h-[26px] items-center border-b border-line bg-surface-2 px-3 font-mono text-[7.5px] tracking-[.075em] text-ink-3 uppercase'>
+                <h3 className='flex h-[26px] items-center border-b border-line bg-surface-2 px-3 font-mono text-[8.5px] tracking-[.075em] text-ink-3 uppercase'>
                   {group.label}
                 </h3>
               )}
@@ -325,15 +325,15 @@ export function AccessPanel({
                     >
                       <span
                         aria-hidden='true'
-                        className='grid size-6 place-items-center border border-line bg-surface-2 font-mono text-[8px] text-ink-2'
+                        className='grid size-6 place-items-center border border-line bg-surface-2 font-mono text-[9px] text-ink-2'
                       >
                         {initials(user)}
                       </span>
                       <div className='min-w-0 overflow-hidden'>
-                        <p className='truncate text-[11.5px] leading-[17px] text-ink'>
+                        <p className='truncate text-[13px] leading-[17px] text-ink'>
                           {user.name ?? user.username}
                         </p>
-                        <p className='mt-[3px] flex min-w-0 items-center gap-1.5 text-[7.5px] leading-[11px] text-ink-3'>
+                        <p className='mt-[3px] flex min-w-0 items-center gap-1.5 text-[8.5px] leading-[11px] text-ink-3'>
                           <LevelBadge level={user.accessLevel} />
                           {rankUnit && (
                             <span className='truncate font-mono'>
@@ -359,12 +359,12 @@ export function AccessPanel({
                         />
                         <span
                           aria-hidden='true'
-                          className='font-mono text-[6.5px] leading-[9px] text-ink-3'
+                          className='font-mono text-[7.5px] leading-[9px] text-ink-3'
                         >
                           LVL
                         </span>
                       </div>
-                      <p className='col-span-2 truncate font-mono text-[8px] leading-[12px] text-ink-3 sm:col-span-1'>
+                      <p className='col-span-2 truncate font-mono text-[9px] leading-[12px] text-ink-3 sm:col-span-1'>
                         {reasonFor(state)}
                       </p>
                     </li>
@@ -376,7 +376,7 @@ export function AccessPanel({
         </div>
       )}
 
-      <p className='border-t border-line px-3 py-2.5 text-[11px] text-ink-3'>
+      <p className='border-t border-line px-3 py-2.5 text-[12.5px] text-ink-3'>
         Switch ON mengajukan permintaan akses yang harus disetujui dua pihak.
         Switch OFF mencabut grant aktif.
       </p>

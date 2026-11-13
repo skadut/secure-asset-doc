@@ -1,4 +1,5 @@
-// Protects existing document_versions rows by documents.tlp: CLEAR -> integrity tag, GREEN+ -> sealed (t1:).
+// Protects existing document_versions rows by documents.tlp: every TLP, CLEAR included, is sealed (t1:) with an HMAC tag.
+// Migrates protection='none' rows and upgrades old protection='integrity' rows (CLEAR, plaintext base64) to 'encrypted'.
 // Runs inside backend image: node /app/protect-documents.mjs [--dry-run]. Admin creds via PG* env only. Prints no payloads.
 // ponytail: if a document TLP changes later, re-running this script does NOT re-protect or un-protect existing versions. Re-run protect requires manual reset. Out of scope.
 import pg from 'pg';
@@ -25,7 +26,7 @@ async function call(path, body, field) {
   return r.json[field];
 }
 
-// One transaction per row. Row must still be protection='none' (rowCount 1), else nothing is written.
+// One transaction per row. Row must still have its original protection (rowCount 1), else nothing is written.
 async function write(client, sql, params) {
   await client.query('BEGIN');
   try {
@@ -38,6 +39,7 @@ async function write(client, sql, params) {
   }
 }
 
+// p is always 'encrypted' now; the branch stays simple. Old integrity rows keep their tag if it still verifies.
 async function protectRow(client, row) {
   let p;
   try {
@@ -45,21 +47,18 @@ async function protectRow(client, row) {
   } catch {
     throw new Fail('unknown tlp');
   }
+  if (p !== 'encrypted') throw new Fail('unexpected target');
   let raw = null;
   let rec = null;
   let recBuf = null;
   try {
     const b64 = row.content_base64;
     raw = Buffer.from(b64, 'base64');
-    const tag = await call('/hmac', { Message: b64 }, 'Value');
-    if (typeof tag !== 'string') throw new Fail('crypto /hmac bad response');
-
-    if (p === 'integrity') {
-      if ((await call('/verifyhmac', { Message: b64, HMACstring: tag }, 'Value')) !== true) throw new Fail('hmac verify failed');
-      if (!DRY) {
-        await write(client, "UPDATE document_versions SET integrity_tag=$1, protection='integrity' WHERE document_id=$2 AND version=$3 AND protection='none'", [tag, row.document_id, row.version]);
-      }
-      return;
+    let tag = row.integrity_tag;
+    if (tag && (await call('/verifyhmac', { Message: b64, HMACstring: tag }, 'Value')) !== true) tag = null;
+    if (!tag) {
+      tag = await call('/hmac', { Message: b64 }, 'Value');
+      if (typeof tag !== 'string') throw new Fail('crypto /hmac bad response');
     }
 
     const ct = await call('/sealfile', { Data: b64 }, 'Ciphertext');
@@ -70,7 +69,7 @@ async function protectRow(client, row) {
     if (!sha256(recBuf).equals(sha256(raw))) throw new Fail('roundtrip mismatch');
     if ((await call('/verifyhmac', { Message: rec, HMACstring: tag }, 'Value')) !== true) throw new Fail('hmac verify failed');
     if (!DRY) {
-      await write(client, "UPDATE document_versions SET content_ciphertext=$1, integrity_tag=$2, content_base64=NULL, protection='encrypted' WHERE document_id=$3 AND version=$4 AND protection='none'", [ct, tag, row.document_id, row.version]);
+      await write(client, "UPDATE document_versions SET content_ciphertext=$1, integrity_tag=$2, content_base64=NULL, protection='encrypted' WHERE document_id=$3 AND version=$4 AND protection=$5", [ct, tag, row.document_id, row.version, row.protection]);
     }
   } finally {
     raw?.fill(0);
@@ -93,10 +92,14 @@ async function main() {
   await client.connect();
   try {
     const rows = await client.query(
-      "SELECT v.document_id, v.version, v.content_base64, d.tlp FROM document_versions v JOIN documents d ON d.id=v.document_id WHERE v.protection='none' AND v.content_base64 IS NOT NULL ORDER BY 1,2",
+      "SELECT v.document_id, v.version, v.content_base64, v.integrity_tag, v.protection, d.tlp FROM document_versions v JOIN documents d ON d.id=v.document_id WHERE v.protection IN ('none','integrity') AND v.content_base64 IS NOT NULL ORDER BY 1,2",
+    );
+    const noFile = await client.query(
+      "SELECT count(*)::int AS n FROM document_versions WHERE protection IN ('none','integrity') AND content_base64 IS NULL AND content_ciphertext IS NULL",
     );
     const stats = new Map();
     let failed = 0;
+    let migratedIntegrity = 0;
     for (const row of rows.rows) {
       if (!stats.has(row.tlp)) stats.set(row.tlp, { processed: 0, ok: 0, failed: 0 });
       const s = stats.get(row.tlp);
@@ -104,6 +107,7 @@ async function main() {
       try {
         await protectRow(client, row);
         s.ok++;
+        if (row.protection === 'integrity') migratedIntegrity++;
       } catch (e) {
         s.failed++;
         failed++;
@@ -114,6 +118,8 @@ async function main() {
     }
 
     for (const [tlp, s] of stats) console.log(`summary tlp=${tlp} processed=${s.processed} ok=${s.ok} failed=${s.failed}`);
+    console.log(`migrated integrity=${migratedIntegrity}`);
+    console.log(`no file=${noFile.rows[0].n}`);
     const after = await client.query('SELECT protection, count(*)::int AS n FROM document_versions GROUP BY 1 ORDER BY 1');
     for (const r of after.rows) console.log(`protection ${r.protection}=${r.n}`);
     console.log(DRY ? 'dry-run: no writes' : 'writes committed');

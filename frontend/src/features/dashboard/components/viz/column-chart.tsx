@@ -56,7 +56,7 @@ export function ColumnChart({
                 right: 4,
                 bottom: pct(t),
                 transform: 'translateY(50%)',
-                fontSize: 11,
+                fontSize: 12.5,
                 lineHeight: '11px',
                 color: 'var(--text-2)',
                 textAlign: 'right',
@@ -190,7 +190,7 @@ export function ColumnChart({
             {item.axisLabel && (
               <span
                 style={{
-                  fontSize: 11,
+                  fontSize: 12.5,
                   lineHeight: '16px',
                   color: 'var(--text-2)',
                   whiteSpace: 'nowrap',

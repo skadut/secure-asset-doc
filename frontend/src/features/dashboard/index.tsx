@@ -143,7 +143,7 @@ const ActionLink = ({
 }) => (
   <Link
     to={to}
-    className='inline-flex min-h-8 items-center gap-2 border border-line-strong bg-surface px-2.5 font-mono text-[10px] font-semibold tracking-wide text-ink uppercase hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-line-strong'
+    className='inline-flex min-h-8 items-center gap-2 border border-line-strong bg-surface px-2.5 font-mono text-[11.5px] font-semibold tracking-wide text-ink uppercase hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-line-strong'
   >
     {label}
     <ArrowRight aria-hidden='true' size={13} />
@@ -385,9 +385,17 @@ export function Dashboard() {
                 asChild
                 className='min-h-9 rounded-none bg-ink px-4 text-bg hover:bg-ink/90'
               >
-                <Link to='/documents'>
-                  Buka registri <ArrowUpFromLine aria-hidden='true' size={14} />
-                </Link>
+                {me?.can.upload?.c ? (
+                  <Link to='/documents' search={{ upload: true }}>
+                    Unggah dokumen{' '}
+                    <ArrowUpFromLine aria-hidden='true' size={14} />
+                  </Link>
+                ) : (
+                  <Link to='/documents'>
+                    Buka registri{' '}
+                    <ArrowUpFromLine aria-hidden='true' size={14} />
+                  </Link>
+                )}
               </Button>
             }
           />
@@ -460,7 +468,7 @@ export function Dashboard() {
             title='Event audit per hari'
             meta={`${activity.length} hari · ${hasServerSeries ? '/api/dashboard/summary' : 'timestamp audit lokal'}`}
             actions={
-              <span className='ml-auto font-mono text-[9px] text-ink-3 uppercase'>
+              <span className='ml-auto font-mono text-[10.5px] text-ink-3 uppercase'>
                 RATA-RATA {activityMean}
               </span>
             }
@@ -501,7 +509,7 @@ export function Dashboard() {
               <div className='overflow-x-auto'>
                 <table className='w-full min-w-[620px] border-collapse text-left'>
                   <thead>
-                    <tr className='border-b border-line-strong font-mono text-[8px] tracking-wide text-ink-3 uppercase'>
+                    <tr className='border-b border-line-strong font-mono text-[9px] tracking-wide text-ink-3 uppercase'>
                       <th className='px-2 py-2 font-normal'>Dokumen</th>
                       <th className='px-2 py-2 font-normal'>TLP</th>
                       <th className='px-2 py-2 font-normal'>Status</th>
@@ -517,14 +525,14 @@ export function Dashboard() {
                       >
                         <td className='max-w-[240px] px-2 py-[21px]'>
                           <Link
-                            className='font-mono text-[10px] font-semibold text-ink no-underline'
+                            className='font-mono text-[11.5px] font-semibold text-ink no-underline'
                             to='/documents/$documentId'
                             params={{ documentId: doc.id }}
                           >
                             {doc.id}
                           </Link>
                           <span
-                            className='mt-1 line-clamp-2 block text-[10px] leading-5 text-ink-3'
+                            className='mt-1 line-clamp-2 block text-[11.5px] leading-5 text-ink-3'
                             title={doc.title}
                           >
                             {doc.title}
@@ -536,11 +544,11 @@ export function Dashboard() {
                         <td className='px-2 py-[21px]'>
                           <DocStatusBadge status={doc.status} />
                         </td>
-                        <td className='px-2 py-2.5 font-mono text-[10px] tabular-nums'>
+                        <td className='px-2 py-2.5 font-mono text-[11.5px] tabular-nums'>
                           {doc.nextReview}
                         </td>
                         <td
-                          className={`px-2 py-2.5 text-right font-mono text-[10px] tabular-nums ${days < 0 ? 'text-fail' : 'text-pass'}`}
+                          className={`px-2 py-2.5 text-right font-mono text-[11.5px] tabular-nums ${days < 0 ? 'text-fail' : 'text-pass'}`}
                         >
                           {days < 0
                             ? `lewat ${Math.abs(days)} hari`
@@ -575,12 +583,12 @@ export function Dashboard() {
                       <Link
                         to='/evidence'
                         hash={`subcategory-${subcategory.id}`}
-                        className='font-mono text-[10px] font-semibold text-ink no-underline'
+                        className='font-mono text-[11.5px] font-semibold text-ink no-underline'
                       >
                         {subcategory.id}
                       </Link>
                       <p
-                        className='truncate text-[10px] text-ink-3'
+                        className='truncate text-[11.5px] text-ink-3'
                         title={subcategory.outcome}
                       >
                         {subcategory.outcome}
@@ -604,7 +612,7 @@ export function Dashboard() {
               title='Aktivitas terbaru'
               meta='AUDIT LOG'
               actions={
-                <span className='font-mono text-[9px] text-pass uppercase'>
+                <span className='font-mono text-[10.5px] text-pass uppercase'>
                   LIVE
                 </span>
               }
@@ -615,11 +623,11 @@ export function Dashboard() {
                     key={event.id}
                     className='flex min-w-0 items-baseline gap-2 border-b border-line px-3 py-1.5 last:border-0'
                   >
-                    <p className='min-w-0 flex-1 truncate text-[10px] leading-4'>
+                    <p className='min-w-0 flex-1 truncate text-[11.5px] leading-4'>
                       {actionLabel(event.action)}
                       {event.summary ? ` · ${event.summary}` : ''}
                     </p>
-                    <span className='shrink-0 truncate font-mono text-[9px] text-ink-3'>
+                    <span className='shrink-0 truncate font-mono text-[10.5px] text-ink-3'>
                       <time className='tabular-nums'>
                         {new Intl.DateTimeFormat('id-ID', {
                           hour: '2-digit',
@@ -678,11 +686,11 @@ export function Dashboard() {
                         className='grid min-w-0 grid-cols-[92px_minmax(0,1fr)_30px] items-center gap-2 border-b border-line px-3 py-2.5 last:border-0'
                       >
                         <div className='min-w-0'>
-                          <p className='truncate font-mono text-[10px]'>
+                          <p className='truncate font-mono text-[11.5px]'>
                             {grant.user}
                           </p>
                           <Link
-                            className='font-mono text-[8px] text-ink-3 no-underline'
+                            className='font-mono text-[9px] text-ink-3 no-underline'
                             to='/documents/$documentId'
                             params={{ documentId: grant.documentId }}
                           >
@@ -706,7 +714,7 @@ export function Dashboard() {
                           />
                         </div>
                         <span
-                          className={`text-right font-mono text-[9px] tabular-nums ${soon ? 'text-warn' : 'text-ink-2'}`}
+                          className={`text-right font-mono text-[10.5px] tabular-nums ${soon ? 'text-warn' : 'text-ink-2'}`}
                         >
                           {expiryLabel(grant.expiresAt, now)}
                         </span>
@@ -714,7 +722,7 @@ export function Dashboard() {
                     )
                   })}
                 </ul>
-                <div className='grid grid-cols-[92px_minmax(0,1fr)_30px] gap-2 px-3 pt-2 font-mono text-[8px] text-ink-3'>
+                <div className='grid grid-cols-[92px_minmax(0,1fr)_30px] gap-2 px-3 pt-2 font-mono text-[9px] text-ink-3'>
                   <span />
                   <span className='flex justify-between'>
                     <span>hari ini</span>
@@ -723,7 +731,7 @@ export function Dashboard() {
                   </span>
                   <span />
                 </div>
-                <div className='flex flex-wrap justify-between gap-2 border-t border-line px-3 py-2 font-mono text-[8px] text-ink-3'>
+                <div className='flex flex-wrap justify-between gap-2 border-t border-line px-3 py-2 font-mono text-[9px] text-ink-3'>
                   <span>
                     <i className='me-1 inline-block size-2 bg-warn' />
                     ≤7 hari · perlu keputusan{' '}
@@ -736,7 +744,7 @@ export function Dashboard() {
             ) : (
               <div className='p-3 text-xs text-ink-2'>
                 Tidak ada grant yang kedaluwarsa dalam 30 hari.
-                <p className='mt-2 font-mono text-[9px]'>
+                <p className='mt-2 font-mono text-[10.5px]'>
                   +{noExpiry} grant tanpa kedaluwarsa
                 </p>
               </div>
@@ -757,7 +765,7 @@ export function Dashboard() {
                       className='grid min-w-0 grid-cols-[92px_minmax(0,1fr)_32px] items-center gap-2'
                     >
                       <span
-                        className='truncate font-mono text-[9px]'
+                        className='truncate font-mono text-[10.5px]'
                         title={row.name}
                       >
                         <b className='text-ink'>{row.fn}</b>{' '}
@@ -787,7 +795,7 @@ export function Dashboard() {
                           }}
                         />
                       </div>
-                      <span className='text-right font-mono text-[9px] tabular-nums'>
+                      <span className='text-right font-mono text-[10.5px] tabular-nums'>
                         {Math.round(
                           (row.covered / Math.max(1, row.total)) * 100
                         )}
@@ -796,7 +804,7 @@ export function Dashboard() {
                     </li>
                   ))}
                 </ul>
-                <div className='mt-3 flex gap-3 border-t border-line pt-2 font-mono text-[8px] text-ink-3'>
+                <div className='mt-3 flex gap-3 border-t border-line pt-2 font-mono text-[9px] text-ink-3'>
                   <span>
                     <i className='me-1 inline-block size-2 bg-pass' />
                     Tercakup
@@ -890,7 +898,7 @@ function AttentionCard({
       to={to}
       className={`relative min-w-0 border border-t-2 border-line bg-surface p-3.5 text-ink no-underline transition-colors hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-line-strong ${TONE_BORDER[tone]}`}
     >
-      <span className='absolute top-3 right-3 font-mono text-[8px] text-ink-3'>
+      <span className='absolute top-3 right-3 font-mono text-[9px] text-ink-3'>
         {index}
       </span>
       <strong
@@ -899,7 +907,7 @@ function AttentionCard({
         {number}
       </strong>
       <span className='mt-2 block text-sm font-semibold'>{label}</span>
-      <span className='mt-1 block font-mono text-[8px] leading-4 text-ink-3'>
+      <span className='mt-1 block font-mono text-[9px] leading-4 text-ink-3'>
         {detail}
       </span>
     </Link>
@@ -1020,7 +1028,7 @@ function LineChart({ rows }: { rows: { date: string; count: number }[] }) {
           </g>
         )}
       </svg>
-      <p className='mt-1 text-[9px] text-ink-3'>
+      <p className='mt-1 text-[10.5px] text-ink-3'>
         Jumlah event audit per tanggal, termasuk tanggal tanpa event (0). Bukan
         jumlah pembukaan dokumen.
       </p>
@@ -1065,14 +1073,14 @@ function Heatmap({ rows }: { rows: DashboardHeatmapRow[] }) {
         {dayNames.map((day, i) => (
           <span
             key={`${day}-${i}`}
-            className='text-center font-mono text-[7px] text-ink-3'
+            className='text-center font-mono text-[8px] text-ink-3'
           >
             {day}
           </span>
         ))}
         {BLOCKS.map((block, index) => (
           <div key={block} className='contents'>
-            <span className='self-center font-mono text-[7px] text-ink-3'>
+            <span className='self-center font-mono text-[8px] text-ink-3'>
               {block}
             </span>
             {WEEK_DATES.map((date) => {
@@ -1095,7 +1103,7 @@ function Heatmap({ rows }: { rows: DashboardHeatmapRow[] }) {
           </div>
         ))}
       </div>
-      <div className='mt-2 flex flex-wrap items-center gap-3 font-mono text-[8px] text-ink-3'>
+      <div className='mt-2 flex flex-wrap items-center gap-3 font-mono text-[9px] text-ink-3'>
         {[0, 1, 2, 3].map((level) => (
           <span key={level} className='inline-flex items-center gap-1'>
             <i
@@ -1129,7 +1137,7 @@ function Bars({ rows, empty }: { rows: BarRow[]; empty: string }) {
             key={row.key}
             className='grid min-w-0 grid-cols-[96px_minmax(0,1fr)_24px] items-center gap-2'
           >
-            <span className='truncate font-mono text-[8px] text-ink-3 uppercase'>
+            <span className='truncate font-mono text-[9px] text-ink-3 uppercase'>
               {row.label}
             </span>
             <span className='block h-1.5 bg-surface-2'>
@@ -1141,7 +1149,7 @@ function Bars({ rows, empty }: { rows: BarRow[]; empty: string }) {
                 }}
               />
             </span>
-            <span className='text-right font-mono text-[9px] tabular-nums'>
+            <span className='text-right font-mono text-[10.5px] tabular-nums'>
               {row.value}
             </span>
           </li>

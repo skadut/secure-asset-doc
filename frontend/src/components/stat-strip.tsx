@@ -83,7 +83,7 @@ export function StatStrip({
           key={label}
           className={`flex min-w-0 flex-col bg-surface ${compact ? 'gap-1 px-3.5 py-2' : 'gap-1.5 px-4 py-3'}`}
         >
-          <span className='truncate font-mono text-[7.5px] leading-[1.2] tracking-[.12em] text-ink-3 uppercase'>
+          <span className='truncate font-mono text-[8.5px] leading-[1.2] tracking-[.12em] text-ink-3 uppercase'>
             {label}
           </span>
           <div className='flex min-w-0 items-end justify-between gap-2'>
@@ -95,7 +95,7 @@ export function StatStrip({
             {spark && spark.length > 1 && <Spark values={spark} tone={tone} />}
           </div>
           {sub && (
-            <span className='truncate font-mono text-[8.5px] leading-[1.3] text-ink-3'>
+            <span className='truncate font-mono text-[10px] leading-[1.3] text-ink-3'>
               {sub}
             </span>
           )}

@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { MaintenanceError } from '@/features/errors/maintenance-error'
+import { ServiceBusy } from '@/features/errors/service-busy'
 
 export const Route = createFileRoute('/(errors)/503')({
-  component: MaintenanceError,
+  component: ServiceBusy,
 })

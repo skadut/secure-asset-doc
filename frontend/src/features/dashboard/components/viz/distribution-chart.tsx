@@ -50,10 +50,10 @@ function ChartErrorBox({ onRetry }: { onRetry: () => void }) {
         style={{ color: 'var(--fail)', flexShrink: 0 }}
       />
       <div>
-        <div style={{ fontSize: '13px', fontWeight: 600 }}>
+        <div style={{ fontSize: '15px', fontWeight: 600 }}>
           {"This chart couldn't load."}
         </div>
-        <div style={{ fontSize: '12px', color: 'var(--text-2)' }}>
+        <div style={{ fontSize: '14px', color: 'var(--text-2)' }}>
           The rest of the overview is unaffected.
         </div>
         <button
@@ -62,7 +62,7 @@ function ChartErrorBox({ onRetry }: { onRetry: () => void }) {
           onClick={onRetry}
           style={{
             marginTop: '8px',
-            fontSize: '12px',
+            fontSize: '14px',
             fontWeight: 600,
             padding: '4px 10px',
             border: '1px solid var(--line-strong)',
@@ -137,7 +137,7 @@ export function DistributionChart({
               key={col}
               scope='col'
               style={{
-                fontSize: '12px',
+                fontSize: '14px',
                 fontWeight: 600,
                 textAlign: 'left',
                 padding: '6px 8px',
@@ -157,7 +157,7 @@ export function DistributionChart({
               <td
                 key={j}
                 style={{
-                  fontSize: '12px',
+                  fontSize: '14px',
                   fontVariantNumeric: 'tabular-nums',
                   padding: '6px 8px',
                   borderBottom: '1px solid var(--line-subtle)',
@@ -201,13 +201,13 @@ export function DistributionChart({
             style={{
               margin: 0,
               fontFamily: 'var(--font-sans)',
-              fontSize: '13px',
+              fontSize: '15px',
               fontWeight: 600,
             }}
           >
             {title}
           </h3>
-          <div style={{ fontSize: '12px', color: 'var(--text-2)' }}>
+          <div style={{ fontSize: '14px', color: 'var(--text-2)' }}>
             {caption}
           </div>
         </div>
@@ -218,7 +218,7 @@ export function DistributionChart({
           onClick={() => setOpen((o) => !o)}
           className='viz-focus bg-transparent hover:bg-[var(--surface-active)]'
           style={{
-            fontSize: '12px',
+            fontSize: '14px',
             fontWeight: 600,
             padding: '4px 8px',
             border: '1px solid var(--line-subtle)',
@@ -244,7 +244,7 @@ export function DistributionChart({
                 display: 'flex',
                 flexWrap: 'wrap',
                 gap: '12px 16px',
-                fontSize: '12px',
+                fontSize: '14px',
               }}
             >
               {legend.map((item) => {
@@ -287,7 +287,7 @@ export function DistributionChart({
             <div
               style={{
                 background: 'var(--bg-sunken)',
-                fontSize: '12px',
+                fontSize: '14px',
                 color: 'var(--text-2)',
                 padding: '8px 10px',
                 borderRadius: '6px',

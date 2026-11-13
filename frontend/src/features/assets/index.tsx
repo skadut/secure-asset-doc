@@ -60,7 +60,7 @@ const PAGE_SIZE = 9
 
 // Pen gQAhw: 34px select, sentence-case label, 9px mono; chevron overridden to 12px below.
 const selectClass =
-  'h-[34px] rounded-none border-line bg-surface px-2.5 font-mono text-[9px] text-ink shadow-none hover:bg-surface-2 dark:bg-surface dark:hover:bg-surface-2 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink max-sm:h-11 [&_svg]:size-3 [&_svg]:opacity-100'
+  'h-[34px] rounded-none border-line bg-surface px-2.5 font-mono text-[10.5px] text-ink shadow-none hover:bg-surface-2 dark:bg-surface dark:hover:bg-surface-2 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink max-sm:h-11 [&_svg]:size-3 [&_svg]:opacity-100'
 
 const FILTERS: {
   id: string
@@ -177,7 +177,7 @@ export function Assets() {
             canOpenAudit ? (
               <Link
                 to='/audit-log'
-                className='inline-flex h-9 items-center gap-1.5 border border-line-strong bg-surface px-3 font-sans text-[12.5px] font-semibold text-ink hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+                className='inline-flex h-9 items-center gap-1.5 border border-line-strong bg-surface px-3 font-sans text-[14.5px] font-semibold text-ink hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
               >
                 <ScrollText aria-hidden='true' className='size-3.5' />
                 Buka audit log
@@ -233,7 +233,7 @@ export function Assets() {
               value={globalFilter}
               onChange={(event) => setGlobalFilter(event.target.value)}
               placeholder='Cari nama aset'
-              className='h-full min-w-0 flex-1 bg-transparent font-mono text-[9.5px] text-ink outline-none placeholder:text-ink-3'
+              className='h-full min-w-0 flex-1 bg-transparent font-mono text-[11px] text-ink outline-none placeholder:text-ink-3'
             />
           </div>
           {FILTERS.map((filter) => (
@@ -255,13 +255,13 @@ export function Assets() {
               <SelectContent className='rounded-none'>
                 <SelectItem
                   value='all'
-                  className='font-mono text-[9px]'
+                  className='font-mono text-[10.5px]'
                 >{`${filter.label}: semua`}</SelectItem>
                 {filter.options.map((option) => (
                   <SelectItem
                     key={option}
                     value={option}
-                    className='font-mono text-[9px]'
+                    className='font-mono text-[10.5px]'
                   >
                     {filter.id === 'criticality'
                       ? criticalityLabel[option as Criticality]
@@ -286,7 +286,7 @@ export function Assets() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align='end' className='w-44'>
-                <DropdownMenuLabel className='font-mono text-[9px] tracking-[.08em] uppercase'>
+                <DropdownMenuLabel className='font-mono text-[10.5px] tracking-[.08em] uppercase'>
                   Kolom
                 </DropdownMenuLabel>
                 {table
@@ -295,7 +295,7 @@ export function Assets() {
                   .map((column) => (
                     <DropdownMenuCheckboxItem
                       key={column.id}
-                      className='font-mono text-[10px]'
+                      className='font-mono text-[11.5px]'
                       checked={column.getIsVisible()}
                       onCheckedChange={(value) =>
                         column.toggleVisibility(!!value)
@@ -323,7 +323,7 @@ export function Assets() {
                       <TableHead
                         key={header.id}
                         style={{ width: header.getSize() }}
-                        className='h-8 bg-surface-2 px-3.5 font-mono text-[7.5px] tracking-[.09em] text-ink-3 uppercase'
+                        className='h-8 bg-surface-2 px-3.5 font-mono text-[8.5px] tracking-[.09em] text-ink-3 uppercase'
                       >
                         {header.isPlaceholder
                           ? null
@@ -344,7 +344,10 @@ export function Assets() {
                       className='h-[52px] transition-colors duration-150 hover:bg-surface-2'
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className='px-3.5 text-[11px]'>
+                        <TableCell
+                          key={cell.id}
+                          className='px-3.5 text-[12.5px]'
+                        >
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext()
@@ -371,7 +374,7 @@ export function Assets() {
           </div>
 
           <footer className='flex flex-wrap items-center justify-between gap-2 border-t border-line bg-surface-2 px-3.5 py-2'>
-            <span className='font-mono text-[9px] text-ink-3'>
+            <span className='font-mono text-[10.5px] text-ink-3'>
               {filtered
                 ? `Menampilkan ${pageIndex * PAGE_SIZE + 1}–${pageIndex * PAGE_SIZE + rows.length} dari ${filtered} aset`
                 : 'Menampilkan 0 aset'}
@@ -380,7 +383,7 @@ export function Assets() {
               <Button
                 variant='outline'
                 size='icon'
-                className='size-6 font-mono text-[10px]'
+                className='size-6 font-mono text-[11.5px]'
                 disabled={!table.getCanPreviousPage()}
                 onClick={() => table.previousPage()}
                 aria-label='Halaman sebelumnya'
@@ -392,7 +395,7 @@ export function Assets() {
                   key={index}
                   variant='outline'
                   size='icon'
-                  className={`size-6 font-mono text-[10px] tabular-nums ${index === pageIndex ? 'border-ink bg-ink text-surface hover:bg-ink' : ''}`}
+                  className={`size-6 font-mono text-[11.5px] tabular-nums ${index === pageIndex ? 'border-ink bg-ink text-surface hover:bg-ink' : ''}`}
                   aria-label={`Halaman ${index + 1}`}
                   aria-current={index === pageIndex ? 'page' : undefined}
                   onClick={() => table.setPageIndex(index)}
@@ -403,7 +406,7 @@ export function Assets() {
               <Button
                 variant='outline'
                 size='icon'
-                className='size-6 font-mono text-[10px]'
+                className='size-6 font-mono text-[11.5px]'
                 disabled={!table.getCanNextPage()}
                 onClick={() => table.nextPage()}
                 aria-label='Halaman berikutnya'

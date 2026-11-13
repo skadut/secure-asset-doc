@@ -384,10 +384,10 @@ async function file(res, me, documentId, version, viewerSession) {
 async function warnUnprotected() {
   try {
     const r = await dbq(
-      "SELECT count(*)::int AS n FROM document_versions v JOIN documents d ON d.id=v.document_id WHERE d.tlp <> 'CLEAR' AND v.protection='none' AND v.content_base64 IS NOT NULL",
+      "SELECT count(*)::int AS n FROM document_versions WHERE protection <> 'encrypted' AND (content_base64 IS NOT NULL OR content_ciphertext IS NOT NULL)",
     );
     const n = r.rows[0].n;
-    if (n > 0) console.warn(`WARN: ${n} GREEN+ document versions unprotected; run db/scripts/protect-documents.mjs`);
+    if (n > 0) console.warn(`WARN: ${n} document versions not sealed; run db/scripts/protect-documents.mjs`);
   } catch {
     console.warn('WARN: protection check skipped');
   }

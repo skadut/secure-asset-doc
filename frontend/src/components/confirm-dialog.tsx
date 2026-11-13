@@ -56,7 +56,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
           </AlertDialogTitle>
           <AlertDialogDescription
             asChild
-            className='text-[11.5px] leading-[1.45] text-ink-2'
+            className='text-[13px] leading-[1.45] text-ink-2'
           >
             <div>{desc}</div>
           </AlertDialogDescription>
@@ -65,7 +65,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
         <AlertDialogFooter className='border-t border-line px-4 py-3'>
           <AlertDialogCancel
             disabled={isLoading}
-            className='min-h-8 rounded-none border-line bg-surface font-sans text-[12px] text-ink focus-visible:ring-2 focus-visible:ring-ring'
+            className='min-h-8 rounded-none border-line bg-surface font-sans text-[14px] text-ink focus-visible:ring-2 focus-visible:ring-ring'
           >
             {cancelBtnText ?? 'Cancel'}
           </AlertDialogCancel>
@@ -75,7 +75,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
             onClick={handleConfirm}
             variant={destructive ? 'destructive' : 'default'}
             disabled={disabled || isLoading}
-            className='min-h-8 rounded-none font-sans text-[12px] focus-visible:ring-2 focus-visible:ring-ring'
+            className='min-h-8 rounded-none font-sans text-[14px] focus-visible:ring-2 focus-visible:ring-ring'
           >
             {confirmText ?? 'Continue'}
           </Button>

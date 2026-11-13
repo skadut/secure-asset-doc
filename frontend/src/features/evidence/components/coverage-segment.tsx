@@ -26,7 +26,7 @@ export function CoverageSegment({
         return (
           <label
             key={option.value}
-            className={`relative inline-flex h-8 cursor-pointer items-center gap-1.5 border px-2.5 font-mono text-[8.5px] transition-colors select-none before:absolute before:-inset-x-0 before:-inset-y-1.5 before:content-[''] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink motion-safe:duration-150 ${active ? 'border-ink bg-surface-2 text-ink' : 'border-line bg-surface text-ink-2 hover:bg-surface-2'}`}
+            className={`relative inline-flex h-8 cursor-pointer items-center gap-1.5 border px-2.5 font-mono text-[10px] transition-colors select-none before:absolute before:-inset-x-0 before:-inset-y-1.5 before:content-[''] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink motion-safe:duration-150 ${active ? 'border-ink bg-surface-2 text-ink' : 'border-line bg-surface text-ink-2 hover:bg-surface-2'}`}
           >
             <input
               type='radio'

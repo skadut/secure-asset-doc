@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Inbox } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   Table,
@@ -17,18 +17,21 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { EmptyState } from '@/components/empty-state'
 import { type DocRow, documentColumns as columns } from './documents-columns'
 
 type DocumentsTableProps = {
   data: DocRow[]
   selectedId?: string
   onSelect: (document: DocRow) => void
+  onResetFilter: () => void
 }
 
 export function DocumentsTable({
   data,
   selectedId,
   onSelect,
+  onResetFilter,
 }: DocumentsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
 
@@ -74,7 +77,7 @@ export function DocumentsTable({
                         ? { width: header.getSize() }
                         : undefined
                     }
-                    className='h-[26px] border-b border-line px-2.5 py-0 font-mono text-[7.5px] font-normal tracking-[.09em] text-ink-3 uppercase'
+                    className='h-[26px] border-b border-line px-2.5 py-0 font-mono text-[8.5px] font-normal tracking-[.09em] text-ink-3 uppercase'
                   >
                     {header.isPlaceholder
                       ? null
@@ -126,19 +129,29 @@ export function DocumentsTable({
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className='h-20 text-center text-[11px] text-ink-3'
-                >
-                  Tidak ada dokumen yang sesuai dengan filter.
+              <TableRow className='hover:bg-transparent'>
+                <TableCell colSpan={columns.length} className='p-4'>
+                  <EmptyState
+                    filterVariant
+                    title='Tidak ada yang cocok'
+                    icon={<Inbox />}
+                    action={
+                      <button
+                        type='button'
+                        onClick={onResetFilter}
+                        className='relative inline-flex h-[30px] items-center border border-line bg-surface px-3 text-[12px] text-ink-2 after:absolute after:inset-x-0 after:-inset-y-[7px] hover:bg-surface-2 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus)]'
+                      >
+                        Reset filter
+                      </button>
+                    }
+                  />
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
-      <div className='flex flex-wrap items-center justify-between gap-3 border-t border-line bg-surface-2 px-3.5 py-2.5 font-mono text-[8.5px] tracking-[.08em] text-ink-3'>
+      <div className='flex flex-wrap items-center justify-between gap-3 border-t border-line bg-surface-2 px-3.5 py-2.5 font-mono text-[10px] tracking-[.08em] text-ink-3'>
         <p aria-live='polite'>
           Menampilkan {data.length} dokumen, {versionCount} versi · AKSES: Level
           = dari level Anda, Grant = izin khusus

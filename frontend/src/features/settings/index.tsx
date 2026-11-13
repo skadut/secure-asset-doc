@@ -61,7 +61,7 @@ const DIR_OPTIONS = [
   { value: 'rtl', label: 'Kanan ke kiri (RTL)' },
 ] as const
 
-const LABEL = 'font-mono text-[7.5px] uppercase tracking-[1px] text-ink-3'
+const LABEL = 'font-mono text-[8.5px] uppercase tracking-[1px] text-ink-3'
 const FOCUS =
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
 
@@ -153,7 +153,7 @@ export function Settings() {
               to={tab.to}
               aria-current={active === tab.to ? 'page' : undefined}
               className={cn(
-                '-mb-px inline-flex min-h-11 shrink-0 items-center border-b-2 px-3.5 text-[12.5px] no-underline transition-colors motion-reduce:transition-none',
+                '-mb-px inline-flex min-h-11 shrink-0 items-center border-b-2 px-3.5 text-[14.5px] no-underline transition-colors motion-reduce:transition-none',
                 FOCUS,
                 active === tab.to
                   ? 'border-ink font-semibold text-ink'
@@ -184,17 +184,17 @@ function Row({
 }) {
   return (
     <div className='grid grid-cols-[minmax(96px,160px)_minmax(0,1fr)] gap-3 border-b border-line px-3.5 py-2.5 last:border-0'>
-      <dt className='font-mono text-[9px] leading-[1.4] tracking-[.08em] text-ink-3 uppercase'>
+      <dt className='font-mono text-[10.5px] leading-[1.4] tracking-[.08em] text-ink-3 uppercase'>
         {label}
       </dt>
-      <dd className='min-w-0 text-[12px] leading-5 text-ink'>{children}</dd>
+      <dd className='min-w-0 text-[14px] leading-5 text-ink'>{children}</dd>
     </div>
   )
 }
 
 function PendingNote({ children }: { children: React.ReactNode }) {
   return (
-    <p className='flex flex-wrap items-center gap-2 border border-line bg-surface-2 px-3.5 py-2.5 text-[11px] leading-[1.5] text-ink-2'>
+    <p className='flex flex-wrap items-center gap-2 border border-line bg-surface-2 px-3.5 py-2.5 text-[12.5px] leading-[1.5] text-ink-2'>
       <Chip tone='warn'>PENDING</Chip>
       <span className='min-w-0'>{children}</span>
     </p>
@@ -225,7 +225,7 @@ function ProfileTab() {
           <Row label='Nama'>{me.name}</Row>
           <Row label='Pangkat'>
             {me.rankName || me.rank}
-            <span className='ms-2 font-mono text-[10px] text-ink-3'>
+            <span className='ms-2 font-mono text-[11.5px] text-ink-3'>
               {me.rank}
             </span>
           </Row>
@@ -236,7 +236,7 @@ function ProfileTab() {
           </Row>
           <Row label='Tingkat akses'>Tingkat {me.accessLevel} dari 5</Row>
           <Row label='ID personel'>
-            <span className='font-mono text-[11px]'>{me.id}</span>
+            <span className='font-mono text-[12.5px]'>{me.id}</span>
           </Row>
         </dl>
       </CardPanel>
@@ -287,12 +287,12 @@ function AccountTab() {
       <CardPanel title='Akun' meta='Read-only'>
         <dl>
           <Row label='Username'>
-            <span className='font-mono text-[11px]'>
+            <span className='font-mono text-[12.5px]'>
               {me?.username ?? 'Tidak tersedia'}
             </span>
           </Row>
           <Row label='ID akun'>
-            <span className='font-mono text-[11px]'>
+            <span className='font-mono text-[12.5px]'>
               {me?.id ?? 'Tidak tersedia'}
             </span>
           </Row>
@@ -308,7 +308,7 @@ function AccountTab() {
             Formulir perubahan akun tidak mengirim data ke server. Penyimpanan
             akun di server belum tersedia.
           </PendingNote>
-          <p className='text-[11px] leading-[1.5] text-ink-2'>
+          <p className='text-[12.5px] leading-[1.5] text-ink-2'>
             Nilai di samping berasal dari sesi aktif dan hanya dapat dibaca.
           </p>
         </div>
@@ -348,7 +348,7 @@ function Seg<T extends string>({
               aria-pressed={pressed}
               onClick={() => onChange(option.value)}
               className={cn(
-                'h-[34px] min-w-0 flex-1 px-3 font-mono text-[9px] transition-colors motion-reduce:transition-none',
+                'h-[34px] min-w-0 flex-1 px-3 font-mono text-[10.5px] transition-colors motion-reduce:transition-none',
                 FOCUS,
                 pressed
                   ? 'bg-ink text-surface'
@@ -468,7 +468,7 @@ function AppearanceTab() {
       >
         <div className='flex flex-col gap-1'>
           <h2 className='text-[17px] font-semibold text-ink'>Tampilan</h2>
-          <p className='text-[10.5px] leading-[1.5] text-ink-3'>
+          <p className='text-[12px] leading-[1.5] text-ink-3'>
             Perubahan langsung berlaku di browser ini dan dikirim ke server
             setelah jeda singkat.
           </p>
@@ -482,7 +482,7 @@ function AppearanceTab() {
               updateFont(event.target.value as (typeof fonts)[number])
             }
             className={cn(
-              'h-[38px] w-full border border-line bg-surface px-2.5 text-[12px] text-ink',
+              'h-[38px] w-full border border-line bg-surface px-2.5 text-[14px] text-ink',
               FOCUS
             )}
           >
@@ -521,7 +521,7 @@ function AppearanceTab() {
                     <span className={cn('h-1 w-10', option.bar)} />
                     <span className={cn('h-1 w-[66px]', option.bar)} />
                   </span>
-                  <span className='text-[11px] text-ink'>{option.label}</span>
+                  <span className='text-[12.5px] text-ink'>{option.label}</span>
                 </button>
               )
             })}
@@ -551,7 +551,7 @@ function AppearanceTab() {
           <p
             role='status'
             aria-live='polite'
-            className='min-w-0 text-[10.5px] text-ink-3'
+            className='min-w-0 text-[12px] text-ink-3'
           >
             {status}
           </p>
@@ -560,7 +560,7 @@ function AppearanceTab() {
               type='button'
               onClick={reset}
               className={cn(
-                'h-9 border border-line px-3.5 text-[12px] text-ink-2 transition-colors hover:bg-surface-2 motion-reduce:transition-none',
+                'h-9 border border-line px-3.5 text-[14px] text-ink-2 transition-colors hover:bg-surface-2 motion-reduce:transition-none',
                 FOCUS
               )}
             >
@@ -569,7 +569,7 @@ function AppearanceTab() {
             <button
               type='submit'
               className={cn(
-                'h-9 bg-ink px-4 text-[12px] font-semibold text-surface transition-opacity hover:opacity-90 motion-reduce:transition-none',
+                'h-9 bg-ink px-4 text-[14px] font-semibold text-surface transition-opacity hover:opacity-90 motion-reduce:transition-none',
                 FOCUS
               )}
             >
@@ -584,11 +584,11 @@ function AppearanceTab() {
 
         <section className='flex flex-col gap-2 border border-line bg-surface p-3.5'>
           <h3 className={LABEL}>Catatan</h3>
-          <p className='text-[10.5px] leading-[1.5] text-ink-2'>
+          <p className='text-[12px] leading-[1.5] text-ink-2'>
             Sakelar tema di header hanya dua keadaan (terang atau gelap). Opsi
             Sistem tersedia lewat kartu Tema di formulir ini.
           </p>
-          <p className='text-[10.5px] leading-[1.5] text-ink-2'>
+          <p className='text-[12px] leading-[1.5] text-ink-2'>
             Bila server menolak, cookie tetap berlaku di browser ini.
           </p>
         </section>
@@ -598,22 +598,22 @@ function AppearanceTab() {
           aria-label='Pratinjau mode gelap'
         >
           <div className='flex h-[29.5px] items-center justify-between gap-2 px-3'>
-            <span className='font-mono text-[7px] tracking-[1px] text-rail-dim uppercase'>
+            <span className='font-mono text-[8px] tracking-[1px] text-rail-dim uppercase'>
               PRATINJAU · MODE GELAP
             </span>
-            <span className='min-w-0 truncate font-mono text-[7px] text-rail-dim'>{`vite-ui-theme=${getCookie('vite-ui-theme') ?? 'tidak diset'}`}</span>
+            <span className='min-w-0 truncate font-mono text-[8px] text-rail-dim'>{`vite-ui-theme=${getCookie('vite-ui-theme') ?? 'tidak diset'}`}</span>
           </div>
           <div className='flex flex-col gap-2 p-3.5'>
             <p className='text-[18px] font-semibold text-rail-ink'>
               Registri dokumen
             </p>
-            <p className='text-[10px] leading-[1.5] text-rail-dim'>
+            <p className='text-[11.5px] leading-[1.5] text-rail-dim'>
               Surface gelap memakai --ink sebagai latar dan --rail-ink untuk
               teks. Token status tetap sama.
             </p>
             <div className='flex items-center gap-2 bg-rail-active px-2.5 py-2'>
               <span className='size-1.5 bg-pass' aria-hidden />
-              <span className='font-mono text-[8.5px] text-rail-ink'>
+              <span className='font-mono text-[10px] text-rail-ink'>
                 TLP:GREEN · Approved 2.3
               </span>
             </div>
@@ -629,7 +629,7 @@ function CookiePanel() {
     <section className='border border-line bg-surface'>
       <div className='flex h-[31.5px] items-center justify-between gap-2 bg-surface-2 px-3'>
         <span className={LABEL}>Tersimpan di perangkat</span>
-        <span className='font-mono text-[7px] text-ink-3'>COOKIE</span>
+        <span className='font-mono text-[8px] text-ink-3'>COOKIE</span>
       </div>
       <dl>
         {COOKIE_NAMES.map((name) => {
@@ -647,9 +647,9 @@ function CookiePanel() {
               key={name}
               className='flex h-[31.5px] items-center justify-between gap-3 border-t border-line px-3'
             >
-              <dt className='font-mono text-[8.5px] text-ink-2'>{name}</dt>
+              <dt className='font-mono text-[10px] text-ink-2'>{name}</dt>
               <dd
-                className='min-w-0 truncate text-right font-mono text-[8.5px] text-ink'
+                className='min-w-0 truncate text-right font-mono text-[10px] text-ink'
                 title={value ?? undefined}
               >
                 {value ?? 'Tidak diset'}

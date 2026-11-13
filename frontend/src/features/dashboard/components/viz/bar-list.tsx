@@ -64,7 +64,7 @@ export function BarList({ rows, labelWidth, max }: BarListProps) {
             >
               <span
                 style={{
-                  fontSize: 12,
+                  fontSize: 14,
                   color: 'var(--text-2)',
                   minWidth: 0,
                   overflow: 'hidden',
@@ -114,7 +114,7 @@ export function BarList({ rows, labelWidth, max }: BarListProps) {
 
               <span
                 style={{
-                  fontSize: 12,
+                  fontSize: 14,
                   fontWeight: 600,
                   fontVariantNumeric: 'tabular-nums',
                   width: 28,

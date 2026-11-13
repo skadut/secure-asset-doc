@@ -15,7 +15,7 @@ export function PageHead({
     <header className='flex min-w-0 flex-wrap items-end justify-between gap-4'>
       <div className='min-w-0'>
         {eyebrow && (
-          <p className='mb-2 font-mono text-[10px] tracking-[.14em] text-ink-3 uppercase'>
+          <p className='mb-2 font-mono text-[11.5px] tracking-[.14em] text-ink-3 uppercase'>
             {eyebrow}
           </p>
         )}
@@ -26,7 +26,7 @@ export function PageHead({
       {(note || actions) && (
         <div className='ml-auto flex min-w-0 flex-wrap items-center justify-end gap-3 text-right'>
           {note && (
-            <div className='font-mono text-[9px] tracking-[.08em] text-ink-3'>
+            <div className='font-mono text-[10.5px] tracking-[.08em] text-ink-3'>
               {note}
             </div>
           )}

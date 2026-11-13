@@ -36,7 +36,7 @@ Get-ChildItem db\seed\*.sql | Sort-Object Name | ForEach-Object { Get-Content -R
 
 - `scripts/seed-users.mjs`: 80 demo accounts across 22 ranks, `access_level` per rank, DOC-0017 grants, and the derived demo child. Run first after fresh start. Needs `DEMO_USER_PASSWORD` (at least 16 characters). No `--dry-run`. Safe to re-run. Account list: [CREDENTIALS.md](CREDENTIALS.md).
 - `scripts/tokenize-titles.mjs`: tokenizes plaintext titles and file names for non-CLEAR documents. Supports `--dry-run`. TPM crypto-api must be available. Dry-run and real runs exit 1 if any row fails.
-- `scripts/protect-documents.mjs`: protection migration. Supports `--dry-run`.
+- `scripts/protect-documents.mjs`: protection migration; seals every TLP (CLEAR included) and upgrades old `integrity` rows. Supports `--dry-run`.
 - `scripts/protect-fields.mjs`: tokenizes `assets.ip_address` and `uploaded_files.name`; seals `assets.model`/`firmware`, non-CLEAR `document_versions.summary`, request/approval reasons and level-change free text. Supports `--dry-run`. Run as the DB owner (not `sad_app`). Idempotent: protected values are skipped. Needs `015` applied first.
 - `scripts/seed-db.mjs`: regenerates `seed/002_seed.sql` from `frontend/src/test-utils/grc-fixture.ts` and the files in `seed-files/`.
 - `seed-files/`: sample files read by `seed-db.mjs`. Not served by the app.
@@ -51,7 +51,8 @@ docker compose run --rm --no-deps -v "./db/scripts/protect-documents.mjs:/app/pr
 
 Real run: same command without `--dry-run`.
 
-- Re-running is safe. Only `protection='none'` rows are touched.
+- Every TLP, CLEAR included, is sealed via `/sealfile`. Old CLEAR `protection='integrity'` rows are upgraded to `encrypted` (existing HMAC tag reused if it verifies, else recomputed).
+- Re-running is safe. Only `protection='none'` and `protection='integrity'` rows with a file are touched; versions without a file are counted as `no file` and skipped.
 - Exit code is 1 if any row failed.
 - Values in `<...>` come from the root `.env`. Never paste real values into docs or shell history.
 - Limit: sealfile accepts up to 10 MiB decoded per file. Larger files stay `none` and are reported as failed.

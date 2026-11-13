@@ -213,7 +213,7 @@ function Graph({
               x={labelX}
               y={route.y}
               textAnchor={route.anchor}
-              className={`font-mono text-[8px] tabular-nums ${TEXT[lvl]}`}
+              className={`font-mono text-[9px] tabular-nums ${TEXT[lvl]}`}
             >
               {label}
             </text>
@@ -258,14 +258,14 @@ function Graph({
             <text
               x={23}
               y={23}
-              className='fill-ink font-mono text-[10.5px] font-medium'
+              className='fill-ink font-mono text-[12px] font-medium'
             >
               {n.label}
             </text>
             <text
               x={12}
               y={38}
-              className='fill-ink-3 font-mono text-[8px] tabular-nums'
+              className='fill-ink-3 font-mono text-[9px] tabular-nums'
             >{`${m.rps.toFixed(1)} rps · ${m.avgMs.toFixed(0)} ms`}</text>
           </g>
         )
@@ -287,7 +287,7 @@ function MiniChart({
 }) {
   return (
     <figure className='flex flex-col gap-2'>
-      <figcaption className='font-mono text-[9px] tracking-[.08em] text-ink uppercase'>
+      <figcaption className='font-mono text-[10.5px] tracking-[.08em] text-ink uppercase'>
         {title}
       </figcaption>
       {values.length < 2 ? (
@@ -308,13 +308,13 @@ function MiniChart({
               />
               <XAxis
                 dataKey='t'
-                tick={{ fontSize: 11, fill: 'currentColor' }}
+                tick={{ fontSize: 12.5, fill: 'currentColor' }}
                 tickLine={false}
                 axisLine={false}
                 minTickGap={28}
               />
               <YAxis
-                tick={{ fontSize: 11, fill: 'currentColor' }}
+                tick={{ fontSize: 12.5, fill: 'currentColor' }}
                 tickLine={false}
                 axisLine={false}
                 width={44}
@@ -400,23 +400,23 @@ function Detail({
       {m ? (
         <div className='grid grid-cols-2 gap-3 p-4 sm:grid-cols-4'>
           <div>
-            <p className='font-mono text-[8px] text-ink-3 uppercase'>
+            <p className='font-mono text-[9px] text-ink-3 uppercase'>
               REQ / DTK
             </p>
             <p className='font-mono text-sm tabular-nums'>{m.rps.toFixed(1)}</p>
           </div>
           <div>
-            <p className='font-mono text-[8px] text-ink-3 uppercase'>ERROR</p>
+            <p className='font-mono text-[9px] text-ink-3 uppercase'>ERROR</p>
             <p className='font-mono text-sm tabular-nums'>{pct(m.errorRate)}</p>
           </div>
           <div>
-            <p className='font-mono text-[8px] text-ink-3 uppercase'>AVG</p>
+            <p className='font-mono text-[9px] text-ink-3 uppercase'>AVG</p>
             <p className='font-mono text-sm tabular-nums'>
               {m.avgMs.toFixed(0)} ms
             </p>
           </div>
           <div>
-            <p className='font-mono text-[8px] text-ink-3 uppercase'>STATUS</p>
+            <p className='font-mono text-[9px] text-ink-3 uppercase'>STATUS</p>
             <StatusTag level={m.level} />
           </div>
         </div>
@@ -497,7 +497,7 @@ export function Traffic() {
                   <Chip tone='line'>SUPER ADMIN</Chip>
                   <Button
                     variant='outline'
-                    className='h-9 gap-1.5 bg-surface px-3.5 font-mono text-[10px] tracking-[.04em] text-ink max-sm:min-h-11'
+                    className='h-9 gap-1.5 bg-surface px-3.5 font-mono text-[11.5px] tracking-[.04em] text-ink max-sm:min-h-11'
                     onClick={() => void refetch()}
                     disabled={loading}
                   >
@@ -553,7 +553,7 @@ export function Traffic() {
                           aria-hidden
                         />
                         <span className='min-w-0'>
-                          <span className='block truncate font-mono text-[10px] font-medium text-ink'>
+                          <span className='block truncate font-mono text-[11.5px] font-medium text-ink'>
                             {n.label}
                           </span>
                           <span className='mt-1 block'>
@@ -616,10 +616,10 @@ export function Traffic() {
                                 key={`${call.at}-${index}`}
                                 className='h-8'
                               >
-                                <TableCell className='px-3 font-mono text-[9px] whitespace-nowrap text-ink-3 tabular-nums'>
+                                <TableCell className='px-3 font-mono text-[10.5px] whitespace-nowrap text-ink-3 tabular-nums'>
                                   {hms(call.at)}
                                 </TableCell>
-                                <TableCell className='px-3 font-mono text-[9px] text-ink'>
+                                <TableCell className='px-3 font-mono text-[10.5px] text-ink'>
                                   {call.probe ? (
                                     <span title='Health probe'>
                                       {call.path}
@@ -629,11 +629,11 @@ export function Traffic() {
                                   )}
                                 </TableCell>
                                 <TableCell
-                                  className={`px-3 font-mono text-[9px] ${call.status === 200 ? 'text-pass' : 'text-fail'}`}
+                                  className={`px-3 font-mono text-[10.5px] ${call.status === 200 ? 'text-pass' : 'text-fail'}`}
                                 >
                                   {String(call.status)}
                                 </TableCell>
-                                <TableCell className='px-3 text-right font-mono text-[9px] text-ink-3 tabular-nums'>
+                                <TableCell className='px-3 text-right font-mono text-[10.5px] text-ink-3 tabular-nums'>
                                   {call.ms}
                                 </TableCell>
                               </TableRow>
@@ -652,22 +652,22 @@ export function Traffic() {
                     <Table>
                       <TableHeader>
                         <TableRow className='bg-surface-2 hover:bg-surface-2'>
-                          <TableHead className='font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'>
+                          <TableHead className='font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'>
                             DARI
                           </TableHead>
-                          <TableHead className='font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'>
+                          <TableHead className='font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'>
                             KE
                           </TableHead>
-                          <TableHead className='text-right font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'>
+                          <TableHead className='text-right font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'>
                             RPS
                           </TableHead>
-                          <TableHead className='text-right font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'>
+                          <TableHead className='text-right font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'>
                             ERROR
                           </TableHead>
-                          <TableHead className='text-right font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'>
+                          <TableHead className='text-right font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'>
                             AVG
                           </TableHead>
-                          <TableHead className='font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'>
+                          <TableHead className='font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'>
                             STATUS
                           </TableHead>
                         </TableRow>
@@ -677,21 +677,21 @@ export function Traffic() {
                           const lvl = edgeLevel(e)
                           return (
                             <TableRow key={`${e.source}>${e.target}`}>
-                              <TableCell className='font-mono text-[9px] text-ink'>
+                              <TableCell className='font-mono text-[10.5px] text-ink'>
                                 {e.source}
                               </TableCell>
-                              <TableCell className='font-mono text-[9px] text-ink'>
+                              <TableCell className='font-mono text-[10.5px] text-ink'>
                                 {e.target}
                               </TableCell>
-                              <TableCell className='text-right font-mono text-[9px] text-ink-2 tabular-nums'>
+                              <TableCell className='text-right font-mono text-[10.5px] text-ink-2 tabular-nums'>
                                 {e.rps.toFixed(1)}
                               </TableCell>
                               <TableCell
-                                className={`text-right font-mono text-[9px] tabular-nums ${TEXT[lvl]}`}
+                                className={`text-right font-mono text-[10.5px] tabular-nums ${TEXT[lvl]}`}
                               >
                                 {pct(e.errorRate)}
                               </TableCell>
-                              <TableCell className='text-right font-mono text-[9px] text-ink-2 tabular-nums'>
+                              <TableCell className='text-right font-mono text-[10.5px] text-ink-2 tabular-nums'>
                                 {e.avgMs.toFixed(0)} ms
                               </TableCell>
                               <TableCell>

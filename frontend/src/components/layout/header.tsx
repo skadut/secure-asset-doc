@@ -53,7 +53,7 @@ export function Header({ className, fixed, children, ...props }: HeaderProps) {
             className='size-10 shrink-0 rounded-none border border-line bg-surface text-ink hover:bg-surface-2'
           />
         </div>
-        <div className='flex min-w-0 items-center gap-2 font-mono text-[10px] font-normal tracking-[.12em] text-ink-3'>
+        <div className='flex min-w-0 items-center gap-2 font-mono text-[11.5px] font-normal tracking-[.12em] text-ink-3'>
           <LayoutGrid className='size-[13px] shrink-0' aria-hidden='true' />
           <span className='truncate'>
             {crumbs[location.pathname] ?? crumbs['/settings']}

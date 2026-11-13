@@ -63,7 +63,7 @@ const NAV_ACTIVE =
 
 function NavBadge({ children }: { children: ReactNode }) {
   return (
-    <Badge className='rounded-none px-1 py-0 font-mono text-[8px]'>
+    <Badge className='rounded-none px-1 py-0 font-mono text-[9px]'>
       {children}
     </Badge>
   )

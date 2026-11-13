@@ -32,10 +32,10 @@ export function AppSidebar() {
             S
           </span>
           <div className='min-w-0'>
-            <div className='truncate font-heading text-[13px] leading-[1.15] font-semibold text-rail-ink'>
+            <div className='truncate font-heading text-[15px] leading-[1.15] font-semibold text-rail-ink'>
               Secure Asset Doc
             </div>
-            <div className='truncate font-mono text-[8px] leading-[1.4] tracking-[.08em] text-rail-dim uppercase'>
+            <div className='truncate font-mono text-[9px] leading-[1.4] tracking-[.08em] text-rail-dim uppercase'>
               Kontrol akses dokumen
             </div>
           </div>

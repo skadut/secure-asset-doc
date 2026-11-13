@@ -162,7 +162,7 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
           <span className='text-ink-3'>/</span>
           <span className='shrink-0'>{r.documentId}</span>
           {documentTitle && (
-            <span className='truncate font-mono text-[9px] font-normal tracking-normal text-ink-3 normal-case'>
+            <span className='truncate font-mono text-[10.5px] font-normal tracking-normal text-ink-3 normal-case'>
               {documentTitle}
             </span>
           )}
@@ -173,8 +173,8 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
     >
       <div className='grid min-w-0 gap-4 p-3.5 lg:grid-cols-[minmax(0,1fr)_minmax(260px,.8fr)]'>
         <div className='flex min-w-0 flex-col gap-3'>
-          <p className='flex flex-wrap items-baseline gap-x-2 text-[11px]'>
-            <span className='font-mono text-[8px] tracking-[.1em] text-ink-3 uppercase'>
+          <p className='flex flex-wrap items-baseline gap-x-2 text-[12.5px]'>
+            <span className='font-mono text-[9px] tracking-[.1em] text-ink-3 uppercase'>
               Penerima
             </span>
             <span className='font-medium break-all text-ink'>{r.grantee}</span>
@@ -182,10 +182,10 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
               · {r.granteeUnit ?? '—'}
             </span>
           </p>
-          <p className='text-[13px] leading-normal break-words whitespace-pre-line text-ink'>
+          <p className='text-[15px] leading-normal break-words whitespace-pre-line text-ink'>
             {r.reason}
           </p>
-          <p className='font-mono text-[8px] leading-[1.6] text-ink-3'>
+          <p className='font-mono text-[9px] leading-[1.6] text-ink-3'>
             Diajukan {r.requestedBy} · {fmt(r.createdAt)} · kedaluwarsa{' '}
             {r.expiresAt ? fmt(r.expiresAt) : 'tanpa kedaluwarsa'}
           </p>
@@ -222,16 +222,16 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
                   )}
                 </span>
                 <div className='flex min-w-0 flex-1 flex-col gap-1'>
-                  <p className='font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'>
+                  <p className='font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'>
                     {ROLE_LABEL[role]}
                   </p>
                   {approval ? (
                     <>
-                      <p className='text-[11px] font-medium break-words text-ink'>
+                      <p className='text-[12.5px] font-medium break-words text-ink'>
                         {approval.approver}
                       </p>
                       {approval.reason && (
-                        <p className='text-[10px] break-words text-ink-2'>
+                        <p className='text-[11.5px] break-words text-ink-2'>
                           {approval.reason}
                         </p>
                       )}
@@ -246,7 +246,7 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
                   <time
                     dateTime={approval.at}
                     title={fmt(approval.at)}
-                    className={`shrink-0 font-mono text-[8px] ${
+                    className={`shrink-0 font-mono text-[9px] ${
                       approval.decision === 'approve'
                         ? 'text-pass'
                         : 'text-fail'
@@ -260,7 +260,7 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
                   <div className='flex shrink-0 gap-1.5'>
                     <Button
                       size='sm'
-                      className='h-[30px] rounded-none px-2.5 text-[11.5px] font-semibold'
+                      className='h-[30px] rounded-none px-2.5 text-[13px] font-semibold'
                       disabled={locked || deciding}
                       aria-describedby={
                         isRequester ? `${reasonId}-disabled` : undefined
@@ -272,7 +272,7 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
                     <Button
                       size='sm'
                       variant='outline'
-                      className='h-[30px] rounded-none px-2.5 text-[11.5px] font-semibold'
+                      className='h-[30px] rounded-none px-2.5 text-[13px] font-semibold'
                       disabled={locked || deciding}
                       aria-describedby={
                         isRequester ? `${reasonId}-disabled` : undefined
@@ -290,7 +290,7 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
             <div className='flex flex-col gap-2 border-t border-line bg-surface-2 p-2.5'>
               <Label
                 htmlFor={reasonId}
-                className='font-mono text-[8px] text-ink-3 uppercase'
+                className='font-mono text-[9px] text-ink-3 uppercase'
               >
                 Catatan keputusan · opsional
               </Label>
@@ -299,12 +299,12 @@ function RequestItem({ r, me, viewerRole, deciding, onDecide }: ItemProps) {
                 value={reason}
                 disabled={locked}
                 onChange={(e) => setReason(e.target.value)}
-                className='min-h-16 rounded-none bg-surface text-[11px]'
+                className='min-h-16 rounded-none bg-surface text-[12.5px]'
               />
               {locked && (
                 <p
                   id={`${reasonId}-disabled`}
-                  className='text-[10px] text-ink-3'
+                  className='text-[11.5px] text-ink-3'
                 >
                   {isRequester
                     ? 'Pemohon tidak dapat memutuskan permintaannya.'
@@ -511,7 +511,7 @@ export function AccessSection() {
                 </li>
               ))}
             </ul>
-            <p className='flex items-start gap-2.5 border border-line bg-surface px-3.5 py-2.5 text-[11px] text-ink-2'>
+            <p className='flex items-start gap-2.5 border border-line bg-surface px-3.5 py-2.5 text-[12.5px] text-ink-2'>
               <Shield
                 aria-hidden='true'
                 className='mt-px size-3.5 shrink-0 text-ink'
@@ -552,11 +552,11 @@ export function AccessSection() {
                 <div className='flex items-baseline justify-between gap-2'>
                   <Label
                     htmlFor={`${uid}-doc`}
-                    className='font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'
+                    className='font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'
                   >
                     ID dokumen
                   </Label>
-                  <span className='font-mono text-[8px] text-ink-3'>
+                  <span className='font-mono text-[9px] text-ink-3'>
                     format DOC-0000
                   </span>
                 </div>
@@ -565,7 +565,7 @@ export function AccessSection() {
                   value={docId}
                   placeholder='DOC-0011'
                   autoComplete='off'
-                  className='h-[34px] rounded-none font-mono text-[10px] md:text-[10px]'
+                  className='h-[34px] rounded-none font-mono text-[11.5px] md:text-[11.5px]'
                   aria-invalid={Boolean(createErrs.docId)}
                   aria-describedby={
                     createErrs.docId ? `${uid}-doc-err` : undefined
@@ -578,7 +578,7 @@ export function AccessSection() {
               <div className='flex flex-col gap-1.5'>
                 <Label
                   htmlFor={`${uid}-grantee`}
-                  className='font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'
+                  className='font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'
                 >
                   Penerima
                 </Label>
@@ -589,7 +589,7 @@ export function AccessSection() {
                 >
                   <SelectTrigger
                     id={`${uid}-grantee`}
-                    className='w-full rounded-none text-[11px]'
+                    className='w-full rounded-none text-[12.5px]'
                     aria-invalid={Boolean(createErrs.grantee)}
                     aria-describedby={
                       createErrs.grantee ? `${uid}-grantee-err` : undefined
@@ -611,7 +611,7 @@ export function AccessSection() {
                   </SelectContent>
                 </Select>
                 {users.isError && (
-                  <p className='text-[10px] text-ink-3'>
+                  <p className='text-[11.5px] text-ink-3'>
                     Daftar pengguna gagal dimuat.
                   </p>
                 )}
@@ -625,13 +625,13 @@ export function AccessSection() {
                 <div className='flex items-baseline justify-between gap-2'>
                   <Label
                     htmlFor={`${uid}-reason`}
-                    className='font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'
+                    className='font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'
                   >
                     Alasan
                   </Label>
                   <span
                     id={`${uid}-reason-count`}
-                    className='font-mono text-[8px] text-ink-3 tabular-nums'
+                    className='font-mono text-[9px] text-ink-3 tabular-nums'
                   >
                     {[...reason.trim()].length} / {REASON_MAX}
                   </span>
@@ -639,7 +639,7 @@ export function AccessSection() {
                 <Textarea
                   id={`${uid}-reason`}
                   value={reason}
-                  className='min-h-20 rounded-none text-[11px]'
+                  className='min-h-20 rounded-none text-[12.5px]'
                   aria-invalid={Boolean(createErrs.reason)}
                   aria-describedby={`${uid}-reason-count${createErrs.reason ? ` ${uid}-reason-err` : ''}`}
                   onChange={(e) => setReason(e.target.value)}
@@ -651,11 +651,11 @@ export function AccessSection() {
                 <div className='flex items-baseline justify-between gap-2'>
                   <Label
                     htmlFor={`${uid}-expires`}
-                    className='font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'
+                    className='font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'
                   >
                     Kedaluwarsa
                   </Label>
-                  <span className='font-mono text-[8px] text-ink-3'>
+                  <span className='font-mono text-[9px] text-ink-3'>
                     opsional
                   </span>
                 </div>
@@ -668,7 +668,7 @@ export function AccessSection() {
                     id={`${uid}-expires`}
                     type='datetime-local'
                     value={expires}
-                    className='h-[34px] rounded-none pl-7 font-mono text-[10px] md:text-[10px]'
+                    className='h-[34px] rounded-none pl-7 font-mono text-[11.5px] md:text-[11.5px]'
                     aria-invalid={Boolean(createErrs.expires)}
                     aria-describedby={
                       createErrs.expires ? `${uid}-expires-err` : undefined
@@ -683,18 +683,18 @@ export function AccessSection() {
               </div>
 
               <div className='border border-line bg-surface-2 p-3'>
-                <p className='mb-2.5 font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'>
+                <p className='mb-2.5 font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'>
                   Butuh dua persetujuan berbeda
                 </p>
-                <ol className='flex flex-col gap-2 text-[10.5px] text-ink-2'>
+                <ol className='flex flex-col gap-2 text-[12px] text-ink-2'>
                   <li className='flex items-center gap-2'>
-                    <span className='grid size-3.5 shrink-0 place-items-center border border-line-2 font-mono text-[7px] leading-none text-ink-3'>
+                    <span className='grid size-3.5 shrink-0 place-items-center border border-line-2 font-mono text-[8px] leading-none text-ink-3'>
                       01
                     </span>
                     Komandan · L5
                   </li>
                   <li className='flex items-center gap-2'>
-                    <span className='grid size-3.5 shrink-0 place-items-center border border-line-2 font-mono text-[7px] leading-none text-ink-3'>
+                    <span className='grid size-3.5 shrink-0 place-items-center border border-line-2 font-mono text-[8px] leading-none text-ink-3'>
                       02
                     </span>
                     Perwira keamanan · flag SO
@@ -704,13 +704,13 @@ export function AccessSection() {
 
               <Button
                 type='submit'
-                className='h-10 w-full justify-between rounded-none text-[12.5px] font-semibold'
+                className='h-10 w-full justify-between rounded-none text-[14.5px] font-semibold'
                 disabled={create.isPending}
               >
                 Ajukan permintaan
                 <ArrowRight aria-hidden='true' />
               </Button>
-              <p className='font-mono text-[9px] leading-[1.5] text-ink-3'>
+              <p className='font-mono text-[10.5px] leading-[1.5] text-ink-3'>
                 Permintaan tidak dapat dibatalkan setelah diajukan. Keputusan
                 dicatat di audit log.
               </p>
@@ -728,7 +728,7 @@ export function AccessSection() {
               <div className='flex flex-col gap-1.5'>
                 <Label
                   htmlFor={`${uid}-rev-doc`}
-                  className='font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'
+                  className='font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'
                 >
                   ID dokumen
                 </Label>
@@ -737,7 +737,7 @@ export function AccessSection() {
                   value={revokeDoc}
                   placeholder='DOC-0001'
                   autoComplete='off'
-                  className='h-[34px] rounded-none font-mono text-[10px] md:text-[10px]'
+                  className='h-[34px] rounded-none font-mono text-[11.5px] md:text-[11.5px]'
                   aria-invalid={Boolean(revokeErrs.docId)}
                   aria-describedby={
                     revokeErrs.docId ? `${uid}-rev-doc-err` : undefined
@@ -750,7 +750,7 @@ export function AccessSection() {
               <div className='flex flex-col gap-1.5'>
                 <Label
                   htmlFor={`${uid}-rev-user`}
-                  className='font-mono text-[8px] tracking-[.08em] text-ink-3 uppercase'
+                  className='font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'
                 >
                   Nama pengguna
                 </Label>
@@ -758,7 +758,7 @@ export function AccessSection() {
                   id={`${uid}-rev-user`}
                   value={revokeUser}
                   autoComplete='off'
-                  className='h-[34px] rounded-none font-mono text-[10px] md:text-[10px]'
+                  className='h-[34px] rounded-none font-mono text-[11.5px] md:text-[11.5px]'
                   aria-invalid={Boolean(revokeErrs.username)}
                   aria-describedby={
                     revokeErrs.username ? `${uid}-rev-user-err` : undefined
@@ -774,7 +774,7 @@ export function AccessSection() {
               <Button
                 type='submit'
                 variant='destructive'
-                className='h-10 w-full rounded-none text-[12.5px] font-semibold'
+                className='h-10 w-full rounded-none text-[14.5px] font-semibold'
               >
                 Cabut akses
               </Button>

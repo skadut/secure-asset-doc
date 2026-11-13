@@ -33,14 +33,14 @@ export function Operation() {
       >
         <header className='flex min-w-0 flex-wrap items-end justify-between gap-4'>
           <div className='min-w-0'>
-            <p className='mb-1 font-mono text-[9px] tracking-[.14em] text-ink-3 uppercase'>
+            <p className='mb-1 font-mono text-[10.5px] tracking-[.14em] text-ink-3 uppercase'>
               Grant per dokumen · khusus level 5
             </p>
             <h1 className='page-title tracking-tight'>Akses operasi</h1>
           </div>
           {allowed && (
             <div className='ms-auto flex flex-wrap items-center justify-end gap-3'>
-              <span className='font-mono text-[9px] tracking-[.08em] text-ink-3 uppercase'>
+              <span className='font-mono text-[10.5px] tracking-[.08em] text-ink-3 uppercase'>
                 Grant baru lewat otorisasi ganda
               </span>
               <Button variant='outline' asChild>

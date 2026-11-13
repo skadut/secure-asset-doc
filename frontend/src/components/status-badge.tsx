@@ -103,7 +103,7 @@ export function ReviewStatusBadge({
 export function FileTypeBadge({ type }: { type: 'PDF' | 'Excel' | 'None' }) {
   if (type === 'None') return <span>None</span>
   return (
-    <span className='inline-flex border border-line px-1.5 py-0.5 font-mono text-[9px] leading-[1.4] text-ink-2 uppercase'>
+    <span className='inline-flex border border-line px-1.5 py-0.5 font-mono text-[10.5px] leading-[1.4] text-ink-2 uppercase'>
       {type}
     </span>
   )
