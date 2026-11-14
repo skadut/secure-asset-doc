@@ -442,7 +442,10 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
               <div className='lg-brand-name'>ARCA</div>
             </div>
             <div className='lg-org'>TNI-AD · DOKUMEN OPERASIONAL</div>
-            <div className='lg-org'>Secure Asset Document Management · TPM 2.0 · Cryptographic Key Protection</div>
+            <div className='lg-org'>
+              Secure Asset Document Management · TPM 2.0 · Cryptographic Key
+              Protection
+            </div>
           </div>
           <div className='lg-hero lg-in2'>
             <div className='lg-eyebrow'>KENDALI AKSES DOKUMEN / AAL2</div>
@@ -977,9 +980,7 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                       onClick={enter}
                       disabled={leaving}
                     >
-                      <span>
-                        {leaving ? 'Membuka' : 'Masuk ke ARCA'}
-                      </span>
+                      <span>{leaving ? 'Membuka' : 'Masuk ke ARCA'}</span>
                       <ArrowIcon />
                     </button>
                     <button
