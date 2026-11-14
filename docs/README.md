@@ -2,6 +2,8 @@
 
 Dokumentasi ARCA — Hardware-Backed Digital Asset Security.
 
+Dikembangkan oleh Aeru Team untuk Kartika Cyberhackaton 2026.
+
 Repositori ini memakai satu jalur baca: mulai dari gambaran sistem, lalu jalur baca dokumen, lalu detail per layanan. Dokumen keamanan, operasi, referensi, dan demo melengkapi sisanya.
 
 Stack ini TPM-only. Vault sudah pensiun, data dimulai dari nol, dan tidak ada rekey.

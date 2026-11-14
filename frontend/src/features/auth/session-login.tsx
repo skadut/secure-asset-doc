@@ -503,7 +503,9 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                 github.com/skadut
               </a>
               <br />
-              <span>Dikembangkan oleh Aeru Team</span>
+              <span>
+                Dikembangkan oleh Aeru Team untuk Kartika Cyberhackaton 2026
+              </span>
             </div>
             <div className='lg-stamp'>SP 800-53 REV.5 / FIPS 199</div>
           </div>

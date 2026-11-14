@@ -63,7 +63,7 @@ export function AppSidebar() {
           }}
         />
         <div className='px-2 pb-1 text-center font-mono text-[9px] leading-[1.4] tracking-[.08em] text-rail-dim uppercase'>
-          Aeru Team ·{' '}
+          Aeru Team · Kartika Cyberhackaton 2026 ·{' '}
           <a
             href='https://github.com/skadut'
             target='_blank'
