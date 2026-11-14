@@ -588,9 +588,9 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                     </header>
                     <div className='lg-notice'>
                       <p>
-                        Anda mengakses sistem terbatas milik Arasaka
-                        Corporation. Penggunaan hanya untuk pengguna berwenang
-                        dan keperluan resmi.
+                        Anda mengakses sistem terbatas ARCA untuk dokumen
+                        operasional TNI-AD (simulasi demo). Penggunaan hanya
+                        untuk pengguna berwenang dan keperluan resmi.
                       </p>
                       <p>
                         Semua aktivitas dipantau dan dicatat, termasuk setiap
