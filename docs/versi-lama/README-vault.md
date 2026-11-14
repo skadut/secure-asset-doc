@@ -1,5 +1,5 @@
 # Vault stack (pre-blueprint design)
-Pre-blueprint Vault design, superseded on 2026-11-04 by the TPM blueprint ([../tpm-development-crypto-service.md](../tpm-development-crypto-service.md)), kept for reference and for the one-time rekey (`k1:` to `t1:`).
+Pre-blueprint Vault design, superseded on 2026-11-04 by the TPM blueprint (../tpm-development-crypto-service.md), kept for reference and for the one-time rekey (`k1:` to `t1:`).
 
 ## Architecture
 

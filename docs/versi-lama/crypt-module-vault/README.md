@@ -109,7 +109,7 @@ Tidak diimplementasikan: `GET /`, `GET /transaksi`, `/totpgenerate`, `/totpvalid
 
 ## Mode tpm
 
-Mode ini tidak memegang materi kunci. Semua kunci ada di key container (keyd) dan diakses lewat Unix socket. Rancangan: [tpm-development-crypto-service.md](../../tpm-development-crypto-service.md).
+Mode ini tidak memegang materi kunci. Semua kunci ada di key container (keyd) dan diakses lewat Unix socket. Rancangan: tpm-development-crypto-service.md.
 
 | Env | Default | Keterangan |
 |---|---|---|

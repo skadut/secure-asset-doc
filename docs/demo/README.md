@@ -45,6 +45,7 @@ Jalankan berurutan. Skenario berikutnya memakai keadaan yang dibuat skenario seb
 10. [CSF dan NIST](10-csf-dan-nist/README.md) — membuktikan bukti CSF 2.0 dan pemetaan 22 kontrol NIST 800-53 hanya menampilkan data yang boleh dilihat.
 11. [Traffic dan database](11-traffic-dan-database/README.md) — membuktikan dua tampilan operasional hanya untuk super admin dan database view bersifat baca saja.
 12. [Keadaan error](12-keadaan-error/README.md) — membuktikan 404, 403, dokumen tidak tersedia, sesi berakhir, filter kosong, akun terkunci, dan 503 tampil tanpa membocorkan dokumen.
+13. [Kelola aset](13-kelola-aset/README.md) — membuktikan aset bisa dibuat, diubah, dan dihapus dengan alasan wajib, zona dihitung dari level Purdue, dan setiap tulisan tercatat di audit log.
 
 ## Aturan demo
 

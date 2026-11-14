@@ -16,11 +16,25 @@ Tidak ada environment variable runtime. Perilaku ditentukan `frontend/nginx.conf
 
 - `/api/files/`, `/api/uploads`, `/api/traffic`, `/api/login`, `/api/auth/`, `/api/documents`, dan `/api/` di-proxy ke `http://backend:3000`.
 - Rate limit nginx: `traffic` 5 r/s, `uploads` 2 r/s (burst 4), `login` 1 r/s (burst 5).
-- Batas body `/api/uploads` dan `/api/documents` 15 MB.
 - Header keamanan: `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Frame-Options`, dan CSP. `/api/files/` mengizinkan frame same-origin untuk pratinjau PDF.
 - Aset statis yang tidak ada mengembalikan 404, bukan fallback SPA. Hanya route non-file yang jatuh ke `/index.html`.
 
 Nilai `APP_ORIGINS` dibaca backend, bukan frontend; lihat [backend](backend.md).
+
+## Batas ukuran body
+
+Sumber: `frontend/nginx.conf`.
+
+- `location ^~ /api/uploads` dan `location ^~ /api/documents`: `client_max_body_size 15m`.
+- `POST /api/documents` menerima berkas 10 MiB yang di-base64 dalam JSON, sekitar 13,3 MiB. Batas 15 MB memberi ruang untuk itu. Backend membatasi body 14 MiB (`MAX_BODY` di `backend/uploads.mjs`).
+- `POST /api/assets` jatuh ke `location /api/`, yang tidak menetapkan batas sendiri, sehingga batas default nginx 1 MiB berlaku. Body aset kecil dan tidak mencapai batas itu.
+
+## Rute tulis
+
+- `/documents/upload`: wizard unggah 6 langkah (`?step=1` sampai `?step=6`, `frontend/src/routes/_authenticated/documents/upload.tsx`). Langkah: Berkas, Identitas, Klasifikasi, Siklus, Tinjau, Selesai. Nilai `step` di luar 1-6 jatuh ke 1 (`clampStep`). Langkah 5 mengirim `POST /api/documents`; langkah 6 menampilkan hasil. Komponen: `features/documents/upload/upload-wizard.tsx`.
+- `/assets/new`: form buat aset (`frontend/src/routes/_authenticated/assets/new.tsx`, komponen `features/assets/create.tsx`). Mengirim `POST /api/assets`. Tombol muncul hanya bila `me.can.asset.c` true.
+- Dialog unggah lama (`features/documents/uploads/upload-dialog.tsx`) sudah dihapus. Panel daftar unggahan `uploads-panel.tsx` tetap ada.
+- Edit dan hapus aset memakai `features/assets/edit-dialog.tsx` dan `delete-dialog.tsx` (`PATCH` dan `DELETE /api/assets/:id`).
 
 ## Berkomunikasi dengan
 

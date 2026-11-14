@@ -13,6 +13,7 @@ Route `/api/grc` memanggil `grc()` untuk membangun payload: `documents`, `contro
 - Security officer mendapat `restrictedDocuments` berisi `{id, tlp, createdAt, versionCount, grantees}`. `createdAt` adalah tanggal versi paling awal. Tidak ada judul, nama file, atau isi.
 - Dokumen yang boleh dibaca didetokenkan judulnya. Bila panggilan kripto gagal, `revealTokens` memakai bagian masked, bukan token.
 - Bila pengguna tidak punya izin baca aset, field `model`, `firmware`, dan `ipAddress` pada aset dikosongkan.
+- Catatan field aset: `model` dan `firmware` disimpan SEALED saat at rest, `ip_address` disimpan TOKENIZED (`db/scripts/protect-fields.mjs:53-55`; penulisan lewat `backend/asset-manage.mjs:86-88`). Saat baca, `revealTokens` (`backend/server.mjs:338-349`) membuka ketiga field itu hanya bila gate `assetRead = can(...).asset.r` benar (`server.mjs:589`), yang diteruskan sebagai `assetRead ? out.assets : []` (`server.mjs:591`). Bila gate salah, `/api/grc` menyamarkan field (`server.mjs:590`): token menjadi `maskedPart`, teks sealed menjadi `***` (`backend/reveal.mjs:5`, `:22-27`). Saat ini semua tier memegang `asset.r` (`backend/auth.mjs:63-81`), sehingga cabang penyamaran hanya berlaku untuk rank yang tidak dikenal atau tidak valid.
 
 ## 2. Sesi viewer
 

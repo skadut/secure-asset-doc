@@ -157,6 +157,61 @@ Alur route GET file (`backend/server.mjs`, fungsi `file`):
 3. Jika tidak, cek grant aktif: `revoked_at IS NULL AND (expires_at IS NULL OR expires_at > now())`. Jika aktif, izinkan.
 4. Selain itu, 404 (keberadaan dokumen disembunyikan).
 
+## Hak tulis asset
+
+Route tulis asset (create, update, delete) butuh dua syarat: grant tier untuk aksi itu DAN `accessLevel >= 4`.
+
+Sumber: `backend/asset-manage.mjs` (:79, :116, :177), `backend/session.mjs` (:45), `backend/auth.mjs` (:63-81).
+
+| Tier | asset c | asset r | asset u | asset d |
+|---|---|---|---|---|
+| TAMTAMA | tidak | ya | tidak | tidak |
+| BINTARA | tidak | ya | tidak | tidak |
+| BINTARA_TINGGI | tidak | ya | tidak | tidak |
+| PAMA | ya | ya | ya | tidak |
+| PAMEN | ya | ya | ya | ya |
+| PATI | ya | ya | ya | ya |
+
+BINTARA dan BINTARA_TINGGI juga punya `uOwn`. Route asset tidak bisa memakainya: butuh `accessLevel >= 4` dan tidak ada owner yang dikirim.
+
+Hasil: `asset.d` hanya untuk PAMEN dan PATI, dan hanya pada `accessLevel >= 4`.
+
+Aturan request:
+
+- Validasi (400) dijalankan sebelum cek otorisasi (403).
+- Update butuh `reason` 1-500 karakter (`assets-write.mjs:49-50`, dipanggil `asset-manage.mjs:111-112`). Jika tidak valid: 400.
+- Delete butuh `reason` 1-500 karakter dan `confirmId` yang sama dengan id asset (`asset-manage.mjs:173-174`). Jika tidak valid: 400.
+- `reason` disegel di audit log. Kegagalan seal: 502.
+- Create: 409 jika (site, lower(name)) sudah ada (`asset-manage.mjs:83-84`).
+- Update: 409 jika name atau site bentrok (`asset-manage.mjs:127-132`).
+- Delete: 404 jika asset tidak ditemukan. Delete tidak pernah 409.
+- Delete melepas `evidence_links` dan `asset_document_links` dalam transaksi yang sama, lalu menghapus asset (`asset-manage.mjs:187-189`). Respons memuat `unlinkedEvidence` dan `unlinkedDocuments`. Audit action: `asset.delete`.
+
+## Batas TLP saat upload dokumen
+
+Upload dokumen (`document.c`) dibatasi oleh grant tier dan oleh `accessLevel`.
+
+- Grant tier: hanya PAMA, PAMEN, dan PATI yang punya `document.c`. TAMTAMA, BINTARA, dan BINTARA_TINGGI tidak bisa membuat dokumen. Grant tidak menaikkan batas TLP.
+- Urutan TLP: `CLEAR`, `GREEN`, `AMBER`, `AMBER+STRICT`, `RED`, `RED+STRICT` (`TLP_ORDER`, `backend/auth.mjs:8`).
+- TLP maksimum upload = `TLP_ORDER[min(accessLevel, 4)]` (`backend/auth.mjs:104-110`, `:160-162`).
+- `CLEAR` selalu boleh di level berapa pun.
+- `RED+STRICT` tidak bisa diunggah lewat level.
+- `newTlp` yang tidak valid atau tidak ada: ditolak.
+
+| accessLevel | TLP maksimum upload |
+|---|---|
+| 1 | GREEN |
+| 2 | AMBER |
+| 3 | AMBER+STRICT |
+| 4 | RED |
+| 5 | RED |
+
+Di kode (`backend/session.mjs:42-43`, `:64`): `docCreateMaxTlp` adalah TLP tertinggi yang lolos `authorize('document.c')`. `canCreateDocument` = `docCreateMaxTlp !== null`.
+
+`rank.tlpMax` di `backend/auth.mjs` tidak dipakai `authorize()`. Batas TLP hanya berasal dari `accessLevel`.
+
+Update dokumen (`document.u`): PAMA hanya bisa mengubah dokumen draft (`backend/auth.mjs:157`).
+
 ## Alur briefing turunan (sanitasi)
 
 1. Pelaku: user level 5 yang aktif (`derive_document`, `009_derive.sql`, error 42501).

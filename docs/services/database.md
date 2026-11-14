@@ -24,7 +24,7 @@ PostgreSQL menyimpan seluruh data aplikasi: aset, dokumen dan versi, tautan bukt
 
 ## Script init
 
-Script berjalan alfabetis berdasarkan nama file, `001` sampai `015`, dan hanya pada volume kosong. Skema saja: volume baru berisi 0 baris di setiap tabel. Data berasal dari seed.
+Script berjalan alfabetis berdasarkan nama file, `001` sampai `018`, dan hanya pada volume kosong. Skema saja: volume baru berisi 0 baris di setiap tabel. Data berasal dari seed.
 
 - `001`: skema.
 - `003`: tabel uploads dan grant.
@@ -40,8 +40,11 @@ Script berjalan alfabetis berdasarkan nama file, `001` sampai `015`, dan hanya p
 - `013`: lockout login, last sign-in, pelacakan idle session, kosakata audit login/logout (`013_login_lockout.sql`).
 - `014`: flag `users.super_admin`; super admin mengisi salah satu slot persetujuan, tidak pernah keduanya (`014_super_admin.sql`). `014` harus diterapkan sebelum backend yang membaca `users.super_admin` di-deploy.
 - `015`: proteksi field (`015_field_protection.sql`): `assets.ip_address` dari inet ke text (token), batas CHECK diperlebar ke 4096 untuk alasan/nama berukuran ciphertext, `document_versions.sha256` dihapus, fungsi request/level/Derive ditulis ulang untuk menyimpan teks tersegel. Terapkan sebelum backend yang menyegel field tersebut di-deploy.
+- `016`: kolom `users.totp_secret` untuk OTP login (`016_totp.sql`). Nilai diisi `db/scripts/seed-totp.mjs` dari `DEMO_TOTP_SECRET`. Deploy tidak menerapkan `016`; volume lama harus menerapkannya manual.
+- `017`: tambahan UI (`017_ui_additive.sql`): `users.preferences`, tabel `nist_controls`, `traffic_samples`, `viewer_sessions`, dan indeks. Deploy menerapkannya setiap kali.
+- `018`: memperluas `audit_events_action_check` dengan `doc.upload`, `asset.create`, `asset.update`, `asset.delete` (`018_audit_actions.sql`). Pada volume yang sudah ada, admin menerapkannya manual lewat psql; deploy juga menerapkannya.
 
-`001` sampai `015` berjalan otomatis pada volume `pgdata` baru. Pada volume lama, terapkan `010`, lalu `011`, lalu `012`, lalu `013`, `014`, dan `015` secara manual. Urutan fresh start ada di [docs/operasi/](../operasi/).
+`001` sampai `018` berjalan otomatis pada volume `pgdata` baru. Pada volume lama, terapkan `016` secara manual bila belum ada (deploy tidak menjalankannya). `017` dan `018` dijalankan deploy setiap kali (`.github/workflows/deploy.yml` baris 200-201); di luar deploy, terapkan manual lewat psql sebagai admin. Urutan fresh start ada di [docs/operasi/](../operasi/).
 
 ## Seed data
 

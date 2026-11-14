@@ -60,6 +60,72 @@ Response `201`: `{ "id": "<uuid>", "name": "a.pdf", "mime": "application/pdf", "
 - Error: `403` tanpa `upload.r`, `400` bila ID bukan UUID, `404`, `502`, `503`.
 - Self-check: `node backend/uploads.check.mjs`.
 
+### Tulis dokumen: `POST /api/documents`
+
+File: `doc-upload.mjs` (handler), `doc-create.mjs` (validasi). Dipakai wizard `/documents/upload`.
+
+Auth dan CSRF berlaku untuk semua route tulis di bagian ini: session cookie wajib (tanpa session `401 {"error":"unauthenticated"}`), dan `Origin` harus ada di `APP_ORIGINS` (selain itu `403 {"error":"forbidden"}`). Body dengan `Content-Type` selain JSON ditolak `415`.
+
+Body JSON (`Content-Type: application/json`):
+
+```json
+{ "title": "...", "type": "Policy", "owner": "...", "approver": "...", "tlp": "AMBER", "status": "draft", "nextReview": "2027-01-31", "version": "1.0", "summary": "...", "file": { "name": "a.pdf", "mime": "application/pdf", "data": "<std base64>" } }
+```
+
+- Validasi: `title` 1-200; `type` salah satu nilai `documents.type`; `owner` dan `approver` 1-120; `tlp` salah satu dari enam TLP; `status` `draft` atau `in review`; `nextReview` `YYYY-MM-DD`; `version` `\d+.\d+`; `summary` 1-500.
+- File: mime `application/pdf` atau XLSX. Magic bytes diperiksa; XLSX hanya memeriksa header ZIP. Nama lewat `sanitizeName`.
+- Otorisasi: `authorize(rank, 'document.c')` dengan level dan TLP tujuan. TLP di atas plafon level ditolak.
+- Proses: file disegel crypto-api (`/sealfile`) dan dihitung HMAC (`/hmac`). Untuk TLP selain CLEAR, judul dan nama file ditokenkan dan `summary` disegel. Insert dokumen dan versi dalam satu transaksi dengan `protection='encrypted'`, lalu audit `doc.upload`.
+
+Response `201`: `{ id, title, type, tlp, status, version, nextReview, owner, approver, fileName, size, uploadedBy, at }`. `title` (sudah di-trim) dan `fileName` (sudah disanitasi) adalah nilai plaintext, bukan token.
+
+Error:
+
+- `400`: `{"error":"bad request"}` (JSON rusak, base64 tidak valid, atau file tidak bisa didekode), atau `{"error":"invalid <field>"}` (`title`, `type`, `owner`, `approver`, `tlp`, `status`, `nextReview`, `version`, `summary`, `file`, `mime`, `file name`, `file data`), atau `file content does not match mime`.
+- `403`: `{"error":"forbidden"}`. Dicatat sebagai `access.denied`.
+- `408`: `{"error":"timeout"}`, body tidak terbaca dalam 20 detik.
+- `413`: `{"error":"too large"}`, body di atas 14 MiB atau file di atas 10 MiB.
+- `415`: `{"error":"unsupported media type"}`.
+- `429`: `{"error":"rate_limited"}`, 2 req/s (burst 2) atau 3 request in-flight.
+- `502`: `{"error":"crypto failure"}`. `503`: `{"error":"unavailable"}` bila crypto-api tidak tersedia.
+- Bentrok unik (`23505`) dicoba ulang sampai 3 percobaan total. Setelah itu error jatuh ke `500 {"error":"internal"}`; route ini tidak memetakan `23505` ke 409.
+
+### Tulis aset: `POST /api/assets`, `PATCH /api/assets/:id`, `DELETE /api/assets/:id`
+
+File: `asset-manage.mjs` (handler), `assets-write.mjs` (validasi). Dipakai `/assets/new` dan dialog edit/hapus di halaman aset.
+
+Syarat: level minimal 4 dan `authorize()` mengizinkan `asset.c`, `asset.u`, atau `asset.d` sesuai route. Selain itu `403 {"error":"forbidden"}`, dicatat sebagai `access.denied`.
+
+Body JSON wajib `Content-Type: application/json`. Body di atas 14 MiB ditolak `413`. Body yang bukan objek JSON ditolak `400 {"error":"bad request"}`.
+
+`POST /api/assets` (201):
+
+- Field: `name`, `type`, `site`, `sector`, `purdueLevel`, `vendor`, `model`, `firmware`, `ipAddress`, `criticality`, `status`, `owner`, `lastReviewed`. Semua wajib.
+- Nilai: `type` (9 nilai), `sector` (`Energy`, `Water`, `Telecom`), `purdueLevel` (`L0`, `L1`, `L2`, `L3`, `L3.5`, `L4`), `criticality` (`high`, `medium`, `low`), `status` (`active`, `maintenance`, `retired`). `ipAddress` IPv4. `name`, `site`, `owner`, `vendor` 1-120; `model`, `firmware` 1-80; `lastReviewed` `YYYY-MM-DD`.
+- `zone` dihitung dari `purdueLevel` dan `type`. `ipAddress` ditokenkan; `model` dan `firmware` disegel.
+- Nama duplikat per `site` (tanpa membedakan huruf besar-kecil) ditolak `409 {"error":"conflict","field":"name"}`. Pengecekan awal dilakukan di luar transaksi.
+- Response: `{ id, zone, at }`. Audit `asset.create`.
+
+`PATCH /api/assets/:id` (200):
+
+- Field yang boleh: `name`, `type`, `site`, `purdueLevel`, `criticality`, `status`, `lastReviewed`, `owner`, dan `reason` wajib (1-500). Field lain: `400 {"error":"unknown field <x>"}`.
+- ID harus `AST-\d{4,}`, selain itu `400`. ID tidak ada: `404 {"error":"not found"}`.
+- Tanpa perubahan nilai: `400 {"error":"no changes"}`. Nama duplikat: `409`.
+- Perubahan `type` atau `purdueLevel` menghitung ulang `zone`.
+- Response: `{ id, changed: [<field>...] }`. Audit `asset.update`. `reason` disimpan di audit dalam bentuk disegel.
+
+`DELETE /api/assets/:id` (200):
+
+- Body: `{ "reason": "...", "confirmId": "AST-0001" }`. `reason` 1-500 setelah trim. `confirmId` harus sama dengan ID di path. Selain itu `400`.
+- Menghapus baris `evidence_links` dan `asset_document_links` milik aset, lalu aset itu sendiri, dalam satu transaksi.
+- Response: `{ id, unlinkedEvidence, unlinkedDocuments }`. ID tidak ada: `404`. Audit `asset.delete`, dengan jumlah tautan yang dilepas dan `reason` disegel.
+
+Error umum route aset: `401 {"error":"unauthenticated"}`, `403`, `408`, `413`, `415`, `502 {"error":"crypto failure"}` bila sealing atau tokenisasi gagal.
+
+### Audit aksi baru
+
+Migrasi `018_audit_actions.sql` menambah `doc.upload`, `asset.create`, `asset.update`, dan `asset.delete` ke `audit_events_action_check`. Penolakan akses tetap memakai `access.denied` (`log_access_denied`, `006_rbac.sql`).
+
 ### Proteksi dan `GET /api/files/:doc/:ver`
 
 File: `protection.mjs` (`protectionFor` memetakan TLP, `INTEGRITY_ERROR`). Self-check: `node backend/protection.check.mjs`.
@@ -114,6 +180,7 @@ Field wajib: `justification`, `screeningVerified` dan `screeningRef` (PS-3), `ac
 ### `/api/me` dan `/api/users`
 
 - `/api/me` (`meJson` di `session.mjs`) mengembalikan `accessLevel`, `tlpMax`, `securityOfficer`, `unit`, `unitHead`, dan `can.access` = `{grant, request, approve, revoke}`. `grant` hanya level 5; sisanya level 5 atau officer.
+- `permissions` di `/api/me` (`meJson` di `session.mjs`): `canCreateDocument` (boolean), `docCreateMaxTlp` (TLP tertinggi yang lolos `authorize('document.c')`, atau null bila tidak ada), dan `canWriteAssets` = `{c, u, d}`. Setiap flag `canWriteAssets` true hanya bila `authorize()` mengizinkan dan level minimal 4.
 - `/api/users` mengembalikan `username`, `name` (string atau null), `rankName`, `golongan`, `accessLevel`, `unit`, `unitHead`, `securityOfficer`. Butuh `canManage`.
 - `unit` dan `unitHead` hanya label; tidak ada jalur otorisasi yang memakainya. `unit_head` membatasi satu head per unit (`012_unit_head.sql`).
 

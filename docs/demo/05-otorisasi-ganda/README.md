@@ -16,7 +16,7 @@ Membuktikan grant RED+STRICT baru aktif setelah satu komandan level 5 dan satu p
 
 1. Masuk sebagai `hendra.wiratama`, buka `Otorisasi ganda` lewat sidebar `Akses dokumen`.
 2. Di panel `AJUKAN PERMINTAAN AKSES`, isi `ID DOKUMEN` `DOC-0011`, pilih `PENERIMA` yang belum punya grant, isi `ALASAN`, lalu klik `Ajukan permintaan`.
-3. Kartu permintaan muncul dengan status `Menunggu 0/2`. Dua slot terlihat: `KOMANDAN` dan `PERWIRA KEAMANAN`.
+3. Kartu permintaan muncul dengan status `Menunggu 0/2`. Dua slot terlihat: `KOMANDAN` dan `PERWIRA KEAMANAN`. Di sidebar, angka di samping `Otorisasi ganda` menghitung dokumen yang punya permintaan tertunda. Angka ini hanya diambil untuk akun level 5 dan perwira keamanan, diperbarui tiap 60 detik, dan hilang bila tidak ada yang tertunda.
 4. Masuk sebagai `yudi.ananda`, buka kartu yang sama, klik `Setujui`. Status menjadi `Menunggu 1/2`; grant belum dibuat.
 5. Masuk sebagai `teguh.prasetya`, buka kartu, klik `Setujui`. Status menjadi `Diberikan`; grant aktif.
 6. Ulangi dengan urutan terbalik pada dokumen atau penerima lain: perwira keamanan lebih dulu, lalu komandan. Hasilnya sama.
@@ -35,6 +35,8 @@ Membuktikan grant RED+STRICT baru aktif setelah satu komandan level 5 dan satu p
 ## Bukti
 
 ![Dua permintaan RED+STRICT yang sudah diberikan](../../screenshots/requests.png)
+
+![Badge jumlah dokumen tertunda di samping Otorisasi ganda](../../screenshots/sidebar-pending-badge.png)
 
 ## Catatan
 

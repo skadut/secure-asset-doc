@@ -42,12 +42,10 @@ Buka [https://skadut-hack.tail9e496c.ts.net/](https://skadut-hack.tail9e496c.ts.
     <td align="center">Viewer aman</td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/upload-dialog-done.png" width="300" alt="Unggahan dokumen terenkripsi"></td>
     <td><img src="docs/screenshots/uploads-panel.png" width="300" alt="Unggahan terenkripsi dengan dekripsi sisi server"></td>
     <td><img src="docs/screenshots/upload-decrypt.png" width="300" alt="Unggahan dibuka dan didekripsi lewat /unsealfile"></td>
   </tr>
   <tr>
-    <td align="center">Unggahan terenkripsi (<code>/sealfile</code>)</td>
     <td align="center">Daftar unggahan terenkripsi</td>
     <td align="center">Buka unggahan (<code>/unsealfile</code>)</td>
   </tr>
@@ -103,13 +101,13 @@ Buka [https://skadut-hack.tail9e496c.ts.net/](https://skadut-hack.tail9e496c.ts.
   </tr>
   <tr>
     <td><img src="docs/screenshots/viewer-403-inline.png" width="300" alt="Viewer menampilkan 403 Dokumen tidak tersedia di bagian Berkas terkontrol, judul token tertutup"></td>
-    <td></td>
-    <td></td>
+    <td><img src="docs/screenshots/documents-registry-selected.png" width="300" alt="Registri dokumen dengan panel Dokumen terpilih terbuka setelah baris diklik"></td>
+    <td><img src="docs/screenshots/sidebar-pending-badge.png" width="300" alt="Sidebar dengan angka dokumen menunggu persetujuan di samping Otorisasi ganda"></td>
   </tr>
   <tr>
     <td align="center">Super admin tanpa grant: judul ber-mask, 403 inline</td>
-    <td></td>
-    <td></td>
+    <td align="center">Panel <code>Dokumen terpilih</code> di registri</td>
+    <td align="center">Badge permintaan tertunda di sidebar</td>
   </tr>
 </table>
 
@@ -134,8 +132,8 @@ Langkah lengkap: [docs/operasi/tpm-native-demo.md](docs/operasi/tpm-native-demo.
 
 ## Fitur
 
-- **Aset:** 20 aset OT contoh dengan tipe, sektor, Purdue level, zona IEC 62443, kritikalitas, status, dan tanggal tinjauan.
-- **Registri dokumen:** 18 dokumen contoh dengan riwayat versi, label TLP (CLEAR sampai RED+STRICT), aset tertaut, dan bukti CSF. Pratinjau PDF dan XLSX. Unggahan dienkripsi lewat crypto-api `/sealfile` sebelum disimpan dan didekripsi hanya saat dibuka lewat `/unsealfile`; unggahan terpisah dari versi registri.
+- **Aset:** 20 aset OT contoh dengan tipe, sektor, Purdue level, zona IEC 62443, kritikalitas, status, dan tanggal tinjauan. Aset dapat dibuat, diubah, dan dihapus (akses level 4 ke atas plus grant tier). Field `model` dan `firmware` disegel, `ip_address` ditokenisasi. Setiap tulis tercatat di audit log (`asset.create`, `asset.update`, `asset.delete`). Penghapusan wajib alasan dan mengetik ID aset.
+- **Registri dokumen:** 18 dokumen contoh dengan riwayat versi, label TLP (CLEAR sampai RED+STRICT), aset tertaut, dan bukti CSF. Pratinjau PDF dan XLSX. Dokumen baru diunggah lewat wizard enam langkah di `/documents/upload` (Berkas, Identitas, Klasifikasi, Siklus, Tinjau, Selesai) yang memanggil `POST /api/documents`: PDF atau XLSX, maks 10 MB, file disegel tanpa plaintext, dan membuat baris `documents` serta `document_versions` dengan versi dari formulir (default `1.0`) dan audit `doc.upload`. Butuh `document.c` (PAMA+) dan batas TLP. Jalur lama, unggahan terenkripsi lewat crypto-api `/sealfile` dan dibuka lewat `/unsealfile` (tab "Unggahan terenkripsi"), masih ada untuk PAMA+ dan terpisah dari versi registri.
 - **Viewer aman:** sesi baca berbatas waktu yang terikat ke pengguna dan dokumen, dengan watermark dan hitung mundur. RED dan RED+STRICT mendapat jendela terpendek.
 - **Otorisasi ganda:** pemberian akses RED+STRICT butuh satu commander (level 5) dan satu security officer, dengan urutan bebas.
 - **Operasi akses:** matriks akses per dokumen, permintaan, pencabutan, dan penguji keputusan akses.

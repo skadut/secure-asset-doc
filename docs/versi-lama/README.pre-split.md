@@ -1,6 +1,6 @@
 # Secure Asset Doc
 
-A fictional GRC dashboard for secure assets and controlled documents. It tracks OT-style assets, documents with TLP labels and version history, and 21 NIST CSF 2.0 subcategories linked to evidence. The TPM blueprint ([docs/tpm-development-crypto-service.md](docs/tpm-development-crypto-service.md)) describes the crypto-api and keyd path for protected document data.
+A fictional GRC dashboard for secure assets and controlled documents. It tracks OT-style assets, documents with TLP labels and version history, and 21 NIST CSF 2.0 subcategories linked to evidence. The TPM blueprint (docs/tpm-development-crypto-service.md) describes the crypto-api and keyd path for protected document data.
 
 The sample content is in Indonesian and is framed as the documents of a simulated military unit. It is marked `SIMULASI DEMO - BUKAN DOKUMEN RESMI TNI` ("simulation demo, not an official TNI document").
 
@@ -14,8 +14,8 @@ Open [https://skadut-hack.tail9e496c.ts.net/](https://skadut-hack.tail9e496c.ts.
 
 <table>
   <tr>
-    <td><img src="docs/screenshots/dashboard-light.png" width="480" alt="Dashboard, light theme"></td>
-    <td><img src="docs/screenshots/dashboard-dark.png" width="480" alt="Dashboard, dark theme"></td>
+    <td><img src="../screenshots/dashboard-light.png" width="480" alt="Dashboard, light theme"></td>
+    <td><img src="../screenshots/dashboard-dark.png" width="480" alt="Dashboard, dark theme"></td>
   </tr>
   <tr>
     <td align="center">Dashboard, light</td>
@@ -23,12 +23,12 @@ Open [https://skadut-hack.tail9e496c.ts.net/](https://skadut-hack.tail9e496c.ts.
   </tr>
 </table>
 
-- [Documents](docs/screenshots/documents.png): filterable list with TLP, status, type, and owner.
-- [Document detail](docs/screenshots/document-detail.png): version history and inline PDF preview.
-- [Assets](docs/screenshots/assets.png): inventory with sector, Purdue level, IEC 62443 zone, and criticality.
-- [CSF 2.0 evidence](docs/screenshots/evidence.png): coverage per function (Covered, Partial, Gap).
-- [Service traffic](docs/screenshots/traffic.png): live service map, refreshed every 2 seconds.
-- [Mobile dashboard](docs/screenshots/mobile-dashboard.png): 390 px wide layout.
+- [Documents](../screenshots/documents.png): filterable list with TLP, status, type, and owner.
+- [Document detail](../screenshots/document-detail.png): version history and inline PDF preview.
+- [Assets](../screenshots/assets.png): inventory with sector, Purdue level, IEC 62443 zone, and criticality.
+- [CSF 2.0 evidence](../screenshots/evidence.png): coverage per function (Covered, Partial, Gap).
+- [Service traffic](../screenshots/traffic.png): live service map, refreshed every 2 seconds.
+- [Mobile dashboard](../screenshots/mobile-dashboard.png): 390 px wide layout.
 
 ## Features
 
@@ -101,7 +101,7 @@ The TPM key zone runs in two modes. The VPS deployment loads `cryptography-servi
 
 ## Crypto API
 
-`crypto-api` (Go, Gin; `CRYPTO_MODE=tpm`) serves mTLS on container port 2796, published as 127.0.0.1:2896. See the [TPM blueprint](docs/tpm-development-crypto-service.md).
+`crypto-api` (Go, Gin; `CRYPTO_MODE=tpm`) serves mTLS on container port 2796, published as 127.0.0.1:2896. See the TPM blueprint.
 
 ### Modes
 
@@ -119,7 +119,7 @@ Tokenize output is the masked text followed by the sealed original.
 
 ### Key hierarchy
 
-**TPM hierarchy:** MSK (inside the TPM, non-exportable) > KEK (wrapped under the MSK, stored in a file) > DEK (wrapped under the KEK, held in keyd memory at most 5 minutes). See [blueprint section 4](docs/tpm-development-crypto-service.md#4-key-hierarchy).
+**TPM hierarchy:** MSK (inside the TPM, non-exportable) > KEK (wrapped under the MSK, stored in a file) > DEK (wrapped under the KEK, held in keyd memory at most 5 minutes). See blueprint section 4.
 
 keyd also holds an RSA-3072 delivery key. It is generated in memory at keyd start (`cryptography-service/key-container/src/main.rs:42`), never written to disk, and new on every start. The MSK is generated inside the TPM by `tpm-msk init` by default. `tpm-msk init --import` takes 32 to 64 bytes of hex on stdin instead. The Shamir shares printed by `serve` are demo only and do not restore the MSK.
 
@@ -194,7 +194,7 @@ sequenceDiagram
 ### Zeroization
 
 - **TTL:** `CRYPTO_KEY_TTL` defaults to `5m`. Values above `5m` or at or below zero stop startup. On expiry the DEK is wiped (`zeroize reason=ttl count=N`) and the next call unwraps a new one.
-- **TPM mode:** keyd enforces `KEYD_DEK_TTL`, valid range 31 to 300 s, default 300 (`cryptography-service/key-container/src/main.rs:41`). It subtracts 5 to 30 s of jitter and uses single-flight loading. Expiry also trips on realtime clock jumps, covering suspend. See [keyd TTL](cryptography-service/key-container/README.md#key-ttl).
+- **TPM mode:** keyd enforces `KEYD_DEK_TTL`, valid range 31 to 300 s, default 300 (`cryptography-service/key-container/src/main.rs:41`). It subtracts 5 to 30 s of jitter and uses single-flight loading. Expiry also trips on realtime clock jumps, covering suspend. See keyd TTL.
 - **Per call:** every per-call key buffer is wiped with `defer`.
 - **Key-zone error:** keyd wipes cached DEKs on key-service errors and returns 503. The legacy service's error reason is documented with the archived implementation.
 - **Panic:** the recovery middleware returns 500 and purges the DEK cache (`zeroize reason=panic`).
@@ -304,7 +304,7 @@ docker compose exec db rm /tmp/sad-backup.sql
 
 ## Seeding after fresh start
 
-A fresh volume gets schema only (`db/init`, 0 rows). Seed order after a fresh start: `db/seed/*.sql`, then `seed-users`, then `seed-totp`, then `protect-documents`, then `tokenize-titles`. Commands and checks are in [Fresh start](#fresh-start) and [TUTORIAL step 5](cryptography-service/tpm-services/TUTORIAL.md#5-reset-data-dari-nol).
+A fresh volume gets schema only (`db/init`, 0 rows). Seed order after a fresh start: `db/seed/*.sql`, then `seed-users`, then `seed-totp`, then `protect-documents`, then `tokenize-titles`. Commands and checks are in [Fresh start](#fresh-start) and TUTORIAL step 5.
 
 `seed-totp` stores the shared demo TOTP secret for login OTP. Set `DEMO_TOTP_SECRET` to 20 printable ASCII characters, then run:
 
@@ -355,11 +355,11 @@ Crypto-api internal port 2797 serves only `GET /internal/traffic` and is not pub
 | `CHANGELOG.md`, `cz.yaml` | Changelog and Commitizen config |
 | `LICENSE`, `THIRD_PARTY_NOTICES.md` | MIT license and third-party notices |
 
-The three parts under `cryptography-service/` (`encryption-services/`, `tpm-services/`, `key-container/`) are described in [cryptography-service/README.md](cryptography-service/README.md).
+The three parts under `cryptography-service/` (`encryption-services/`, `tpm-services/`, `key-container/`) are described in cryptography-service/README.md.
 
 ## TPM operations
 
-The design is in [TPM blueprint](docs/tpm-development-crypto-service.md). Command steps are in [Quick start](#quick-start).
+The design is in TPM blueprint. Command steps are in [Quick start](#quick-start).
 
 If the TPM service stops, crypto operations fail closed once loaded DEKs expire, within 5 minutes.
 
@@ -367,7 +367,7 @@ Each service writes a hash-chained JSONL audit log (SHA-256 chain). From `crypto
 
 `[DEMO]` Shamir shares: `tpm-msk serve` prints them by default (`--demo-ceremony`, default true). They are split from a throwaway random secret, not the MSK, and cannot recover the MSK. `init` does not print them.
 
-Laptop hardening is manual, not performed by tooling: BitLocker on the system drive (`manage-bde -status`), `powercfg /h off`, `swap=0` under `[wsl2]` in `%UserProfile%\.wslconfig`, and stop keyd before sleep with `docker compose -f compose.yaml stop keyd`. See [cryptography-service README](cryptography-service/README.md#laptop-hardening-blueprint-section-9).
+Laptop hardening is manual, not performed by tooling: BitLocker on the system drive (`manage-bde -status`), `powercfg /h off`, `swap=0` under `[wsl2]` in `%UserProfile%\.wslconfig`, and stop keyd before sleep with `docker compose -f compose.yaml stop keyd`. See cryptography-service README.
 
 This single-laptop setup is for development and demonstrations, with no zone separation. Malware with Windows administrator rights, an attacker controlling the running keyd container, and a compromised application using its own valid certificate are not protected against. See blueprint section 12, Security boundaries.
 
@@ -385,7 +385,7 @@ These three variables are for the vTPM/container mode only (`cryptography-servic
 
 ## Blueprint conformance
 
-Maps each section of [docs/tpm-development-crypto-service.md](docs/tpm-development-crypto-service.md) to the code in `cryptography-service/`. Status values: **Implemented**, **Partial**, **Deviation**, **Not built**, **Open**. Code paths are relative to `cryptography-service/`.
+Maps each section of docs/tpm-development-crypto-service.md to the code in `cryptography-service/`. Status values: **Implemented**, **Partial**, **Deviation**, **Not built**, **Open**. Code paths are relative to `cryptography-service/`.
 
 #### §1 Purpose
 
@@ -502,7 +502,7 @@ Maps each section of [docs/tpm-development-crypto-service.md](docs/tpm-developme
 - crypto-api: read-only, `cap_drop: ALL`, core 0, socket mounted `:ro` (`compose.yaml`). **Implemented.**
 - No cgo: crypto-api builds with `CGO_ENABLED=0`. keyd is Rust. **Implemented.**
 - **Deviation:** network `crypto-tpm-net` is a plain bridge, not `internal` (`compose.yaml:102-104`).
-- Laptop hardening: see [cryptography-service README](cryptography-service/README.md#laptop-hardening-blueprint-section-9). Manual, not enforced by tooling.
+- Laptop hardening: see cryptography-service README. Manual, not enforced by tooling.
 
 **Audit events**
 
@@ -658,7 +658,7 @@ Requires Docker Desktop (Compose v2) and the TPM service on the Windows host. Fr
 Copy-Item .env.example .env
 ```
 
-From `cryptography-service\tpm-services\` (after building `bin\tpm-msk.exe` as described in [TPM service setup](cryptography-service/tpm-services/README.md#build-tpm-mskexe)):
+From `cryptography-service\tpm-services\` (after building `bin\tpm-msk.exe` as described in TPM service setup):
 
 ```powershell
 & .\bin\tpm-msk.exe pki --out ..\run\pki
@@ -679,7 +679,7 @@ On a fresh install, follow [Fresh start](#fresh-start).
 
 ### Fresh start
 
-All data starts from zero. The stack is TPM-only; there is no rekey and no migration from Vault. Operator steps (optional backup, `docker compose down -v`, seeding, SQL checks) are in [TUTORIAL step 5, Reset data dari nol](cryptography-service/tpm-services/TUTORIAL.md#5-reset-data-dari-nol).
+All data starts from zero. The stack is TPM-only; there is no rekey and no migration from Vault. Operator steps (optional backup, `docker compose down -v`, seeding, SQL checks) are in TUTORIAL step 5, Reset data dari nol.
 
 > **Warning:** `docker compose down -v` deletes all DB data and named volumes. Use it only for a deliberate local reset. Never run it on the VPS; see [Deployment (CI/CD)](#deployment-cicd). For normal stops, use `docker compose down` (data kept).
 
@@ -689,7 +689,7 @@ All data starts from zero. The stack is TPM-only; there is no rekey and no migra
 
 ### Demo accounts
 
-Every demo account uses the password in `DEMO_USER_PASSWORD` from `.env`. Usernames are the person's first and last name, for example `hendra.wiratama`; every account is fictional. The script seeds 80 accounts across 22 ranks and sets `access_level` per rank. For the full account list and old-to-new username mapping, see [db/CREDENTIALS.md](db/CREDENTIALS.md). To seed these accounts, follow [Fresh start](#fresh-start); `DEMO_USER_PASSWORD` must be at least 16 characters. Sign in at http://127.0.0.1:8088.
+Every demo account uses the password in `DEMO_USER_PASSWORD` from `.env`. Usernames are the person's first and last name, for example `hendra.wiratama`; every account is fictional. The script seeds 80 accounts across 22 ranks and sets `access_level` per rank. For the full account list and old-to-new username mapping, see db/CREDENTIALS.md. To seed these accounts, follow [Fresh start](#fresh-start); `DEMO_USER_PASSWORD` must be at least 16 characters. Sign in at http://127.0.0.1:8088.
 
 Access level is independent of rank. For example, `sersan-mayor` is Bintara but has level 2.
 
@@ -843,6 +843,6 @@ RED/AMBER/GREEN is a proposed scheme here; national classification rules take pr
 
 ## License and credits
 
-The dashboard UI started from [satnaing/shadcn-admin](https://github.com/satnaing/shadcn-admin) (MIT, Copyright (c) 2024 Sat Naing) and was adapted for this project. The repository is distributed under the MIT License. See [LICENSE](LICENSE).
+The dashboard UI started from [satnaing/shadcn-admin](https://github.com/satnaing/shadcn-admin) (MIT, Copyright (c) 2024 Sat Naing) and was adapted for this project. The repository is distributed under the MIT License. See [LICENSE](../../LICENSE).
 
-Modified shadcn/ui components and RTL-related changes are in `frontend/src/components/ui/`. Third-party appearance references, their sources, and their licenses are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Modified shadcn/ui components and RTL-related changes are in `frontend/src/components/ui/`. Third-party appearance references, their sources, and their licenses are listed in THIRD_PARTY_NOTICES.md.

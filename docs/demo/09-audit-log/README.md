@@ -21,6 +21,15 @@ Membuktikan jejak audit hanya bisa ditambah, bisa difilter, dan purge hanya ters
 7. Klik tombol itu. Dialog meminta tanggal dan frasa `PURGE AUDIT BEFORE <tanggal>`. Lihat pratinjau jumlah baris dan tanggal tertua. Jangan klik konfirmasi pada demo langsung.
 8. Dari terminal database, coba `UPDATE audit_events SET summary = 'x' WHERE id = (SELECT max(id) FROM audit_events);`. Database menolak dengan `permission denied` atau pesan `audit_events is append-only`, tergantung peran yang dipakai.
 
+## Aksi audit untuk dokumen dan aset
+
+Aksi berikut ditambahkan lewat `db/init/018_audit_actions.sql`. Pilih `Aksi` di filter untuk menemukannya.
+
+- `doc.upload` — dokumen baru diunggah lewat wizard, termasuk versi dari formulir (default `1.0`) dan berkas tersegel.
+- `asset.create` — aset baru disimpan.
+- `asset.update` — metadata aset diubah. Kolom `PERUBAHAN` berisi nilai lama, nilai baru, dan alasan yang tersegel.
+- `asset.delete` — aset dihapus beserta tautan bukti CSF dan dokumen. Alasan tersegel di `PERUBAHAN`.
+
 ## Hasil yang diharapkan
 
 - Tabel audit menampilkan 8 baris per halaman. Filter berjalan di tampilan. Pencarian mencocokkan ringkasan, ID dokumen/objek, aktor, dan aksi.
