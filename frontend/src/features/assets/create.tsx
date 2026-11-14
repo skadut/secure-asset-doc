@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import {
   TODAY,
@@ -32,6 +32,7 @@ import { Main } from '@/components/layout/main'
 import { PageHead } from '@/components/page-head'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
+import { StatusDot } from '@/components/status-dot'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { criticalityLabel, isReviewOverdue, statusLabel } from './columns'
 import { zoneFor } from './zone'
@@ -459,14 +460,44 @@ function CreateAssetWizard({ me }: { me: Me }) {
           ? 'Simpan aset'
           : 'Lihat di daftar aset'
 
-  const reviewRows: { label: string; value: string }[] = [
+  const reviewRows: { label: string; value: ReactNode }[] = [
     { label: 'ID', value: saved?.id ?? 'AST-0025' },
     { label: 'NAMA', value: name },
     { label: 'TIPE', value: form.type },
     { label: 'SITE', value: form.site },
-    { label: 'PURDUE', value: form.purdueLevel },
-    { label: 'KRITIKALITAS', value: criticalityLabel[form.criticality] },
-    { label: 'STATUS', value: statusLabel[form.status] },
+    { label: 'PURDUE', value: `${form.purdueLevel} · ${zone}` },
+    {
+      label: 'KRITIKALITAS',
+      value: (
+        <StatusDot
+          tone={
+            form.criticality === 'high'
+              ? 'fail'
+              : form.criticality === 'medium'
+                ? 'warn'
+                : 'ink'
+          }
+        >
+          {criticalityLabel[form.criticality]}
+        </StatusDot>
+      ),
+    },
+    {
+      label: 'STATUS',
+      value: (
+        <StatusDot
+          tone={
+            form.status === 'active'
+              ? 'pass'
+              : form.status === 'maintenance'
+                ? 'warn'
+                : 'ink'
+          }
+        >
+          {statusLabel[form.status]}
+        </StatusDot>
+      ),
+    },
     {
       label: 'TINJAUAN',
       value: `${form.lastReviewed} · ${overdue ? 'Terlambat' : 'Dalam 365 hari'}`,

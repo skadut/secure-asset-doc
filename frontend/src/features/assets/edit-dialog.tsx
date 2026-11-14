@@ -232,9 +232,19 @@ export function EditAssetDialog({
       >
         <div className='flex items-center justify-between bg-ink px-5 py-3 text-surface'>
           <span className='font-mono text-[10px] tracking-[.1em]'>
-            02 · EDIT
+            {phase === 'edit'
+              ? '02 · EDIT'
+              : phase === 'review'
+                ? '03 · TINJAU'
+                : '04 · TERSIMPAN'}
           </span>
-          <Chip tone='warn'>{asset.id}</Chip>
+          {phase === 'edit' ? (
+            <Chip tone='warn'>{asset.id}</Chip>
+          ) : phase === 'review' ? (
+            <Chip tone='warn'>{changes.length} KOLOM BERUBAH</Chip>
+          ) : (
+            <Chip tone='pass'>TERSIMPAN</Chip>
+          )}
         </div>
         <form
           onSubmit={submit}
