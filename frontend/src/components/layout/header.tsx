@@ -9,7 +9,9 @@ import { ThemeSwitch } from '@/components/theme-switch'
 const crumbs: Record<string, string> = {
   '/': 'OVERVIEW / DASHBOARD',
   '/assets': 'INVENTARIS / ASET',
+  '/assets/new': 'INVENTARIS / ASET / TAMBAH ASET',
   '/documents': 'AKSES DOKUMEN / REGISTRI DOKUMEN',
+  '/documents/upload': 'AKSES DOKUMEN / REGISTRI DOKUMEN / UNGGAH',
   '/requests': 'AKSES DOKUMEN / OTORISASI GANDA',
   '/operation': 'AKSES DOKUMEN / AKSES OPERASI',
   '/evidence': 'KEPATUHAN / CSF 2.0 EVIDENCE',

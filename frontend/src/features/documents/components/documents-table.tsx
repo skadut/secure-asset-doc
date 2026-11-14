@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { ChevronLeft, ChevronRight, Inbox } from 'lucide-react'
+import { Inbox } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   Table,
@@ -18,7 +18,10 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { EmptyState } from '@/components/empty-state'
+import { TablePager } from '@/components/table-pager'
 import { type DocRow, documentColumns as columns } from './documents-columns'
+
+const PAGE_SIZE = 8
 
 type DocumentsTableProps = {
   data: DocRow[]
@@ -43,7 +46,7 @@ export function DocumentsTable({
     onSortingChange: setSorting,
     initialState: {
       pagination: {
-        pageSize: 8,
+        pageSize: PAGE_SIZE,
       },
     },
     getCoreRowModel: getCoreRowModel(),
@@ -151,35 +154,19 @@ export function DocumentsTable({
           </TableBody>
         </Table>
       </div>
-      <div className='flex flex-wrap items-center justify-between gap-3 border-t border-line bg-surface-2 px-3.5 py-2.5 font-mono text-[10px] tracking-[.08em] text-ink-3'>
-        <p aria-live='polite'>
-          Menampilkan {data.length} dokumen, {versionCount} versi · AKSES: Level
-          = dari level Anda, Grant = izin khusus
-        </p>
-        <div className='flex items-center gap-2'>
-          <button
-            type='button'
-            aria-label='Halaman sebelumnya'
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className='inline-flex size-4 items-center justify-center text-ink-3 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus)] disabled:opacity-40'
-          >
-            <ChevronLeft aria-hidden='true' className='size-3' />
-          </button>
-          <span aria-live='polite'>
-            HALAMAN {pageIndex + 1} / {pageCount}
-          </span>
-          <button
-            type='button'
-            aria-label='Halaman berikutnya'
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            className='inline-flex size-4 items-center justify-center text-ink-3 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus)] disabled:opacity-40'
-          >
-            <ChevronRight aria-hidden='true' className='size-3' />
-          </button>
-        </div>
-      </div>
+      <TablePager
+        summary={
+          data.length
+            ? `Menampilkan ${pageIndex * PAGE_SIZE + 1}–${pageIndex * PAGE_SIZE + table.getRowModel().rows.length} dari ${data.length} dokumen · ${versionCount} versi · AKSES: Level = dari level Anda, Grant = izin khusus`
+            : `Menampilkan 0 dokumen · ${versionCount} versi · AKSES: Level = dari level Anda, Grant = izin khusus`
+        }
+        pageIndex={pageIndex}
+        pageCount={pageCount}
+        onPage={(i) => table.setPageIndex(i)}
+        canPrev={table.getCanPreviousPage()}
+        canNext={table.getCanNextPage()}
+        label='Halaman dokumen'
+      />
     </section>
   )
 }

@@ -20,6 +20,8 @@ import { makeViewerRoutes, validate } from './viewer.mjs';
 import { makeDashboardRoutes } from './dashboard.mjs';
 import { makeControlRoutes } from './controls.mjs';
 import { matchRoute } from './router.mjs';
+import { makeDocUploadRoutes } from './doc-upload.mjs';
+import { makeAssetRoutes } from './asset-manage.mjs';
 
 const pool = new pg.Pool({
   host: process.env.PGHOST,
@@ -516,6 +518,9 @@ const viewerPluralRoutes = viewerRoutes;
 const dashboardRoutes = makeDashboardRoutes({ q: dbq, send, forbid });
 const controlRoutes = makeControlRoutes({ q: dbq, send });
 const trafficRoutes = makeTrafficRoutes({ q: dbq, send, forbid });
+const connect = () => pool.connect();
+const docUploadRoutes = makeDocUploadRoutes({ q: dbq, connect, send, readRaw: readBody, forbid, cryptoCall, sealText, tokenizeText, takeUploadToken, MAX_BODY });
+const assetRoutes = makeAssetRoutes({ q: dbq, connect, send, readRaw: readBody, forbid, sealText, tokenizeText, cryptoCall });
 
 // Database view (superAdmin only, read-only transactions). Long strings cut by truncate().
 async function dbviewTables(client) {
@@ -608,6 +613,18 @@ const ROUTES = [
     const viewerSession = new URL(req.url, 'http://localhost').searchParams.get('viewerSession') ?? undefined;
     return file(res, req.me, doc, ver, viewerSession ?? undefined);
   } },
+  { re: /^\/api\/documents$/, methods: ['POST'], run: async (req, res) => {
+    if (inFlight >= MAX_INFLIGHT) return send(res, 429, { error: 'rate_limited' });
+    inFlight++;
+    try {
+      return await docUploadRoutes.create(req, res);
+    } finally {
+      inFlight--;
+    }
+  } },
+  { re: /^\/api\/assets$/, methods: ['POST'], run: (req, res) => assetRoutes.create(req, res) },
+  { re: /^\/api\/assets\/([^/]+)$/, methods: ['PATCH'], run: (req, res, [id]) => assetRoutes.patch(req, res, id) },
+  { re: /^\/api\/assets\/([^/]+)$/, methods: ['DELETE'], run: (req, res, [id]) => assetRoutes.remove(req, res, id) },
   { re: /^\/api\/audit\/purge-preview$/, methods: ['GET'], run: (req, res) => auditPurge.preview(req, res) },
   { re: /^\/api\/audit\/purge$/, methods: ['POST'], run: (req, res) => auditPurge.purge(req, res) },
   { re: /^\/api\/documents\/([^/]+)\/viewer-session$/, methods: ['POST'], run: (req, res, [id]) => viewerRoutes.create(req, res, id) },

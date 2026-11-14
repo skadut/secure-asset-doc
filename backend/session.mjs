@@ -1,5 +1,5 @@
 // Session cookie, DB session lookup, /api/me shape. DB access via injected `q(sql, params)` (pool.query-compatible).
-import { rankByCode, can, newSessionToken, hashSessionToken, SESSION_TTL_MS, IDLE_TIMEOUT_MS, TLP_ORDER } from './auth.mjs';
+import { rankByCode, can, authorize, newSessionToken, hashSessionToken, SESSION_TTL_MS, IDLE_TIMEOUT_MS, TLP_ORDER } from './auth.mjs';
 
 export const SID = 'sid';
 const TOKEN = /^[A-Za-z0-9_-]{43}$/; // base64url of 32 random bytes
@@ -39,6 +39,10 @@ export function meFromRow(row) {
 export function meJson(me) {
   const rank = rankByCode(me.rankCode);
   const { version, ...perms } = can(me.rankCode, me.accessLevel, me.securityOfficer, me.superAdmin); // version.c is internal, not exposed
+  const canDocTlp = (tlp) => authorize(me.rankCode, 'document.c', { accessLevel: me.accessLevel, docTlp: tlp, newTlp: tlp });
+  const docCreateMaxTlp = [...TLP_ORDER].reverse().find(canDocTlp) ?? null;
+  const assetPerms = can(me.rankCode, me.accessLevel).asset;
+  const canAsset = (op) => Boolean(assetPerms?.[op]) && me.accessLevel >= 4;
   return {
     id: me.id,
     username: me.username,
@@ -56,6 +60,11 @@ export function meJson(me) {
     ownerLabel: me.ownerLabel,
     preferences: me.preferences ?? {},
     can: perms,
+    permissions: {
+      canCreateDocument: docCreateMaxTlp !== null,
+      docCreateMaxTlp,
+      canWriteAssets: { c: canAsset('c'), u: canAsset('u'), d: canAsset('d') },
+    },
   };
 }
 

@@ -28,5 +28,5 @@
     "noUncheckedSideEffectImports": true
   },
   "include": ["src"],
-  "exclude": ["src/lib/grc.check.ts", "src/lib/xlsx.check.ts", "src/features/dashboard/stats.check.ts", "src/features/dashboard/viz.check.ts", "src/features/documents/uploads/uploads.check.ts", "src/features/operation/filters.check.ts"]
+  "exclude": ["src/lib/grc.check.ts", "src/lib/xlsx.check.ts", "src/features/dashboard/stats.check.ts", "src/features/dashboard/viz.check.ts", "src/features/documents/uploads/uploads.check.ts", "src/features/documents/upload/upload-helpers.check.ts", "src/features/operation/filters.check.ts", "src/features/assets/zone.check.ts"]
 }

@@ -385,8 +385,8 @@ export function Dashboard() {
                 asChild
                 className='min-h-9 rounded-none bg-ink px-4 text-bg hover:bg-ink/90'
               >
-                {me?.can.upload?.c ? (
-                  <Link to='/documents' search={{ upload: true }}>
+                {me?.can.document?.c ? (
+                  <Link to='/documents/upload' search={{ step: 1 }}>
                     Unggah dokumen{' '}
                     <ArrowUpFromLine aria-hidden='true' size={14} />
                   </Link>

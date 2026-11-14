@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import {
   type ColumnFiltersState,
@@ -14,6 +14,7 @@ import {
 } from '@tanstack/react-table'
 import { assets, evidenceLinks, type Asset, type Criticality } from '@/data/grc'
 import { Columns3, ScrollText, Search as SearchIcon } from 'lucide-react'
+import { useGrcVersion } from '@/lib/grc-refresh'
 import { getMe } from '@/lib/session'
 import { Button } from '@/components/ui/button'
 import {
@@ -47,7 +48,9 @@ import { PageHead } from '@/components/page-head'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { StatStrip } from '@/components/stat-strip'
+import { TablePager } from '@/components/table-pager'
 import { ThemeSwitch } from '@/components/theme-switch'
+import { assetActionsColumn } from './asset-actions'
 import {
   assetColumns,
   assetFilterOptions,
@@ -55,6 +58,8 @@ import {
   isReviewOverdue,
   statusLabel,
 } from './columns'
+import { DeleteAssetDialog } from './delete-dialog'
+import { EditAssetDialog } from './edit-dialog'
 
 const PAGE_SIZE = 9
 
@@ -109,6 +114,7 @@ const COLUMN_LABELS: Record<string, string> = {
   criticality: 'Kritikalitas',
   status: 'Status',
   lastReviewed: 'Tinjauan',
+  actions: 'Aksi',
 }
 
 export function Assets() {
@@ -121,11 +127,32 @@ export function Assets() {
     pageIndex: 0,
     pageSize: PAGE_SIZE,
   })
+  const me = getMe()
+  const [editingAsset, setEditingAsset] = useState<Asset | null>(null)
+  const [deletingAsset, setDeletingAsset] = useState<Asset | null>(null)
+  const version = useGrcVersion()
+  // New array per refresh so TanStack's data memo recomputes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const data = useMemo(() => [...assets], [version])
+  const columns = useMemo(
+    () => [
+      ...assetColumns,
+      assetActionsColumn({
+        canEditAll: me?.can.asset.u === true,
+        canEditOwn: me?.can.asset.uOwn === true,
+        ownerLabel: me?.ownerLabel ?? null,
+        canDelete: me?.can.asset.d === true,
+        onEdit: setEditingAsset,
+        onDelete: setDeletingAsset,
+      }),
+    ],
+    [me]
+  )
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
-    data: assets,
-    columns: assetColumns,
+    data,
+    columns,
     state: {
       sorting,
       columnFilters,
@@ -155,6 +182,7 @@ export function Assets() {
     const me = getMe()
     return me?.securityOfficer === true || me?.superAdmin === true
   })()
+  const canCreateAsset = getMe()?.can.asset.c === true
 
   const filterValue = (id: string) =>
     String(table.getColumn(id)?.getFilterValue() ?? '')
@@ -172,17 +200,27 @@ export function Assets() {
         <PageHead
           title='Aset'
           eyebrow={`INVENTARIS OT · ${assets.length} ASET · IEC 62443 ZONE`}
-          note='DATA /api/grc · TANPA ENDPOINT TULIS'
+          note='DATA /api/grc · TULIS TERAUDIT'
           actions={
-            canOpenAudit ? (
-              <Link
-                to='/audit-log'
-                className='inline-flex h-9 items-center gap-1.5 border border-line-strong bg-surface px-3 font-sans text-[14.5px] font-semibold text-ink hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
-              >
-                <ScrollText aria-hidden='true' className='size-3.5' />
-                Buka audit log
-              </Link>
-            ) : undefined
+            <>
+              {canCreateAsset && (
+                <Link
+                  to='/assets/new'
+                  className='inline-flex h-9 items-center border border-ink bg-ink px-3 font-sans text-[14.5px] font-semibold text-surface hover:bg-ink-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+                >
+                  Tambah aset
+                </Link>
+              )}
+              {canOpenAudit ? (
+                <Link
+                  to='/audit-log'
+                  className='inline-flex h-9 items-center gap-1.5 border border-line-strong bg-surface px-3 font-sans text-[14.5px] font-semibold text-ink hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+                >
+                  <ScrollText aria-hidden='true' className='size-3.5' />
+                  Buka audit log
+                </Link>
+              ) : null}
+            </>
           }
         />
 
@@ -312,7 +350,7 @@ export function Assets() {
 
         <CardPanel className='flex flex-1 flex-col'>
           <div className='flex-1 overflow-x-auto'>
-            <Table className='w-full min-w-[1416px] table-fixed'>
+            <Table className='w-full min-w-[1504px] table-fixed'>
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow
@@ -373,49 +411,41 @@ export function Assets() {
             </Table>
           </div>
 
-          <footer className='flex flex-wrap items-center justify-between gap-2 border-t border-line bg-surface-2 px-3.5 py-2'>
-            <span className='font-mono text-[10.5px] text-ink-3'>
-              {filtered
+          <TablePager
+            summary={
+              filtered
                 ? `Menampilkan ${pageIndex * PAGE_SIZE + 1}–${pageIndex * PAGE_SIZE + rows.length} dari ${filtered} aset`
-                : 'Menampilkan 0 aset'}
-            </span>
-            <nav aria-label='Halaman aset' className='flex items-center gap-1'>
-              <Button
-                variant='outline'
-                size='icon'
-                className='size-6 font-mono text-[11.5px]'
-                disabled={!table.getCanPreviousPage()}
-                onClick={() => table.previousPage()}
-                aria-label='Halaman sebelumnya'
-              >
-                ‹
-              </Button>
-              {Array.from({ length: pageCount }, (_, index) => (
-                <Button
-                  key={index}
-                  variant='outline'
-                  size='icon'
-                  className={`size-6 font-mono text-[11.5px] tabular-nums ${index === pageIndex ? 'border-ink bg-ink text-surface hover:bg-ink' : ''}`}
-                  aria-label={`Halaman ${index + 1}`}
-                  aria-current={index === pageIndex ? 'page' : undefined}
-                  onClick={() => table.setPageIndex(index)}
-                >
-                  {index + 1}
-                </Button>
-              ))}
-              <Button
-                variant='outline'
-                size='icon'
-                className='size-6 font-mono text-[11.5px]'
-                disabled={!table.getCanNextPage()}
-                onClick={() => table.nextPage()}
-                aria-label='Halaman berikutnya'
-              >
-                ›
-              </Button>
-            </nav>
-          </footer>
+                : 'Menampilkan 0 aset'
+            }
+            pageIndex={pageIndex}
+            pageCount={pageCount}
+            onPage={(i) => table.setPageIndex(i)}
+            canPrev={table.getCanPreviousPage()}
+            canNext={table.getCanNextPage()}
+            label='Halaman aset'
+          />
         </CardPanel>
+
+        {editingAsset && (
+          <EditAssetDialog
+            asset={editingAsset}
+            open
+            onOpenChange={(open) => {
+              if (!open) setEditingAsset(null)
+            }}
+            onSaved={() => {}}
+          />
+        )}
+        {deletingAsset && (
+          <DeleteAssetDialog
+            asset={deletingAsset}
+            open
+            onOpenChange={(open) => {
+              if (!open) setDeletingAsset(null)
+            }}
+            onDeleted={() => {}}
+          />
+        )}
       </Main>
     </>
   )

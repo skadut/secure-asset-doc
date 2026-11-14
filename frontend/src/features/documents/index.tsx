@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { documents } from '@/data/grc'
 import { ExternalLink, Lock, Upload } from 'lucide-react'
+import { useGrcVersion } from '@/lib/grc-refresh'
 import { getMe } from '@/lib/session'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -17,19 +18,18 @@ import { DocumentsDetailPanel } from './components/documents-detail-panel'
 import { DocumentsTable } from './components/documents-table'
 import { DocumentsToolbar } from './components/documents-toolbar'
 import { type LevelFilter, filterDocs } from './helpers'
-import { UploadDialog } from './uploads/upload-dialog'
 import { UploadsPanel } from './uploads/uploads-panel'
 
-export function Documents({ autoUpload = false }: { autoUpload?: boolean }) {
-  const navigate = useNavigate()
-  const [uploadOpen, setUploadOpen] = useState(false)
+export function Documents() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [level, setLevel] = useState<LevelFilter>('ALL')
+  const version = useGrcVersion()
   const rows: DocRow[] = documents
   const filtered = useMemo(
     () => filterDocs(rows, query, level),
-    [rows, query, level]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rows, query, level, version]
   )
   const selected = selectedId
     ? (rows.find((doc) => doc.id === selectedId) ?? null)
@@ -41,14 +41,8 @@ export function Documents({ autoUpload = false }: { autoUpload?: boolean }) {
     (sum, doc) => sum + doc.versions.length,
     0
   )
-  const canUpload = me?.can.upload?.c === true
+  const canCreate = me?.can.document?.c === true
   const canReadUploads = me?.can.upload?.r === true
-  const showUpload = canUpload && (uploadOpen || autoUpload)
-  const setShowUpload = (next: boolean) => {
-    setUploadOpen(next)
-    if (!next && autoUpload)
-      void navigate({ to: '/documents', search: {}, replace: true })
-  }
 
   return (
     <>
@@ -70,14 +64,15 @@ export function Documents({ autoUpload = false }: { autoUpload?: boolean }) {
           }
           actions={
             <>
-              {canUpload && (
+              {canCreate && (
                 <Button
-                  type='button'
-                  onClick={() => setShowUpload(true)}
+                  asChild
                   className='h-11 gap-2 rounded-none border-[.67px] border-ink bg-ink px-[14.67px] text-[14.5px] font-semibold text-bg hover:bg-ink'
                 >
-                  <Upload aria-hidden='true' className='size-3.5' />
-                  Unggah dokumen
+                  <Link to='/documents/upload' search={{ step: 1 }}>
+                    <Upload aria-hidden='true' className='size-3.5' />
+                    Unggah dokumen
+                  </Link>
                 </Button>
               )}
               {actionDoc && (
@@ -173,8 +168,6 @@ export function Documents({ autoUpload = false }: { autoUpload?: boolean }) {
             )}
           </Tabs>
         )}
-
-        <UploadDialog open={showUpload} onOpenChange={setShowUpload} />
       </Main>
     </>
   )

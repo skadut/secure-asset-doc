@@ -8,6 +8,7 @@ import {
   Eraser,
   Search as SearchIcon,
 } from 'lucide-react'
+import { refreshGrc } from '@/lib/grc-refresh'
 import { getMe } from '@/lib/session'
 import {
   Select,
@@ -132,15 +133,12 @@ export function AuditLog() {
     .join(' / ')
   const [purgeOpen, setPurgeOpen] = useState(false)
 
-  // ponytail: mirrors main.tsx hydrate; move to an exported loader if a second caller appears.
   async function reloadAudit() {
     try {
-      const r = await fetch('/api/grc', { credentials: 'same-origin' })
-      if (!r.ok) throw new Error()
-      const d = await r.json()
-      if (!Array.isArray(d?.auditEvents)) throw new Error()
-      auditEvents.length = 0
-      auditEvents.push(...d.auditEvents)
+      if ((await refreshGrc()) === 'unauthorized') {
+        window.location.reload()
+        return
+      }
       setVersion((v) => v + 1)
     } catch {
       window.location.reload()

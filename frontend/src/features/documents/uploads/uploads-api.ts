@@ -16,6 +16,7 @@ export type UploadRecord = {
   uploadedBy: string | null
 }
 
+/** @public Retained for the encrypted-uploads tab; no UI entry point after the wizard replaced the dialog. */
 export type UploadOutcome =
   | { ok: true; file: UploadRecord }
   | { ok: false; message: string }
@@ -24,6 +25,7 @@ const UPLOAD_TIMEOUT_MS = 60_000
 const NETWORK_ERROR = 'Jaringan bermasalah. Berkas tidak disimpan.'
 const TIMEOUT_ERROR = 'Unggahan melebihi waktu tunggu. Berkas tidak disimpan.'
 
+/** @public Retained for the encrypted-uploads tab; no UI entry point after the wizard replaced the dialog. */
 export async function uploadFile(file: File): Promise<UploadOutcome> {
   const mime = resolveUploadMime(file)
   const invalid = checkUploadFile(file, mime)
