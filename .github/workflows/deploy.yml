@@ -198,6 +198,7 @@ jobs:
           if [ -z "$approved" ]; then echo "::error::tpm-msk did not approve the keyd delivery key"; docker compose logs --tail 50 tpm-msk keyd; exit 1; fi
           docker compose up -d db
           docker compose exec -T db psql -v ON_ERROR_STOP=1 -U "$PGUSER" -d "$PGDATABASE" < db/init/017_ui_additive.sql
+          docker compose exec -T db psql -v ON_ERROR_STOP=1 -U "$PGUSER" -d "$PGDATABASE" < db/init/018_audit_actions.sql
           docker compose exec -T db psql -v ON_ERROR_STOP=1 -U "$PGUSER" -d "$PGDATABASE" < db/seed/003_nist_controls.sql
           # Same fingerprint in the env, so this up does not recreate tpm-msk without the pin.
           # No --build: images were built in the previous step. A rebuild here could recreate keyd and change its key.
