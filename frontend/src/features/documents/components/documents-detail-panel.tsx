@@ -40,9 +40,9 @@ export function DocumentsDetailPanel({
       itemKey={doc.id}
       className='rounded-none border-[.67px] border-line bg-surface p-0'
     >
-      <div className='flex min-w-0 flex-col'>
+      <div className='-m-4 flex min-w-0 flex-col'>
         <div className='flex items-center justify-between gap-3 border-b border-line bg-surface-2 px-3.5 py-2.5'>
-          <h2 className='font-mono text-[10px] font-normal tracking-[.08em] text-ink-3 uppercase'>
+          <h2 className='font-mono text-[8.5px] font-normal tracking-[.08em] text-ink-3 uppercase'>
             Dokumen terpilih
           </h2>
           <button
@@ -56,11 +56,11 @@ export function DocumentsDetailPanel({
         </div>
 
         <div
-          className={`flex min-w-0 items-center justify-between gap-2 px-3.5 py-2 font-mono text-[12px] font-semibold tracking-[.05em] uppercase ${TLP_BAR[doc.tlp]}`}
+          className={`flex min-w-0 items-center justify-between gap-2 px-3.5 py-2 font-mono text-[10.5px] font-semibold tracking-[.05em] uppercase ${TLP_BAR[doc.tlp]}`}
         >
           <span>TLP:{doc.tlp}</span>
           {isGrantOnly(doc.tlp) && (
-            <span className='text-[8.5px] font-normal tracking-[.04em] opacity-90'>
+            <span className='text-[7.5px] font-normal tracking-[.04em]'>
               Hanya lewat grant
             </span>
           )}
@@ -73,7 +73,7 @@ export function DocumentsDetailPanel({
               title={doc.title}
               className='font-heading text-[22px] leading-[25px] font-semibold break-words text-ink'
             />
-            <p className='font-mono text-[11.5px] text-ink-3'>
+            <p className='font-mono text-[10px] text-ink-3'>
               {doc.id} · versi {current?.version ?? '-'}
               {fileType ? ` · ${fileType}` : ''}
             </p>
@@ -83,7 +83,10 @@ export function DocumentsDetailPanel({
             <Field label='JENIS'>{doc.type}</Field>
             <Field label='PEMILIK'>{doc.owner}</Field>
             <Field label='PENYETUJU'>{doc.approver}</Field>
-            <Field label='STATUS'>{DOC_STATUS_LABEL[doc.status]}</Field>
+            <Field label='STATUS'>
+              {DOC_STATUS_LABEL[doc.status]}
+              {current?.date ? ` · ${current.date}` : ''}
+            </Field>
             <Field label='TINJAUAN'>
               {doc.nextReview} · {reviewLabel(doc.nextReview)}
             </Field>
@@ -115,7 +118,7 @@ export function DocumentsDetailPanel({
               )}
             </div>
             {access !== null ? (
-              <ul className='space-y-0.5 text-[12px] leading-[1.45] text-ink-2'>
+              <ul className='space-y-0.5 text-[10.5px] leading-[1.45] text-ink-2'>
                 {access.reasons.map((reason) => (
                   <li key={reason}>{reason}</li>
                 ))}
@@ -130,39 +133,44 @@ export function DocumentsDetailPanel({
             </p>
           </section>
 
-          <section aria-label='Riwayat versi' className='flex flex-col gap-1.5'>
-            <h3 className='font-mono text-[8.5px] font-normal tracking-[.06em] text-ink-3 uppercase'>
-              Versi
-            </h3>
-            <ol className='flex flex-col'>
-              {doc.versions.map((version, index) => (
-                <li
-                  key={version.version}
-                  className='flex items-center justify-between gap-2 py-0.5 font-mono'
-                >
-                  <span className='flex items-center gap-1.5'>
-                    <span
-                      className={`text-[10.5px] ${index === 0 ? 'text-ink' : 'text-ink-2'}`}
-                    >
-                      {version.version}
-                    </span>
-                    <span className='text-[10px] text-ink-3'>
-                      {version.date}
-                    </span>
-                    {index === 0 && (
-                      <span className='border-[.67px] border-pass px-1.5 py-0.5 text-[8.5px] tracking-[.04em] text-pass uppercase'>
-                        Saat ini
+          {doc.versions.length > 0 && (
+            <section
+              aria-label='Riwayat versi'
+              className='flex flex-col gap-1.5'
+            >
+              <h3 className='font-mono text-[7.5px] font-normal tracking-[.06em] text-ink-3 uppercase'>
+                Versi
+              </h3>
+              <ol className='flex flex-col gap-1'>
+                {doc.versions.map((version, index) => (
+                  <li
+                    key={version.version}
+                    className='flex items-center justify-between gap-2 py-0.5 font-mono'
+                  >
+                    <span className='flex items-center gap-2'>
+                      <span
+                        className={`text-[9px] ${index === 0 ? 'text-ink' : 'text-ink-2'}`}
+                      >
+                        v{version.version.replace(/^v/, '')}
                       </span>
-                    )}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </section>
+                      <span className='text-[8.5px] text-ink-3'>
+                        {version.date}
+                      </span>
+                      {index === 0 && (
+                        <span className='border-[.67px] border-pass px-1.5 py-0.5 text-[7.5px] tracking-[.04em] text-pass uppercase'>
+                          Saat ini
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
 
           <Button
             asChild
-            className='h-10 justify-between rounded-none border-[.67px] border-ink bg-ink px-[14.67px] text-[14.5px] font-semibold text-bg hover:bg-ink'
+            className='h-10 justify-between rounded-none border-[.67px] border-ink bg-ink px-[14.67px] text-[12.5px] font-semibold text-bg hover:bg-ink'
           >
             <Link
               to='/viewer'
@@ -171,7 +179,7 @@ export function DocumentsDetailPanel({
             >
               <span>Buka penampil aman</span>
               {limit !== null && (
-                <span className='font-mono text-[10px] font-semibold tracking-[.04em] tabular-nums'>
+                <span className='font-mono text-[8.5px] font-semibold tracking-[.04em] tabular-nums'>
                   {pad(Math.floor(limit / 60))}:{pad(limit % 60)}
                 </span>
               )}
@@ -192,10 +200,10 @@ function Field({
 }) {
   return (
     <div className='flex min-w-0 items-center gap-2.5 border-b border-line py-1.5'>
-      <dt className='shrink-0 font-mono text-[9px] font-normal tracking-[.04em] text-ink-3 uppercase'>
+      <dt className='shrink-0 font-mono text-[8px] font-normal tracking-[.04em] text-ink-3 uppercase'>
         {label}
       </dt>
-      <dd className='min-w-0 text-left text-[13px] leading-[1.45] text-ink'>
+      <dd className='min-w-0 text-left text-[11.5px] leading-[1.45] text-ink'>
         {children}
       </dd>
     </div>

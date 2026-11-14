@@ -20,7 +20,7 @@ export function assetActionsColumn({
 }): ColumnDef<Asset> {
   return {
     id: 'actions',
-    size: 88,
+    size: 96,
     enableSorting: false,
     enableHiding: false,
     header: () => (

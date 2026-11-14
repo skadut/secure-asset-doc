@@ -35,7 +35,7 @@ import { Search } from '@/components/search'
 import { StatusDot } from '@/components/status-dot'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { criticalityLabel, isReviewOverdue, statusLabel } from './columns'
-import { zoneFor } from './zone'
+import { previewAssetId, zoneFor } from './zone'
 
 const ASSET_TYPES: Asset['type'][] = [
   'PLC',
@@ -460,8 +460,9 @@ function CreateAssetWizard({ me }: { me: Me }) {
           ? 'Simpan aset'
           : 'Lihat di daftar aset'
 
+  const previewId = previewAssetId(assets.map((a) => a.id))
   const reviewRows: { label: string; value: ReactNode }[] = [
-    { label: 'ID', value: saved?.id ?? 'AST-0025' },
+    { label: 'ID', value: saved?.id ?? previewId },
     { label: 'NAMA', value: name },
     { label: 'TIPE', value: form.type },
     { label: 'SITE', value: form.site },
@@ -525,7 +526,7 @@ function CreateAssetWizard({ me }: { me: Me }) {
               <Input
                 id='asset-id'
                 readOnly
-                value='AST-0025 · dibuat otomatis'
+                value={`${previewId} · dibuat otomatis`}
                 className='h-[38px] rounded-none border-line bg-surface-2 pr-10 font-mono text-[11px] text-ink-2 shadow-none focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink max-sm:h-11'
               />
               <Lock
@@ -938,8 +939,8 @@ function CreateAssetWizard({ me }: { me: Me }) {
       <Main className='flex flex-1 flex-col gap-4'>
         <PageHead
           title='Aset — Tambah aset'
-          eyebrow='INVENTARIS / ASET / TAMBAH ASET · 4 TAHAP · METADATA SESUAI KOLOM DAFTAR ASET'
-          note='DARI TOMBOL "Tambah aset" DI 09 ASET · BUTUH LEVEL L4'
+          eyebrow='INVENTARIS / ASET / TAMBAH ASET · 4 TAHAP'
+          note='BUTUH LEVEL L4 · TULIS TERAUDIT'
         />
 
         <div className='mx-auto w-full max-w-[820px]'>

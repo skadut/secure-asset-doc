@@ -16,6 +16,7 @@ import { assets, evidenceLinks, type Asset, type Criticality } from '@/data/grc'
 import { Columns3, ScrollText, Search as SearchIcon } from 'lucide-react'
 import { useGrcVersion } from '@/lib/grc-refresh'
 import { getMe } from '@/lib/session'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -47,7 +48,6 @@ import { Main } from '@/components/layout/main'
 import { PageHead } from '@/components/page-head'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
-import { StatStrip } from '@/components/stat-strip'
 import { TablePager } from '@/components/table-pager'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { assetActionsColumn } from './asset-actions'
@@ -62,6 +62,53 @@ import { DeleteAssetDialog } from './delete-dialog'
 import { EditAssetDialog } from './edit-dialog'
 
 const PAGE_SIZE = 9
+
+type AssetTile = 'ALL' | 'HIGH' | 'OVERDUE' | 'RETIRED' | 'CSF'
+
+// Accents use the existing tokens border-t-fail, border-t-warn, border-t-pass and border-t-line-strong; the mark uses the matching bg-* token.
+const TILES: {
+  value: AssetTile
+  label: string
+  accent: string
+  mark: string
+}[] = [
+  { value: 'ALL', label: 'Semua aset', accent: '', mark: '' },
+  {
+    value: 'HIGH',
+    label: 'Kritikalitas tinggi',
+    accent: 'border-t-fail',
+    mark: 'bg-fail',
+  },
+  {
+    value: 'OVERDUE',
+    label: 'Review terlambat',
+    accent: 'border-t-warn',
+    mark: 'bg-warn',
+  },
+  {
+    value: 'RETIRED',
+    label: 'Status retired',
+    accent: 'border-t-line-strong',
+    mark: 'bg-line-strong',
+  },
+  {
+    value: 'CSF',
+    label: 'Punya bukti CSF',
+    accent: 'border-t-pass',
+    mark: 'bg-pass',
+  },
+]
+
+const tileMatch: Record<
+  AssetTile,
+  (asset: Asset, evidence: Set<string>) => boolean
+> = {
+  ALL: () => true,
+  HIGH: (asset) => asset.criticality === 'high',
+  OVERDUE: (asset) => isReviewOverdue(asset.lastReviewed),
+  RETIRED: (asset) => asset.status === 'retired',
+  CSF: (asset, evidence) => evidence.has(asset.id),
+}
 
 // Pen gQAhw: 34px select, sentence-case label, 9px mono; chevron overridden to 12px below.
 const selectClass =
@@ -123,6 +170,7 @@ export function Assets() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [globalFilter, setGlobalFilter] = useState('')
+  const [tile, setTile] = useState<AssetTile>('ALL')
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: PAGE_SIZE,
@@ -134,6 +182,33 @@ export function Assets() {
   // New array per refresh so TanStack's data memo recomputes.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const data = useMemo(() => [...assets], [version])
+  // Tile filter runs before TanStack; search and Select filters still apply after it.
+  // Tile counts use the search box only, not the Select column filters.
+  // ponytail: counts ignore Select filters; subtract them from the pool if that becomes confusing.
+  const { tileData, counts } = useMemo(() => {
+    const evidence = new Set(
+      evidenceLinks
+        .map((link) => link.assetId)
+        .filter((id): id is string => Boolean(id))
+    )
+    const query = globalFilter.toLowerCase()
+    const pool = query
+      ? data.filter((asset) => asset.name.toLowerCase().includes(query))
+      : data
+    return {
+      tileData: data.filter((asset) => tileMatch[tile](asset, evidence)),
+      counts: Object.fromEntries(
+        TILES.map(({ value }) => [
+          value,
+          pool.filter((asset) => tileMatch[value](asset, evidence)).length,
+        ])
+      ) as Record<AssetTile, number>,
+    }
+  }, [data, tile, globalFilter])
+  const selectTile = (value: AssetTile) => {
+    setTile((prev) => (prev === value && value !== 'ALL' ? 'ALL' : value))
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+  }
   const columns = useMemo(
     () => [
       ...assetColumns,
@@ -151,7 +226,7 @@ export function Assets() {
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
-    data,
+    data: tileData,
     columns,
     state: {
       sorting,
@@ -177,7 +252,6 @@ export function Assets() {
   const filtered = table.getFilteredRowModel().rows.length
   const pageCount = table.getPageCount()
   const pageIndex = table.getState().pagination.pageIndex
-  const evidenceAssets = new Set(evidenceLinks.map((link) => link.assetId))
   const canOpenAudit = (() => {
     const me = getMe()
     return me?.securityOfficer === true || me?.superAdmin === true
@@ -224,133 +298,155 @@ export function Assets() {
           }
         />
 
-        <StatStrip
-          compact
-          items={[
-            { label: 'TOTAL ASET', value: assets.length },
-            {
-              label: 'KRITIKALITAS TINGGI',
-              value: assets.filter((a) => a.criticality === 'high').length,
-              tone: 'fail',
-            },
-            {
-              label: 'REVIEW TERLAMBAT',
-              value: assets.filter((a) => isReviewOverdue(a.lastReviewed))
-                .length,
-              tone: 'warn',
-            },
-            {
-              label: 'STATUS RETIRED',
-              value: assets.filter((a) => a.status === 'retired').length,
-              tone: 'muted',
-            },
-            {
-              label: 'PUNYA BUKTI CSF',
-              value: assets.filter((a) => evidenceAssets.has(a.id)).length,
-              tone: 'pass',
-            },
-          ]}
-        />
-
-        <div
-          className='flex flex-wrap items-center gap-2'
-          role='toolbar'
+        <section
           aria-label='Filter aset'
+          className='flex min-w-0 flex-col gap-2'
         >
-          <div className='flex h-[34px] w-[300px] min-w-0 flex-1 items-center gap-2 border border-line bg-surface px-2.5 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ink max-sm:h-11 sm:flex-none'>
-            <label className='sr-only' htmlFor='asset-search'>
-              Cari nama aset
-            </label>
-            <SearchIcon
-              aria-hidden='true'
-              className='size-3 shrink-0 text-ink-3'
-            />
-            <input
-              id='asset-search'
-              type='search'
-              value={globalFilter}
-              onChange={(event) => setGlobalFilter(event.target.value)}
-              placeholder='Cari nama aset'
-              className='h-full min-w-0 flex-1 bg-transparent font-mono text-[11px] text-ink outline-none placeholder:text-ink-3'
-            />
-          </div>
-          {FILTERS.map((filter) => (
-            <Select
-              key={filter.id}
-              value={filterValue(filter.id) || 'all'}
-              onValueChange={(value) =>
-                table
-                  .getColumn(filter.id)
-                  ?.setFilterValue(value === 'all' ? '' : value)
-              }
-            >
-              <SelectTrigger
-                aria-label={filter.label}
-                className={`${filter.width} max-sm:w-full ${selectClass}`}
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className='rounded-none'>
-                <SelectItem
-                  value='all'
-                  className='font-mono text-[10.5px]'
-                >{`${filter.label}: semua`}</SelectItem>
-                {filter.options.map((option) => (
-                  <SelectItem
-                    key={option}
-                    value={option}
-                    className='font-mono text-[10.5px]'
-                  >
-                    {filter.id === 'criticality'
-                      ? criticalityLabel[option as Criticality]
-                      : filter.id === 'status'
-                        ? statusLabel[option as Asset['status']]
-                        : option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ))}
-          <div className='flex flex-1 items-center justify-end gap-2 max-sm:w-full'>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant='outline'
-                  size='icon'
-                  className='size-[34px] max-sm:size-11'
-                  aria-label='Atur kolom tampil'
+          <div className='grid min-w-0 grid-cols-2 gap-[.67px] border-[.67px] border-line bg-line sm:grid-cols-3 xl:grid-cols-5'>
+            {TILES.map((tileDef) => {
+              const active = tile === tileDef.value
+              const isAll = tileDef.value === 'ALL'
+              return (
+                <button
+                  key={tileDef.value}
+                  type='button'
+                  aria-pressed={active}
+                  onClick={() => selectTile(tileDef.value)}
+                  className={cn(
+                    'flex h-[52px] min-w-0 flex-col justify-center gap-1 border-[.67px] border-line bg-surface px-3 text-left transition-colors hover:bg-surface-active focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--focus)]',
+                    tileDef.accent,
+                    active && !isAll && 'bg-surface-active',
+                    isAll && 'border-ink bg-ink text-bg hover:bg-ink'
+                  )}
                 >
-                  <Columns3 aria-hidden='true' className='size-3.5' />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align='end' className='w-44'>
-                <DropdownMenuLabel className='font-mono text-[10.5px] tracking-[.08em] uppercase'>
-                  Kolom
-                </DropdownMenuLabel>
-                {table
-                  .getAllLeafColumns()
-                  .filter((column) => column.getCanHide())
-                  .map((column) => (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className='font-mono text-[11.5px]'
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                      onSelect={(event) => event.preventDefault()}
+                  <span
+                    className={cn(
+                      'flex items-center gap-1.5 font-mono text-[8.5px] tracking-[.05em] uppercase',
+                      isAll ? 'text-ink-3' : 'text-ink-2'
+                    )}
+                  >
+                    {!isAll && (
+                      <span
+                        aria-hidden='true'
+                        className={cn('size-[7px] shrink-0', tileDef.mark)}
+                      />
+                    )}
+                    <span className='truncate'>{tileDef.label}</span>
+                  </span>
+                  <span className='flex items-baseline gap-1.5'>
+                    <span
+                      className={cn(
+                        'font-heading text-[19px] leading-none font-semibold tabular-nums',
+                        isAll ? 'text-bg' : 'text-ink'
+                      )}
                     >
-                      {COLUMN_LABELS[column.id] ?? column.id}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                      {counts[tileDef.value]}
+                    </span>
+                    <span className='font-mono text-[8.5px] text-ink-3'>
+                      aset
+                    </span>
+                  </span>
+                </button>
+              )
+            })}
           </div>
-        </div>
+
+          <div className='flex flex-wrap items-center gap-2'>
+            <div className='flex h-[34px] w-[300px] min-w-0 flex-1 items-center gap-2 border border-line bg-surface px-2.5 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ink max-sm:h-11 sm:flex-none'>
+              <label className='sr-only' htmlFor='asset-search'>
+                Cari nama aset
+              </label>
+              <SearchIcon
+                aria-hidden='true'
+                className='size-3 shrink-0 text-ink-3'
+              />
+              <input
+                id='asset-search'
+                type='search'
+                value={globalFilter}
+                onChange={(event) => setGlobalFilter(event.target.value)}
+                placeholder='Cari nama aset'
+                className='h-full min-w-0 flex-1 bg-transparent font-mono text-[11px] text-ink outline-none placeholder:text-ink-3'
+              />
+            </div>
+            {FILTERS.map((filter) => (
+              <Select
+                key={filter.id}
+                value={filterValue(filter.id) || 'all'}
+                onValueChange={(value) =>
+                  table
+                    .getColumn(filter.id)
+                    ?.setFilterValue(value === 'all' ? '' : value)
+                }
+              >
+                <SelectTrigger
+                  aria-label={filter.label}
+                  className={`${filter.width} max-sm:w-full ${selectClass}`}
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className='rounded-none'>
+                  <SelectItem
+                    value='all'
+                    className='font-mono text-[10.5px]'
+                  >{`${filter.label}: semua`}</SelectItem>
+                  {filter.options.map((option) => (
+                    <SelectItem
+                      key={option}
+                      value={option}
+                      className='font-mono text-[10.5px]'
+                    >
+                      {filter.id === 'criticality'
+                        ? criticalityLabel[option as Criticality]
+                        : filter.id === 'status'
+                          ? statusLabel[option as Asset['status']]
+                          : option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ))}
+            <div className='flex flex-1 items-center justify-end gap-2 max-sm:w-full'>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant='outline'
+                    size='icon'
+                    className='size-[34px] max-sm:size-11'
+                    aria-label='Atur kolom tampil'
+                  >
+                    <Columns3 aria-hidden='true' className='size-3.5' />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align='end' className='w-44'>
+                  <DropdownMenuLabel className='font-mono text-[10.5px] tracking-[.08em] uppercase'>
+                    Kolom
+                  </DropdownMenuLabel>
+                  {table
+                    .getAllLeafColumns()
+                    .filter((column) => column.getCanHide())
+                    .map((column) => (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className='font-mono text-[11.5px]'
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                        onSelect={(event) => event.preventDefault()}
+                      >
+                        {COLUMN_LABELS[column.id] ?? column.id}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </section>
 
         <CardPanel className='flex flex-1 flex-col'>
           <div className='flex-1 overflow-x-auto'>
-            <Table className='w-full min-w-[1504px] table-fixed'>
+            <Table className='w-full min-w-[1150px] table-fixed'>
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow

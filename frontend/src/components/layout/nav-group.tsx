@@ -61,9 +61,19 @@ export function NavGroup({ title, items }: NavGroupProps) {
 const NAV_ACTIVE =
   'data-[active=true]:bg-rail-active data-[active=true]:shadow-none'
 
-function NavBadge({ children }: { children: ReactNode }) {
+function NavBadge({
+  children,
+  label,
+}: {
+  children: ReactNode
+  label?: string
+}) {
   return (
-    <Badge className='rounded-none px-1 py-0 font-mono text-[9px]'>
+    <Badge
+      role={label ? 'img' : undefined}
+      aria-label={label}
+      className='rounded-none px-1 py-0 font-mono text-[9px]'
+    >
       {children}
     </Badge>
   )
@@ -86,7 +96,9 @@ function SidebarMenuLink({ item, href }: { item: NavLink; href: string }) {
             </span>
           )}
           <span>{item.title}</span>
-          {item.badge && <NavBadge>{item.badge}</NavBadge>}
+          {item.badge && (
+            <NavBadge label={item.badgeLabel}>{item.badge}</NavBadge>
+          )}
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
@@ -116,7 +128,9 @@ function SidebarMenuCollapsible({
               </span>
             )}
             <span>{item.title}</span>
-            {item.badge && <NavBadge>{item.badge}</NavBadge>}
+            {item.badge && (
+              <NavBadge label={item.badgeLabel}>{item.badge}</NavBadge>
+            )}
             <ChevronRight className='ms-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180' />
           </SidebarMenuButton>
         </CollapsibleTrigger>
@@ -132,7 +146,11 @@ function SidebarMenuCollapsible({
                   <Link to={subItem.url} onClick={() => setOpenMobile(false)}>
                     {subItem.icon && <subItem.icon />}
                     <span>{subItem.title}</span>
-                    {subItem.badge && <NavBadge>{subItem.badge}</NavBadge>}
+                    {subItem.badge && (
+                      <NavBadge label={subItem.badgeLabel}>
+                        {subItem.badge}
+                      </NavBadge>
+                    )}
                   </Link>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>

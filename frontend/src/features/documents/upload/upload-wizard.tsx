@@ -334,11 +334,11 @@ function PageShell({ children }: { children: ReactNode }) {
 
       <Main className='focus-strong flex min-w-0 flex-1 flex-col gap-5'>
         <PageHead
-          eyebrow='Akses dokumen · Registri dokumen · Unggah · 6 tahap · metadata sesuai kolom registri'
+          eyebrow='Akses dokumen · Registri dokumen · Unggah · 6 tahap'
           title='Registri dokumen — Unggah'
           note={
             <span className='font-mono text-[10.5px] tracking-[.08em] text-ink-3 uppercase'>
-              Dari tombol “Unggah dokumen” di registri dokumen
+              PDF · XLSX · DISEGEL SAAT UNGGAH
             </span>
           }
         />

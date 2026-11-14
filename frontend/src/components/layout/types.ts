@@ -9,6 +9,7 @@ type Team = {
 type BaseNavItem = {
   title: string
   badge?: string
+  badgeLabel?: string
   icon?: React.ElementType
 }
 

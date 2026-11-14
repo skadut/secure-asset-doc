@@ -115,7 +115,7 @@ export function DocumentsTable({
                   className={cn(
                     'focus-visible:outline-inset h-[52px] cursor-pointer border-b border-line bg-surface transition-colors hover:bg-surface-active focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]',
                     row.original.id === selectedId &&
-                      'shadow-[inset_2px_0_0_var(--ink)]'
+                      'bg-surface-2 shadow-[inset_0_0_0_1px_var(--ink)]'
                   )}
                 >
                   {row.getVisibleCells().map((cell) => (

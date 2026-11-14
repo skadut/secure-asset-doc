@@ -12,6 +12,7 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import { TlpMark } from '@/components/tlp-mark'
 import { FilePreview } from '@/features/documents/components/file-preview'
 import {
+  DOC_STATUS_LABEL,
   TLP_BAR,
   daysUntil,
   isGrantOnly,
@@ -23,7 +24,10 @@ import './viewer.css'
 const pad = (n: number) => String(n).padStart(2, '0')
 
 const versionLabel = (version: string) =>
-  version.startsWith('v') ? version : `v${version}`
+  version === '-' || version.startsWith('v') ? version : `v${version}`
+
+const mmss = (seconds: number) =>
+  `${pad(Math.floor(seconds / 60))}:${pad(seconds % 60)}`
 
 export function Viewer() {
   const { doc } = useSearch({ from: '/_authenticated/viewer/' })
@@ -202,14 +206,9 @@ function ViewerBody({ docId }: { docId: string }) {
   const [openedAt] = useState(() => new Date())
   const stamp = `${pad(openedAt.getHours())}:${pad(openedAt.getMinutes())}`
   const watermark = me?.username ?? '—'
-  const sessionEnd = serverSession
-    ? new Date(serverSession.expiresAtMs)
-    : limit !== null
-      ? new Date(openedAt.getTime() + limit * 1000)
-      : null
-  const sessionEndLabel = sessionEnd
-    ? `${pad(sessionEnd.getHours())}:${pad(sessionEnd.getMinutes())}`
-    : '—'
+  // Pen shows the session length (10:00), not the wall-clock end.
+  const sessionTtl = serverSession?.ttlSeconds ?? limit
+  const sessionEndLabel = sessionTtl !== null ? mmss(sessionTtl) : '—'
 
   useEffect(() => {
     document.body.classList.add('viewer-active')
@@ -318,6 +317,11 @@ function ViewerBody({ docId }: { docId: string }) {
           >
             Versi
           </h2>
+          {doc.versions.length === 0 && (
+            <p className='px-3.5 py-2.5 text-[11.5px] text-rail-dim'>
+              Tidak ada versi yang dapat dibaca.
+            </p>
+          )}
           <ol className='flex min-w-0 flex-col'>
             {doc.versions.map((version, index) => (
               <li key={version.version}>
@@ -390,7 +394,10 @@ function ViewerBody({ docId }: { docId: string }) {
                   <PaperMeta label='VERSI' value={current?.version ?? '-'} />
                   <PaperMeta label='TANGGAL' value={current?.date ?? '-'} />
                   <PaperMeta label='PENYUSUN' value={current?.author ?? '-'} />
-                  <PaperMeta label='STATUS' value={doc.status} />
+                  <PaperMeta
+                    label='STATUS'
+                    value={DOC_STATUS_LABEL[doc.status]}
+                  />
                 </dl>
               </div>
               <p className='text-[13px] leading-5 text-[color:var(--paper-body)]'>
@@ -578,10 +585,10 @@ function MetaField({
 }) {
   return (
     <div className='flex flex-col gap-px border-b border-rail-line py-[7px]'>
-      <dt className='font-mono text-[7.5px] tracking-[.15em] text-rail-dim uppercase'>
+      <dt className='font-mono text-[6.5px] tracking-[.15em] text-rail-dim uppercase'>
         {label}
       </dt>
-      <dd className='text-[12px] leading-[1.4] break-words text-rail-ink'>
+      <dd className='text-[10.5px] leading-[1.4] break-words text-rail-ink'>
         {children}
       </dd>
     </div>
@@ -637,9 +644,7 @@ function SessionTimer({
         Sisa sesi
       </span>
       <span className='font-mono text-[11.5px] text-rail-ink tabular-nums'>
-        {remaining === null
-          ? '—'
-          : `${pad(Math.floor(value / 60))}:${pad(value % 60)}`}
+        {remaining === null ? '—' : mmss(value)}
       </span>
     </div>
   )

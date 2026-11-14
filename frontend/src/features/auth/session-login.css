@@ -127,16 +127,6 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.lg-arrow {
-  width: 16px;
-  height: 16px;
-  flex: none;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
 
 /* layout: split screen, 1px rule between columns */
 .lg-layout {
@@ -554,6 +544,13 @@
   outline: 1.5px solid var(--ink);
   outline-offset: -1px;
 }
+.lg-form input.lg-otp {
+  border-color: var(--ink);
+  text-align: center;
+  font-size: 22px;
+  letter-spacing: 0.5em;
+  padding-left: calc(12px + 0.5em);
+}
 .lg-form input.invalid {
   border-color: var(--fail);
 }
@@ -584,7 +581,7 @@
 .lg-meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 12px;
   color: var(--ink-3);
   font: 400 10px var(--font-mono);
@@ -617,9 +614,9 @@
   color: var(--ink-3);
 }
 .lg-primary-hint {
-  font: 400 7px var(--font-mono);
-  letter-spacing: 0;
-  color: var(--line-2);
+  font: 400 9px var(--font-mono);
+  letter-spacing: 0.1em;
+  opacity: 0.7;
 }
 .lg-ghost {
   display: flex;
@@ -652,26 +649,27 @@
   justify-content: space-between;
   gap: 12px;
   color: var(--ink-3);
-  font: 400 12px var(--font-mono);
+  font: 400 10px var(--font-mono);
 }
 .lg-who .lg-mono {
   color: var(--ink-2);
-  font-size: 15px;
+  font-size: 13px;
   overflow-wrap: anywhere;
 }
 .lg-ring-row {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 8px 0;
 }
 .lg-ring-row svg {
-  width: 40px;
-  height: 40px;
+  width: 52px;
+  height: 52px;
   transform: rotate(-90deg);
   fill: none;
 }
 .lg-ring-row circle {
-  stroke-width: 2;
+  stroke-width: 4;
 }
 .lg-ring-row .track {
   stroke: var(--sunken);

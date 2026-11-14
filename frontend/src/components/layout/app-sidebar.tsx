@@ -1,4 +1,6 @@
+import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/auth-store'
+import { listAccessRequests } from '@/lib/access-api'
 import { getMe } from '@/lib/session'
 import { useLayout } from '@/context/layout-provider'
 import {
@@ -8,6 +10,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from '@/components/ui/sidebar'
+import { pendingDocCount } from '@/features/requests/pending-count'
 import { navGroupsFor } from './data/sidebar-data'
 import { NavGroup } from './nav-group'
 import { NavUser } from './nav-user'
@@ -15,6 +18,30 @@ import { NavUser } from './nav-user'
 export function AppSidebar() {
   const { variant, collapsible } = useLayout()
   const me = getMe()
+  const canReview =
+    me !== null && (me.accessLevel === 5 || me.securityOfficer === true)
+  const pending = useQuery({
+    queryKey: ['access-requests'],
+    queryFn: listAccessRequests,
+    select: pendingDocCount,
+    enabled: canReview,
+    retry: false,
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
+  })
+  const pendingCount = pending.data ?? 0
+  const navGroups = navGroupsFor(me).map((group) => ({
+    ...group,
+    items: group.items.map((item) =>
+      item.url === '/requests' && pendingCount > 0
+        ? {
+            ...item,
+            badge: String(pendingCount),
+            badgeLabel: `${pendingCount} dokumen menunggu persetujuan`,
+          }
+        : item
+    ),
+  }))
   const exp = useAuthStore((s) => s.auth.user?.exp)
   return (
     <Sidebar collapsible={collapsible} variant={variant}>
@@ -41,7 +68,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent className='gap-2 overflow-x-visible bg-[linear-gradient(180deg,var(--rail-top),var(--rail))] px-1.5'>
-        {navGroupsFor(me).map((props) => (
+        {navGroups.map((props) => (
           <NavGroup key={props.title} {...props} />
         ))}
       </SidebarContent>

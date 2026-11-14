@@ -51,7 +51,7 @@ export const criticalityLabel: Record<Criticality, string> = {
 export const assetColumns: ColumnDef<Asset>[] = [
   {
     accessorKey: 'id',
-    size: 112,
+    size: 96,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='ID' />
     ),
@@ -67,8 +67,7 @@ export const assetColumns: ColumnDef<Asset>[] = [
   },
   {
     accessorKey: 'name',
-    // Sized so PURDUE/SITE widening keeps the row total at 1416px (table min-w).
-    size: 434,
+    // No size: flexes to fill the row. Fixed columns total 948px; table min-w 1150px.
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='NAMA' />
     ),
@@ -80,7 +79,7 @@ export const assetColumns: ColumnDef<Asset>[] = [
   },
   {
     accessorKey: 'type',
-    size: 180,
+    size: 120,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='TIPE' />
     ),
@@ -91,7 +90,7 @@ export const assetColumns: ColumnDef<Asset>[] = [
   },
   {
     accessorKey: 'site',
-    size: 190,
+    size: 170,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='SITE' />
     ),
@@ -115,7 +114,7 @@ export const assetColumns: ColumnDef<Asset>[] = [
   },
   {
     accessorKey: 'criticality',
-    size: 126,
+    size: 120,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='KRITIKALITAS' />
     ),
@@ -131,7 +130,7 @@ export const assetColumns: ColumnDef<Asset>[] = [
   },
   {
     accessorKey: 'status',
-    size: 112,
+    size: 120,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='STATUS' />
     ),
@@ -152,7 +151,7 @@ export const assetColumns: ColumnDef<Asset>[] = [
   },
   {
     accessorKey: 'lastReviewed',
-    size: 166,
+    size: 130,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='TINJAUAN' />
     ),

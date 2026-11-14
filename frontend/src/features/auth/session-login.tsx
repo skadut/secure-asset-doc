@@ -38,6 +38,8 @@ const tlpLevels = [
   'RED',
   'RED+STRICT',
 ] as const
+// ponytail: mirrors backend MAX_FAILS (backend/auth-routes.mjs:11). Backend returns attemptsLeft only after a failure, so this is the initial shown value.
+const MAX_ATTEMPTS = 5
 const jsonFetch = (url: string, body?: unknown) =>
   fetch(url, {
     method: body === undefined ? 'GET' : 'POST',
@@ -56,11 +58,11 @@ function CheckIcon() {
     </svg>
   )
 }
-function ArrowIcon() {
+function EnterHint() {
   return (
-    <svg className='lg-arrow' viewBox='0 0 16 16' aria-hidden='true'>
-      <path d='M2.8 8h9.9M8.6 3.9 12.7 8l-4.1 4.1' />
-    </svg>
+    <span className='lg-primary-hint' aria-hidden='true'>
+      ENTER
+    </span>
   )
 }
 function EyeIcon() {
@@ -617,13 +619,9 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                       onClick={() => go('password')}
                     >
                       <span>Lanjutkan</span>
-                      {accepted ? (
-                        <ArrowIcon />
-                      ) : (
-                        <span className='lg-primary-hint'>
-                          TERKUNCI SAMPAI DISETUJUI
-                        </span>
-                      )}
+                      <span className='lg-primary-hint' aria-hidden='true'>
+                        {accepted ? 'ENTER' : 'TERKUNCI SAMPAI DISETUJUI'}
+                      </span>
                     </button>
                   </div>
                 )}
@@ -700,11 +698,7 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                         </div>
                       </div>
                       <div className='lg-meta'>
-                        <span>
-                          {attemptsLeft !== null
-                            ? `${attemptsLeft} percobaan tersisa sebelum akun dikunci`
-                            : 'Akun dikunci 15 menit setelah 5 percobaan gagal'}
-                        </span>
+                        <span>{`${attemptsLeft ?? MAX_ATTEMPTS} percobaan tersisa sebelum akun dikunci`}</span>
                       </div>
                       <button
                         className='lg-primary'
@@ -714,7 +708,7 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                       >
                         {busy && <Spinner />}
                         <span>{busy ? 'Memeriksa' : 'Lanjutkan'}</span>
-                        <ArrowIcon />
+                        <EnterHint />
                       </button>
                     </form>
                     <button
@@ -736,10 +730,14 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                     <header>
                       <div className='lg-eyebrow'>TAHAP 3 DARI 5</div>
                       <h2>Masukkan kode autentikator</h2>
+                      <p>
+                        Buka Google Authenticator pada telepon terdaftar, lalu
+                        masukkan kode 6 digit untuk ARCA.
+                      </p>
                     </header>
                     <div className='lg-who'>
                       <span className='lg-mono'>{username}</span>
-                      <span>30 detik per kode</span>
+                      <span>Kode berubah setiap 30 detik</span>
                     </div>
                     <div className='lg-ring-row'>
                       <svg
@@ -776,11 +774,16 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                             setError('')
                           }}
                           placeholder='······'
-                          className={invalid ? 'invalid' : undefined}
+                          className={invalid ? 'lg-otp invalid' : 'lg-otp'}
                           aria-invalid={invalid || undefined}
-                          aria-describedby={invalid ? 'lg-alert' : undefined}
+                          aria-describedby={
+                            invalid ? 'lg-alert lg-code-meta' : 'lg-code-meta'
+                          }
                           required
                         />
+                      </div>
+                      <div className='lg-meta' id='lg-code-meta'>
+                        <span>{`${attemptsLeft ?? MAX_ATTEMPTS} percobaan tersisa sebelum akun dikunci`}</span>
                       </div>
                       <button
                         className='lg-primary'
@@ -792,7 +795,7 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                         <span>
                           {busy ? 'Memverifikasi' : 'Verifikasi kode'}
                         </span>
-                        <ArrowIcon />
+                        <EnterHint />
                       </button>
                     </form>
                     <button
@@ -927,7 +930,7 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                         onClick={() => go('welcome')}
                       >
                         <span>Lanjutkan</span>
-                        <ArrowIcon />
+                        <EnterHint />
                       </button>
                     )}
                   </div>
@@ -983,7 +986,7 @@ export function SessionLogin({ onSuccess }: { onSuccess: () => void }) {
                       disabled={leaving}
                     >
                       <span>{leaving ? 'Membuka' : 'Masuk ke ARCA'}</span>
-                      <ArrowIcon />
+                      <EnterHint />
                     </button>
                     <button
                       className='lg-ghost'
