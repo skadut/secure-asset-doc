@@ -22,7 +22,7 @@ Workflow CI (`.github/workflows/ci.yml`) juga punya job `tpm-swtpm` yang memakai
 - Menyiapkan zona TPM. PKI dibuat hanya jika `run/pki/keyzone/ca.pem` tidak ada. `tpm-msk init` berjalan jika tidak ada file kunci. `kek-01` dibuat jika belum ada, dan diperiksa pada setiap deploy.
 - Membaca `delivery key fingerprint` keyd dari log, lalu menjalankan `tpm-msk` dengan `TPM_MSK_APPROVE_FP` di-set ke nilai itu.
 - Mem-poll `http://127.0.0.1:8088/api/health`.
-- Menyemai data dan user demo hanya jika tabel `users` kosong. Pada deploy berikutnya, data yang ada dipertahankan. `protect-documents` dan `tokenize-titles` berjalan pada setiap deploy dan melewati baris yang sudah diproses.
+- Menyemai data dan user demo hanya jika tabel `users` kosong. Pada deploy berikutnya, data yang ada dipertahankan. `protect-documents`, `protect-fields`, dan `tokenize-titles` berjalan pada setiap deploy dan melewati baris yang sudah diproses.
 
 ## Yang bertahan antar deploy di server
 
@@ -41,6 +41,6 @@ Workflow CI (`.github/workflows/ci.yml`) juga punya job `tpm-swtpm` yang memakai
 1. Pastikan health check lulus dan `docker compose ps` menunjukkan service `running` atau `healthy`.
 2. Verifikasi log audit seperti di [run.md](run.md#operasi-tpm).
 3. Buka aplikasi di `http://127.0.0.1:8088` (atau origin yang dikonfigurasi di `APP_ORIGINS`).
-4. Jika `protect-documents` atau `tokenize-titles` melaporkan baris gagal, perbaiki penyebabnya lalu deploy ulang; keduanya aman dijalankan ulang.
+4. Jika `protect-documents`, `protect-fields`, atau `tokenize-titles` melaporkan baris gagal, perbaiki penyebabnya lalu deploy ulang; ketiganya aman dijalankan ulang.
 
 Untuk start, stop, dan reset lokal, lihat [run.md](run.md) dan [seeding.md](seeding.md).
